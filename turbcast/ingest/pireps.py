@@ -18,6 +18,7 @@ from __future__ import annotations
 import argparse
 import re
 import sys
+import time
 from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
@@ -344,19 +345,51 @@ def fetch_awc_recent(client: httpx.Client, cfg: config.Config, hours: int = 2) -
     return dedupe(read_awc_json(resp.json() if resp.content.strip() else []))
 
 
+FINAL_AFTER = timedelta(hours=6)  # IEM archive lag before a day is treated as complete
+
+
+def is_final(day: date, now: datetime | None = None) -> bool:
+    now = now or datetime.now(UTC)
+    end = datetime(day.year, day.month, day.day, tzinfo=UTC) + timedelta(days=1)
+    return now >= end + FINAL_AFTER
+
+
+def _fetch_with_retry(client: httpx.Client, day: date, attempts: int = 4) -> str:
+    for i in range(attempts):
+        try:
+            return fetch_iem_day(client, day)
+        except (httpx.TransportError, httpx.HTTPStatusError) as e:
+            if i == attempts - 1:
+                raise
+            wait = 5 * 2**i
+            print(f"{day}: {type(e).__name__}, retry in {wait} s", file=sys.stderr)
+            time.sleep(wait)
+    raise AssertionError("unreachable")
+
+
 def ingest_iem(start: date, end: date, out_dir: str = "data/parquet/pireps") -> pd.DataFrame:
-    """Download [start, end) day by day to data/parquet/pireps/date=YYYY-MM-DD.parquet."""
+    """Download [start, end) day by day to data/parquet/pireps/date=YYYY-MM-DD.parquet.
+
+    Resumable: days already on disk are skipped once final; a day that is not yet
+    final (< 6 h after it ends) is always re-fetched so partial files get completed.
+    """
     out = config.resolve(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     frames = []
     with httpx.Client(timeout=120, headers={"User-Agent": USER_AGENT}) as client:
         day = start
         while day < end:
-            df = dedupe(read_iem_csv(fetch_iem_day(client, day)))
-            table = pa.Table.from_pandas(df, schema=PIREP_SCHEMA, preserve_index=False)
-            pq.write_table(table, out / f"date={day:%Y-%m-%d}.parquet", compression="zstd")
-            frames.append(df)
-            print(f"{day}: {parse_stats(df)}", file=sys.stderr)
+            path = out / f"date={day:%Y-%m-%d}.parquet"
+            if path.exists() and is_final(day):
+                frames.append(pd.read_parquet(path))
+            else:
+                df = dedupe(read_iem_csv(_fetch_with_retry(client, day)))
+                table = pa.Table.from_pandas(df, schema=PIREP_SCHEMA, preserve_index=False)
+                tmp = path.with_suffix(".tmp")
+                pq.write_table(table, tmp, compression="zstd")
+                tmp.replace(path)
+                frames.append(df)
+                print(f"{day}: {parse_stats(df)}", file=sys.stderr)
             day += timedelta(days=1)
     return pd.concat(frames, ignore_index=True) if frames else read_iem_csv("")
 

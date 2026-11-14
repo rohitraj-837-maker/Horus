@@ -20,6 +20,7 @@ SOURCES = {
     "opensky": "data/raw/live/source=opensky",
     "adsblol": "data/raw/live/source=adsblol",
     "trino": "data/raw/trino",
+    "adsblol_hist": "data/raw/adsblol_hist",
 }
 NUMERIC = ["lat", "lon", "baro_alt_ft", "vr_fpm", "gs_kt", "track_deg"]
 

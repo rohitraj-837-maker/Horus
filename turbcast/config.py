@@ -9,6 +9,7 @@ from __future__ import annotations
 import dataclasses
 import typing
 from dataclasses import dataclass
+from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -39,6 +40,7 @@ class Segment:
     max_alt_range_ft: float
     max_abs_median_vr_fpm: float
     trim_s: int
+    min_window_samples: int
 
 
 @dataclass(frozen=True)
@@ -128,8 +130,31 @@ class Eval:
 
 @dataclass(frozen=True)
 class Splits:
-    train: list[str]
-    test: list[str]
+    """Inclusive ISO date ranges. Time-based only (SPEC §3): train before test."""
+
+    train_start: str
+    train_end: str
+    test_start: str
+    test_end: str
+
+    def _days(self, a: str, b: str) -> list[str]:
+        d0, d1 = date.fromisoformat(a), date.fromisoformat(b)
+        return [str(d0 + timedelta(days=i)) for i in range((d1 - d0).days + 1)]
+
+    @property
+    def train(self) -> list[str]:
+        return self._days(self.train_start, self.train_end)
+
+    @property
+    def test(self) -> list[str]:
+        return self._days(self.test_start, self.test_end)
+
+    def split_of(self, day: str) -> str | None:
+        if self.train_start <= day <= self.train_end:
+            return "train"
+        if self.test_start <= day <= self.test_end:
+            return "test"
+        return None
 
 
 @dataclass(frozen=True)
@@ -211,12 +236,16 @@ def _check(cfg: Config) -> None:
         raise ConfigError("live.source must be opensky or adsblol")
     if cfg.normalise.method not in {"robust_z", "percentile"}:
         raise ConfigError("normalise.method must be robust_z or percentile")
-    tr, te = cfg.splits.train, cfg.splits.test
-    overlap = set(tr) & set(te)
-    if overlap:
-        raise ConfigError(f"splits: dates in both train and test: {sorted(overlap)}")
-    if tr and te and max(tr) >= min(te):
-        raise ConfigError("splits: every train date must be earlier than every test date")
+    sp = cfg.splits
+    try:
+        for d in (sp.train_start, sp.train_end, sp.test_start, sp.test_end):
+            date.fromisoformat(d)
+    except ValueError as e:
+        raise ConfigError(f"splits: bad ISO date ({e})") from None
+    if sp.train_start > sp.train_end or sp.test_start > sp.test_end:
+        raise ConfigError("splits: each range needs start <= end")
+    if sp.train_end >= sp.test_start:
+        raise ConfigError("splits: train must end before test starts (no overlap, time order)")
 
 
 def from_dict(raw: dict[str, Any]) -> Config:
@@ -224,7 +253,7 @@ def from_dict(raw: dict[str, Any]) -> Config:
     # YAML reads bare dates as datetime.date; keep splits as ISO strings.
     splits = raw.get("splits")
     if isinstance(splits, dict):
-        raw = {**raw, "splits": {k: [str(d) for d in (v or [])] for k, v in splits.items()}}
+        raw = {**raw, "splits": {k: str(v) for k, v in splits.items()}}
     cfg = typing.cast(Config, _build(Config, raw, "config"))
     _check(cfg)
     return cfg

@@ -7,6 +7,11 @@ One entry per milestone gate. A milestone is **complete** only when its `make ga
 - `make gate-m0`: ruff ✔, mypy (core) ✔, pytest 26/26 ✔, imports ✔.
 - CLAUDE.md, config.yaml (all SPEC parameters, strict loader), canonical track schema, uv + Python 3.12.
 
+## Decisions log
+
+- **2026-11-15: M2 benchmark data.** Use adsb.lol daily history (winter 2025–26, ~16–20 s irregular cadence) now, and re-run the same code at 1 Hz when Trino access arrives. Every reported number names its source and rate. (Rohit)
+- **2026-11-15: Gate-order exception.** M2's data-independent core code (synth, geo, segment, residual + synthetic tests) may start before the M1 gate passes. **No M2 benchmark rows until `make gate-m1` is green.** (Rohit)
+
 ## M1 — Ingestion ⏳ code done, gate waiting on elapsed time
 
 `make gate-m1 DAY=2026-11-14` (2026-11-15 01:5x AEDT): ruff ✔, mypy ✔, **pytest 110 passed** (1 Trino test deselected until access), then:
@@ -28,3 +33,14 @@ Key findings (details in `reports/data_notes.md`):
 - 64 ft/min vertical-rate quantisation survives OpenSky processing.
 - Aircraft DB is 2 years stale; 28% of aircraft at FL200 or above have no type.
 - AWC's own PIREP decoder is inconsistent on mixed intensities; we store max and min.
+- Also built after the first gate run: `ingest/adsblol_history.py` (streams adsb.lol daily tar releases, CONUS ≥ FL180 to Parquet with bounded memory), `scripts/fetch_adsblol_history.py`. The IEM PIREP ingest is now resumable with retries; an earlier run had silently stopped partway when IEM dropped a connection.
+- Study period fixed: 2025-12-02 → 2026-01-15 (most MOD+ PIREPs); train Dec 2–31, test Jan 1–15. History download started 2026-11-15 ~02:13 AEDT (`data/raw/adsblol_hist/_log.csv`).
+
+## M2 — Segmentation, residual, B0–B2 ⏳ core started under the gate-order exception
+
+Done (synthetic tests only; no benchmark rows):
+- `core/geo.py` (haversine, ISA pressure ↔ altitude, FL bins, H3), `core/rolling.py` (NaN-aware centred windows), `core/segment.py` (level flight, trims, sparse-data aware), `core/residual.py` (median trend, flicker-weighted variance, Sheppard, B0/B1 acceleration RMS), `tests/synth.py`.
+- `make check`: ruff ✔, mypy strict on core ✔ (5 files), **pytest 162 passed**.
+- Verified by tests: injected σ ∈ {40, 64, 100, 150} ft/min recovered within 3% after quantisation (Sheppard helps every case); smooth air with 2% flicker stays below every turbulent window; step-climbs never enter segments and never trigger; sparse 20 s data needs wider windows.
+
+Not started (waits for `make gate-m1`): `eval/match.py`, `eval/negatives.py`, `eval/detector_bench.py`, leakage test, B0–B2 rows.

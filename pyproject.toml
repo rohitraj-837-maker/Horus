@@ -20,6 +20,7 @@ dependencies = [
     "uvicorn>=0.30",
     "matplotlib>=3.9",
     "tabulate>=0.10.0",
+    "orjson>=3.13.0",
 ]
 
 [project.optional-dependencies]

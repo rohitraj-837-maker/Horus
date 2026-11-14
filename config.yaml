@@ -16,6 +16,7 @@ segment:                     # SPEC §5.1
   max_alt_range_ft: 300.0
   max_abs_median_vr_fpm: 200.0
   trim_s: 30
+  min_window_samples: 4      # observations required inside each 120 s window
 
 residual:                    # SPEC §5.2
   w_trend_s: 31
@@ -79,9 +80,12 @@ eval:
   nowcast_step_s: 300
   ece_bins: 10
 
-splits:                      # set once the study period is chosen; ISO dates, inclusive
-  train: []
-  test: []
+splits:                      # ISO dates, inclusive ranges. Chosen 2026-11-15, before any detector
+  # run: the 45-day window with the most CONUS >= FL200 MOD+ PIREPs in Dec 2025 - Feb 2026.
+  train_start: "2025-12-02"
+  train_end: "2025-12-31"
+  test_start: "2026-01-01"
+  test_end: "2026-01-15"
 
 live:
   source: opensky              # opensky | adsblol

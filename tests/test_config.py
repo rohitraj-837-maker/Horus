@@ -79,31 +79,54 @@ def test_wrong_type_raises(raw, section, key, value):
         config.from_dict(bad)
 
 
+def _splits(a, b, c, d):
+    return {"train_start": a, "train_end": b, "test_start": c, "test_end": d}
+
+
+def test_repo_splits_are_time_ordered():
+    sp = config.load().splits
+    assert len(sp.train) == 30 and len(sp.test) == 15
+    assert max(sp.train) < min(sp.test)
+    assert sp.split_of("2025-12-15") == "train" and sp.split_of("2026-01-15") == "test"
+    assert sp.split_of("2026-02-01") is None
+
+
 def test_overlapping_splits_raise(raw):
     bad = copy.deepcopy(raw)
-    bad["splits"] = {"train": ["2026-12-01", "2026-12-02"], "test": ["2026-12-02"]}
-    with pytest.raises(ConfigError, match="both train and test"):
+    bad["splits"] = _splits("2026-12-01", "2026-12-02", "2026-12-02", "2026-12-05")
+    with pytest.raises(ConfigError, match="no overlap"):
         config.from_dict(bad)
 
 
 def test_train_after_test_raises(raw):
     bad = copy.deepcopy(raw)
-    bad["splits"] = {"train": ["2026-12-10"], "test": ["2026-12-01"]}
-    with pytest.raises(ConfigError, match="earlier"):
+    bad["splits"] = _splits("2026-12-10", "2026-12-12", "2026-12-01", "2026-12-05")
+    with pytest.raises(ConfigError, match="train must end before test"):
+        config.from_dict(bad)
+
+
+def test_bad_split_date_raises(raw):
+    bad = copy.deepcopy(raw)
+    bad["splits"] = _splits("2026-13-01", "2026-12-12", "2027-01-01", "2027-01-05")
+    with pytest.raises(ConfigError, match="bad ISO date"):
         config.from_dict(bad)
 
 
 def test_yaml_dates_become_iso_strings(tmp_path, raw):
-    raw["splits"] = {"train": [], "test": []}
-    text = (
-        yaml.safe_dump(raw)
-        .replace("train: []", "train:\n  - 2026-12-01")
-        .replace("test: []", "test:\n  - 2027-01-10")
-    )
+    raw["splits"] = _splits("X1", "X2", "X3", "X4")
+    text = yaml.safe_dump(raw)
+    for k, v in {
+        "X1": "2026-12-01",
+        "X2": "2026-12-02",
+        "X3": "2027-01-10",
+        "X4": "2027-01-10",
+    }.items():
+        text = text.replace(k, v)  # bare in YAML -> parsed as datetime.date
+    assert "train_start: 2026-12-01" in text
     p = tmp_path / "c.yaml"
     p.write_text(text)
     cfg = config.load(p)
-    assert cfg.splits.train == ["2026-12-01"]
+    assert cfg.splits.train == ["2026-12-01", "2026-12-02"]
     assert cfg.splits.test == ["2027-01-10"]
 
 
