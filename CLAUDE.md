@@ -11,7 +11,9 @@ Live turbulence detection and nowcasting from ADS-B vertical rate, validated aga
 6. **float32** for bulk arrays; process data by hour/day with Parquet column pruning (8 GB M1).
 7. Prefer simple, vectorised NumPy over abstractions. Numba only when `make bench` shows a step misses budget.
 8. Parameters live in `config.yaml`, not in code.
-9. Commits / pushes only when Rohit asks.
+9. After each milestone gate is fully green: log it in `PROGRESS.md` and make a **local** `git commit`. **Never `git push`, never create a remote.** Everything stays in `~/turbcast`.
+10. **Never read or print `credentials.json` or `.env`.** Code may load credentials at runtime; logs and errors name keys only, never values.
+11. Automated tests never hit live APIs (no credits used): network code is tested with httpx `MockTransport` serving recorded real responses from `tests/fixtures/`.
 
 ## Canonical units (after ingest, everywhere)
 | Field | Unit | Note |
@@ -48,4 +50,6 @@ make bench                    # performance benchmark
 ```
 
 ## Status
+See `PROGRESS.md` (per-milestone gate log) and `reports/data_notes.md` (data findings).
 - Trino research access: **applied, waiting** (as of 2026-11-15). Plan B live archive runs from Week 1.
+- Live recorder: `make record`, `make recorder-status`; PID in `data/raw/live/recorder.pid`.
