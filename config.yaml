@@ -1,0 +1,95 @@
+# TurbCast parameters. Every value here traces to SPEC.md; change via config, never in code.
+
+region:
+  name: CONUS
+  lat_min: 24.0
+  lat_max: 50.0
+  lon_min: -125.0
+  lon_max: -66.0
+
+units:
+  vr_step_fpm: 64.0          # ADS-B vertical-rate quantisation step (verify empirically, SPEC §14 Q1)
+
+segment:                     # SPEC §5.1
+  min_alt_ft: 20000.0
+  window_s: 120
+  max_alt_range_ft: 300.0
+  max_abs_median_vr_fpm: 200.0
+  trim_s: 30
+
+residual:                    # SPEC §5.2
+  w_trend_s: 31
+  w_stat_s: 15
+  min_samples_stat: 6        # floor for 5 s / 10 s data
+  sheppard: true
+  flicker_weight: 0.5
+
+normalise:                   # SPEC §5.3
+  n_min_segments: 200
+  smooth_exclusion:
+    time_s: 7200
+    dist_km: 150.0
+    alt_ft: 4000.0
+  method: robust_z           # robust_z | percentile
+
+detect:                      # SPEC §5.4
+  tau_detect: null           # tuned on train split
+  target_fa_per_1000h: 1.0
+  w_rate:
+    "1": 1.0
+    "5": 0.7
+    "10": 0.5
+  w_type_clip: [0.5, 1.5]
+  event_merge_gap_s: 30
+
+grid:                        # SPEC §5.5
+  h3_res: 4
+  fl_min: 200
+  fl_max: 460
+  fl_bin: 20                 # flight levels (2,000 ft)
+  half_life_s: 720           # starting value; replaced by fitted per-band values
+  half_life_bands_fl: [[200, 290], [290, 370], [370, 460]]
+  advect_interval_s: 60
+  advection: true
+  l_min: -6.0
+  l_max: 6.0
+  theta_display: 0.5
+
+winds:
+  levels_hpa: [400, 300, 250, 200]   # 400 hPa is a logged deviation from SPEC (covers FL200-FL260)
+  refresh_h: 6
+
+match:                       # SPEC §6.1
+  window_s: 600
+  dist_km: 40.0
+  alt_ft: 2000.0
+  positive_min_intensity: MOD
+  sensitivity:
+    window_s: [300, 600, 1200]
+    dist_km: [20.0, 40.0, 80.0]
+  negatives:
+    min_passes: 5
+    exclusion_time_s: 7200
+    exclusion_dist_km: 150.0
+    window_s: 1200
+
+eval:
+  rates_s: [1, 5, 10]
+  nowcast_horizon_s: 900
+  nowcast_step_s: 300
+  ece_bins: 10
+
+splits:                      # set once the study period is chosen; ISO dates, inclusive
+  train: []
+  test: []
+
+live:
+  source: opensky              # opensky | adsblol
+  poll_interval_s: 90          # floor; OpenSky pacing also adapts to remaining credits
+  backoff_max_s: 600
+  flush_interval_s: 300
+  out_dir: data/raw/live
+  credentials_path: credentials.json   # OpenSky API client; anonymous if absent
+  opensky_bbox_credit_cost: 4          # measured 2026-11-15: CONUS bbox (>400 sq deg) = 4 credits
+  adsblol_radius_nm: 250
+  adsblol_request_spacing_s: 1.5
