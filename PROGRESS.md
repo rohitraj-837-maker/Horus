@@ -39,7 +39,7 @@ One entry per milestone gate. A milestone is **complete** only when its `make ga
 
 - **2026-11-15: Demo front end restarted from a blank page (Rohit).** Research first (docs/design-brief.md): aviationweather.gov GFA/PIREP, Aireon, SkyPath read and rendered; Maserati Trident Stars, withwise.com, microdose.studio for structure; Flightradar24/FlightAware/Turbli refused automated access (403) and were not contacted further. New front end: night-sky opening scene; problem; five steps with labs; proof; four skies; dated comparison table (PIREPs, Aireon, SkyPath, Horus; published facts only); roadmap with folds. Radar follows AWC conventions (layer strip, T+ timeline with peak marker, FL range, caret PIREPs, legend; smooth air neutral grey; Moderate #FF9900, Severe AWC #CC0000 brightened to #EC2A2A). Serif font removed.
 
-## M1 — Ingestion ⏳ code done, gate waiting on elapsed time
+## M1 — Ingestion ✅ gate passed (2026-11-15 22:30 UTC)
 
 `make gate-m1 DAY=2026-11-14` (2026-11-15 01:5x AEDT): ruff ✔, mypy ✔, **pytest 110 passed** (1 Trino test deselected until access), then:
 
@@ -48,12 +48,12 @@ One entry per milestone gate. A milestone is **complete** only when its `make ga
 | Full UTC day of CONUS tracks | ✔ adsb.lol history 2025-12-02 (24/24 h) |
 | PIREPs for that day | ✔ 5,741 reports (2025-12-02) |
 | DuckDB per-aircraft series | ✔ |
-| Recorder survives 24 h | ⏳ process alive; sleep gaps accepted from the power log; span reaches 24 h ~22:52 UTC Nov 15 |
+| Recorder survives 24 h | ✔ process alive; span 23.67 h; 2 sleep gaps (3.00 h) excused by the power log |
 | Quantisation measured (Open Q1) | ✔ 64 ft/min confirmed on real data |
 
 **2026-11-15 07:40 UTC, `make gate-m1` (adsb.lol day 2025-12-02):** ruff ✔ mypy ✔ pytest ✔; full day ✔ (24/24 h, 12.3 M rows, 13,991 aircraft); PIREPs ✔ (5,741); per-aircraft series ✔; quantisation ✔; **recorder 24 h ❌ only on span (8.73 h)**. The process is alive; 2 gaps (3.00 h, lid closed 03:46–06:47 UTC) are accepted because the power log shows the laptop asleep. Fixed while getting here: `store` loaders failed on day-only partitions (now select canonical columns by name).
 
-Re-check: `make gate-m1` after **2026-11-15 22:55 UTC**.
+**2026-11-15 22:30 UTC, `make gate-m1`: PASS.** ruff ✔ mypy ✔ pytest 206 passed ✔; full day ✔ (2025-12-02, 24.00 h, 24/24 h, 12,283,366 rows, 13,991 aircraft); PIREPs ✔ (5,741); per-aircraft series ✔ (ad0074, 22,853 samples); recorder ✔ (OpenSky, process alive, 832 polls, ok 0.989, span 23.67 h, 2 gaps = 3.00 h excused as laptop sleep); quantisation ✔ (adsb_icao: 10.66 M samples, 99.6% on the 64 ft/min grid; MLAT is 8 ft/min, so it is excluded from Sheppard's Δ).
 
 Built: `ingest/live.py` (OpenSky OAuth2 + adsb.lol tiling, credit-aware pacing, backoff, hourly Parquet), `ingest/pireps.py` (IEM + AWC, free-text TB parser), `ingest/aircraft_db.py`, `ingest/historical.py` (Trino, tested offline), `ingest/store.py`, `ingest/quantisation.py`, `ingest/audit.py`, scripts, `reports/data_notes.md`.
 
@@ -72,4 +72,4 @@ Done (synthetic tests only; no benchmark rows):
 - `make check`: ruff ✔, mypy strict on core ✔ (5 files), **pytest 162 passed**.
 - Verified by tests: injected σ ∈ {40, 64, 100, 150} ft/min recovered within 3% after quantisation (Sheppard helps every case); smooth air with 2% flicker stays below every turbulent window; step-climbs never enter segments and never trigger; sparse 20 s data needs wider windows.
 
-Not started (waits for `make gate-m1`): `eval/match.py`, `eval/negatives.py`, `eval/detector_bench.py`, leakage test, B0–B2 rows.
+Next (unblocked by the M1 gate): `eval/match.py`, `eval/negatives.py`, `eval/detector_bench.py`, leakage test, B0–B2 rows.
