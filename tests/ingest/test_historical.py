@@ -8,9 +8,9 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from turbcast import config, schema
-from turbcast.ingest import historical as h
-from turbcast.schema import RECORD_SCHEMA
+from horus import config, schema
+from horus.ingest import historical as h
+from horus.schema import RECORD_SCHEMA
 
 HOUR = datetime(2025, 12, 2, 18, tzinfo=UTC)
 T0 = int(HOUR.timestamp())

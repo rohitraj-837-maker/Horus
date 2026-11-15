@@ -22,9 +22,9 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from turbcast import schema
-from turbcast.config import Region, resolve
-from turbcast.schema import FPM_PER_MPS, FT_PER_M, KT_PER_MPS, RECORD_SCHEMA
+from horus import schema
+from horus.config import Region, resolve
+from horus.schema import FPM_PER_MPS, FT_PER_M, KT_PER_MPS, RECORD_SCHEMA
 
 # Explicit column list (minimises cluster scan). lastposupdate is the one addition
 # to the requested set: it gives position age, used to reject stale positions.

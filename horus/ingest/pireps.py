@@ -10,7 +10,7 @@ strongest intensity mentioned ("CONS LGT OCNL MOD" -> 4); `tb_min` the weakest.
 MOD+ means tb_max >= 4 (rule configurable: AWC's own decoder is inconsistent here).
 -1 means the report has no parseable turbulence intensity.
 
-    uv run python -m turbcast.ingest.pireps --start 2026-11-01 --end 2026-11-02
+    uv run python -m horus.ingest.pireps --start 2026-11-01 --end 2026-11-02
 """
 
 from __future__ import annotations
@@ -28,12 +28,12 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from turbcast import config
+from horus import config
 
 IEM_URL = "https://mesonet.agron.iastate.edu/cgi-bin/request/gis/pireps.py"
 IEM_NO_RESULTS = "ERROR: no results found"  # IEM's reply for an empty window
 AWC_URL = "https://aviationweather.gov/api/data/pirep"
-USER_AGENT = "turbcast/0.1 (research prototype)"
+USER_AGENT = "horus/0.1 (research prototype)"
 
 _EPOCH = pd.Timestamp("1970-01-01", tz="UTC")
 NEG, LGT, MOD, SEV, EXTRM = 0, 2, 4, 6, 8

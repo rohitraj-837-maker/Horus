@@ -15,8 +15,8 @@ from dataclasses import dataclass
 import numpy as np
 from numpy.typing import NDArray
 
-from turbcast.config import Config
-from turbcast.core import rolling
+from horus.config import Config
+from horus.core import rolling
 
 
 @dataclass(frozen=True)

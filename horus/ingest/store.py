@@ -14,8 +14,8 @@ import duckdb
 import numpy as np
 import pandas as pd
 
-from turbcast.config import resolve
-from turbcast.schema import RECORD_COLUMNS
+from horus.config import resolve
+from horus.schema import RECORD_COLUMNS
 
 SOURCES = {
     "opensky": "data/raw/live/source=opensky",

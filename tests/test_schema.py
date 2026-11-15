@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from turbcast import schema
-from turbcast.schema import SchemaError
+from horus import schema
+from horus.schema import SchemaError
 
 
 def make_frame(n: int = 3) -> pd.DataFrame:

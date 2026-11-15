@@ -3,7 +3,7 @@
 import pandas as pd
 import pytest
 
-from turbcast.ingest import aircraft_db as adb
+from horus.ingest import aircraft_db as adb
 
 
 @pytest.fixture

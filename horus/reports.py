@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from turbcast.config import resolve
+from horus.config import resolve
 
 REPORTS_DIR = "reports"
 

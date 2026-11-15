@@ -4,7 +4,7 @@ Sources: OpenSky aircraft database (icao24 -> typecode; last published 2024-11) 
 ICAO Doc 8643 type designators (typecode -> wake category, engine type). Size class is
 only the fallback grouping for per-type normalisation when a type has too few samples.
 
-    uv run python -m turbcast.ingest.aircraft_db
+    uv run python -m horus.ingest.aircraft_db
 """
 
 from __future__ import annotations
@@ -15,12 +15,12 @@ import duckdb
 import httpx
 import pandas as pd
 
-from turbcast import config
+from horus import config
 
 BASE = "https://s3.opensky-network.org/data-samples/metadata"
 AIRCRAFT_DB_URL = f"{BASE}/aircraftDatabase.csv"
 DOC8643_URL = f"{BASE}/doc8643AircraftTypes.csv"
-USER_AGENT = "turbcast/0.1 (research prototype)"
+USER_AGENT = "horus/0.1 (research prototype)"
 
 RAW_DIR = "data/raw/metadata"
 TYPES_PARQUET = "data/parquet/aircraft_types.parquet"

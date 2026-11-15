@@ -1,4 +1,4 @@
-# TurbCast
+# Horus
 
 Live turbulence detection and nowcasting from public aircraft broadcasts (ADS-B), validated against pilot reports (PIREPs) over the continental US.
 

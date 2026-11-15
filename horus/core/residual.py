@@ -25,8 +25,8 @@ from dataclasses import dataclass
 import numpy as np
 from numpy.typing import NDArray
 
-from turbcast.config import Config
-from turbcast.core import rolling
+from horus.config import Config
+from horus.core import rolling
 
 G_FT_S2 = 32.174
 FPM_S_PER_G = 60.0 * G_FT_S2  # (ft/min)/s in one g

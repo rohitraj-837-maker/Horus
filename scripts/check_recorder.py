@@ -12,8 +12,8 @@ import time
 
 import duckdb
 
-from turbcast import config
-from turbcast.ingest.audit import audit, read_poll_log
+from horus import config
+from horus.ingest.audit import audit, read_poll_log
 
 
 def main() -> int:

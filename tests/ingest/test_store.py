@@ -5,8 +5,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from turbcast import reports
-from turbcast.ingest import live, quantisation, store
+from horus import reports
+from horus.ingest import live, quantisation, store
 
 
 @pytest.fixture

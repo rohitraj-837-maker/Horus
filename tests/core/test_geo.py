@@ -2,7 +2,7 @@ import h3
 import numpy as np
 import pytest
 
-from turbcast.core import geo
+from horus.core import geo
 
 
 @pytest.mark.parametrize(

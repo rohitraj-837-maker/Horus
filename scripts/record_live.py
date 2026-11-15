@@ -14,8 +14,8 @@ import logging
 import signal
 import sys
 
-from turbcast import config
-from turbcast.ingest import live
+from horus import config
+from horus.ingest import live
 
 
 def main() -> int:

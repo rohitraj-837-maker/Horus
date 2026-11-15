@@ -9,8 +9,8 @@ import argparse
 import sys
 from datetime import date
 
-from turbcast.ingest import quantisation, store
-from turbcast.reports import replace_section
+from horus.ingest import quantisation, store
+from horus.reports import replace_section
 
 
 def main() -> int:

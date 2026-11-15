@@ -7,7 +7,7 @@ import math
 import numpy as np
 import pytest
 
-from turbcast.ingest import pireps as p
+from horus.ingest import pireps as p
 
 NAN = math.nan
 

@@ -4,8 +4,8 @@ import dataclasses
 import pytest
 import yaml
 
-from turbcast import config
-from turbcast.config import ConfigError
+from horus import config
+from horus.config import ConfigError
 
 
 @pytest.fixture

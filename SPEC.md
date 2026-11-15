@@ -1,4 +1,4 @@
-# TurbCast — SPEC
+# Horus — SPEC
 
 Live turbulence detection and nowcasting from public aircraft broadcasts (ADS-B), validated against pilot reports (PIREPs) over the continental US.
 
@@ -10,7 +10,7 @@ Live turbulence detection and nowcasting from public aircraft broadcasts (ADS-B)
 
 Turbulence is the leading cause of in-flight injuries (e.g. Singapore Airlines SQ321, May 2024: one death, dozens injured). Clear-air turbulence (CAT) is invisible to weather radar. Crews learn about it mainly from other pilots' verbal reports (PIREPs), which are sparse, late and subjective.
 
-Every airliner broadcasts its vertical rate over ADS-B about once a second. When an aircraft flies through turbulence, that signal jitters. **TurbCast turns thousands of aircraft into a live turbulence sensor network** and builds a 3D map of *where turbulence is right now and how confident we are*.
+Every airliner broadcasts its vertical rate over ADS-B about once a second. When an aircraft flies through turbulence, that signal jitters. **Horus turns thousands of aircraft into a live turbulence sensor network** and builds a 3D map of *where turbulence is right now and how confident we are*.
 
 **Novelty (checked 2026-11-15):** the FAA is researching ADS-B vertical-rate turbulence (beta planned for 2026) and Aireon has a commercial white paper. No open, real-time, end-to-end system with public benchmarks was found.
 
@@ -160,9 +160,9 @@ Metrics, scored against **future** aircraft and PIREPs (predict at time t, check
 ## 8. Repository layout
 
 ```
-turbcast/
+horus/
   SPEC.md  README.md  config.yaml  pyproject.toml  Makefile  docker-compose.yml
-  turbcast/
+  horus/
     ingest/   historical.py live.py pireps.py winds.py aircraft_db.py
     core/     segment.py residual.py normalise.py detect.py grid.py geo.py
     eval/     match.py negatives.py detector_bench.py nowcast_bench.py plots.py

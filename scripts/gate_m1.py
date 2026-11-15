@@ -24,8 +24,8 @@ from datetime import UTC, date, datetime
 import duckdb
 import pandas as pd
 
-from turbcast import config
-from turbcast.ingest import audit, store
+from horus import config
+from horus.ingest import audit, store
 
 LIVE_SOURCES = {"opensky", "adsblol"}
 
@@ -72,7 +72,7 @@ def main() -> int:
         n = len(pd.read_parquet(p, columns=["time"]))
         results.append(("PIREPs loaded", n > 0, f"{n:,} reports"))
     else:
-        results.append(("PIREPs loaded", False, f"missing {p.name}; run turbcast.ingest.pireps"))
+        results.append(("PIREPs loaded", False, f"missing {p.name}; run horus.ingest.pireps"))
 
     # 3. one aircraft's series for that day
     try:

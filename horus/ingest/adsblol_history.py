@@ -37,12 +37,12 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from turbcast import schema
-from turbcast.config import Region, resolve
-from turbcast.schema import RECORD_SCHEMA
+from horus import schema
+from horus.config import Region, resolve
+from horus.schema import RECORD_SCHEMA
 
 API_TAG_URL = "https://api.github.com/repos/adsblol/globe_history_{year}/releases/tags/{tag}"
-USER_AGENT = "turbcast/0.1 (research prototype)"
+USER_AGENT = "horus/0.1 (research prototype)"
 OUT_DIR = "data/raw/adsblol_hist"
 MIN_ALT_FT = 18000.0  # segmentation needs >= FL200; keep a margin
 FLAG_STALE, FLAG_NEW_LEG, FLAG_GEOM_RATE, FLAG_GEOM_ALT = 1, 2, 4, 8

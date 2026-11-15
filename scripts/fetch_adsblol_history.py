@@ -14,8 +14,8 @@ import sys
 import time
 from datetime import date, timedelta
 
-from turbcast import config
-from turbcast.ingest import adsblol_history as ah
+from horus import config
+from horus.ingest import adsblol_history as ah
 
 
 def main() -> int:

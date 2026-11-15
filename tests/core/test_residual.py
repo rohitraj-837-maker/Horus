@@ -5,10 +5,10 @@ quantisation flicker alone do not look like turbulence."""
 import numpy as np
 import pytest
 
+from horus.core import residual
+from horus.core.residual import ResidualParams
+from horus.core.segment import SegmentParams, level_flight, mask_outside
 from tests import synth
-from turbcast.core import residual
-from turbcast.core.residual import ResidualParams
-from turbcast.core.segment import SegmentParams, level_flight, mask_outside
 
 P = ResidualParams()
 N = 4 * 3600

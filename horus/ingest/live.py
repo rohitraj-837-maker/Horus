@@ -29,9 +29,9 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from turbcast import schema
-from turbcast.config import Config, Region, resolve
-from turbcast.schema import FPM_PER_MPS, FT_PER_M, KT_PER_MPS, RECORD_SCHEMA
+from horus import schema
+from horus.config import Config, Region, resolve
+from horus.schema import FPM_PER_MPS, FT_PER_M, KT_PER_MPS, RECORD_SCHEMA
 
 log = logging.getLogger(__name__)
 
@@ -40,7 +40,7 @@ OPENSKY_TOKEN_URL = (
     "https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token"
 )
 ADSBLOL_POINT_URL = "https://api.adsb.lol/v2/point/{lat:.3f}/{lon:.3f}/{radius:.0f}"
-USER_AGENT = "turbcast/0.1 (research prototype)"
+USER_AGENT = "horus/0.1 (research prototype)"
 
 EARTH_RADIUS_KM = 6371.0088
 KM_PER_DEG_LAT = math.pi * EARTH_RADIUS_KM / 180.0

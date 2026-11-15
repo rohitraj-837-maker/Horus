@@ -2,8 +2,8 @@
 
 import numpy as np
 
+from horus.core.segment import SegmentParams, level_flight
 from tests import synth
-from turbcast.core.segment import SegmentParams, level_flight
 
 P = SegmentParams()
 

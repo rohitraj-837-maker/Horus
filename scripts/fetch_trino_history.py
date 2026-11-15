@@ -24,10 +24,10 @@ from datetime import UTC, datetime, timedelta
 import numpy as np
 import pandas as pd
 
-from turbcast import config
-from turbcast.ingest import historical as hist
-from turbcast.ingest import quantisation
-from turbcast.reports import replace_section
+from horus import config
+from horus.ingest import historical as hist
+from horus.ingest import quantisation
+from horus.reports import replace_section
 
 SMOKE_START = datetime(2025, 12, 2, 18, tzinfo=UTC)
 

@@ -19,6 +19,8 @@ One entry per milestone gate. A milestone is **complete** only when its `make ga
 
 - **2026-11-15: M1 gate reading (Rohit).** SPEC §10 says "one full day of CONUS tracks" from OpenSky historical *or Plan B archive*, so the full-day check uses an adsb.lol history day (default 2025-12-02, the first study day), not a live-recorded day. "Recorder survives 24 h" means the process stays alive 24 h. Gaps are accepted only when macOS's power log (`pmset -g log`) shows the laptop asleep for them; they are counted and printed by the gate. Live-recorded days are still held to the strict rule (no unplanned gaps inside the day) if `SRC=opensky` is used.
 
+- **2026-11-15: Project renamed TurbCast → Horus (Rohit).** Package `turbcast` → `horus` (`git mv`, history kept), imports, tests, scripts, docs, config and demo. **The repository folder stays `~/turbcast` until the live recorder stops** (after the M1 gate): the recorder's working directory and its absolute output paths point there, so moving the folder mid-run would break it. Rename the folder afterwards with `mv ~/turbcast ~/horus` and run `uv sync`.
+
 ## M1 — Ingestion ⏳ code done, gate waiting on elapsed time
 
 `make gate-m1 DAY=2026-11-14` (2026-11-15 01:5x AEDT): ruff ✔, mypy ✔, **pytest 110 passed** (1 Trino test deselected until access), then:

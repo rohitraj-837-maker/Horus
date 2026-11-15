@@ -9,10 +9,10 @@ import orjson
 import pandas as pd
 import pytest
 
-from turbcast import config, schema
-from turbcast.ingest import adsblol_history as ah
-from turbcast.ingest import quantisation
-from turbcast.schema import RECORD_SCHEMA
+from horus import config, schema
+from horus.ingest import adsblol_history as ah
+from horus.ingest import quantisation
+from horus.schema import RECORD_SCHEMA
 
 
 @pytest.fixture

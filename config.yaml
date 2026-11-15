@@ -1,4 +1,4 @@
-# TurbCast parameters. Every value here traces to SPEC.md; change via config, never in code.
+# Horus parameters. Every value here traces to SPEC.md; change via config, never in code.
 
 region:
   name: CONUS

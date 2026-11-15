@@ -384,6 +384,76 @@ wheels = [
 ]
 
 [[package]]
+name = "horus"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "duckdb" },
+    { name = "fastapi" },
+    { name = "h3" },
+    { name = "httpx" },
+    { name = "keyring" },
+    { name = "matplotlib" },
+    { name = "numpy" },
+    { name = "orjson" },
+    { name = "pandas" },
+    { name = "polars" },
+    { name = "pyarrow" },
+    { name = "pyopensky" },
+    { name = "pyyaml" },
+    { name = "scikit-learn" },
+    { name = "scipy" },
+    { name = "tabulate" },
+    { name = "uvicorn" },
+    { name = "xarray" },
+]
+
+[package.optional-dependencies]
+trino = [
+    { name = "pyopensky" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "mypy" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "duckdb", specifier = ">=1.0" },
+    { name = "fastapi", specifier = ">=0.111" },
+    { name = "h3", specifier = ">=4.1" },
+    { name = "httpx", specifier = ">=0.27" },
+    { name = "keyring", specifier = ">=25.7.0" },
+    { name = "matplotlib", specifier = ">=3.9" },
+    { name = "numpy", specifier = ">=1.26" },
+    { name = "orjson", specifier = ">=3.13.0" },
+    { name = "pandas", specifier = ">=2.2" },
+    { name = "polars", specifier = ">=1.0" },
+    { name = "pyarrow", specifier = ">=16" },
+    { name = "pyopensky", specifier = ">=2.0" },
+    { name = "pyopensky", marker = "extra == 'trino'", specifier = ">=2.0" },
+    { name = "pyyaml", specifier = ">=6.0" },
+    { name = "scikit-learn", specifier = ">=1.5" },
+    { name = "scipy", specifier = ">=1.13" },
+    { name = "tabulate", specifier = ">=0.10.0" },
+    { name = "uvicorn", specifier = ">=0.30" },
+    { name = "xarray", specifier = ">=2024.6" },
+]
+provides-extras = ["trino"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "mypy", specifier = ">=1.10" },
+    { name = "pytest", specifier = ">=8.2" },
+    { name = "pytest-asyncio", specifier = ">=0.23" },
+    { name = "ruff", specifier = ">=0.5" },
+]
+
+[[package]]
 name = "httpcore"
 version = "1.0.9"
 source = { registry = "https://pypi.org/simple" }
@@ -1233,76 +1303,6 @@ wheels = [
 [package.optional-dependencies]
 sqlalchemy = [
     { name = "sqlalchemy" },
-]
-
-[[package]]
-name = "turbcast"
-version = "0.1.0"
-source = { editable = "." }
-dependencies = [
-    { name = "duckdb" },
-    { name = "fastapi" },
-    { name = "h3" },
-    { name = "httpx" },
-    { name = "keyring" },
-    { name = "matplotlib" },
-    { name = "numpy" },
-    { name = "orjson" },
-    { name = "pandas" },
-    { name = "polars" },
-    { name = "pyarrow" },
-    { name = "pyopensky" },
-    { name = "pyyaml" },
-    { name = "scikit-learn" },
-    { name = "scipy" },
-    { name = "tabulate" },
-    { name = "uvicorn" },
-    { name = "xarray" },
-]
-
-[package.optional-dependencies]
-trino = [
-    { name = "pyopensky" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "mypy" },
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-    { name = "ruff" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "duckdb", specifier = ">=1.0" },
-    { name = "fastapi", specifier = ">=0.111" },
-    { name = "h3", specifier = ">=4.1" },
-    { name = "httpx", specifier = ">=0.27" },
-    { name = "keyring", specifier = ">=25.7.0" },
-    { name = "matplotlib", specifier = ">=3.9" },
-    { name = "numpy", specifier = ">=1.26" },
-    { name = "orjson", specifier = ">=3.13.0" },
-    { name = "pandas", specifier = ">=2.2" },
-    { name = "polars", specifier = ">=1.0" },
-    { name = "pyarrow", specifier = ">=16" },
-    { name = "pyopensky", specifier = ">=2.0" },
-    { name = "pyopensky", marker = "extra == 'trino'", specifier = ">=2.0" },
-    { name = "pyyaml", specifier = ">=6.0" },
-    { name = "scikit-learn", specifier = ">=1.5" },
-    { name = "scipy", specifier = ">=1.13" },
-    { name = "tabulate", specifier = ">=0.10.0" },
-    { name = "uvicorn", specifier = ">=0.30" },
-    { name = "xarray", specifier = ">=2024.6" },
-]
-provides-extras = ["trino"]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "mypy", specifier = ">=1.10" },
-    { name = "pytest", specifier = ">=8.2" },
-    { name = "pytest-asyncio", specifier = ">=0.23" },
-    { name = "ruff", specifier = ">=0.5" },
 ]
 
 [[package]]

@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from turbcast.core import rolling
+from horus.core import rolling
 
 
 @pytest.mark.parametrize(

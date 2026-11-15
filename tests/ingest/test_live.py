@@ -12,9 +12,9 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from turbcast import config, schema
-from turbcast.ingest import audit, live
-from turbcast.schema import FPM_PER_MPS, FT_PER_M, KT_PER_MPS, RECORD_SCHEMA
+from horus import config, schema
+from horus.ingest import audit, live
+from horus.schema import FPM_PER_MPS, FT_PER_M, KT_PER_MPS, RECORD_SCHEMA
 
 
 @pytest.fixture
