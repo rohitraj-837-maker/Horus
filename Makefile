@@ -1,4 +1,4 @@
-.PHONY: setup test lint types check gate-m0 gate-m1 record recorder-status trino-smoke demo demo-data bundle gate-demo
+.PHONY: setup test lint types check gate-m0 gate-m1 gate-m2 scores bench-detector record recorder-status trino-smoke demo demo-data bundle gate-demo
 
 setup:
 	uv sync
@@ -10,7 +10,7 @@ lint:
 	uv run ruff check .
 
 types:
-	uv run mypy horus/core
+	uv run mypy horus/core horus/eval
 
 check: lint types test
 
@@ -22,6 +22,16 @@ gate-m0: check
 gate-m1: check
 	uv run python scripts/measure_quantisation.py --day $(or $(DAY),2025-12-02) --source $(or $(SRC),adsblol_hist)
 	uv run python scripts/gate_m1.py --day $(or $(DAY),2025-12-02) --source $(or $(SRC),adsblol_hist)
+
+# M2: per-minute detector scores for the study window, then the B0-B2 ablation
+scores:
+	uv run python scripts/score_days.py --start $(or $(START),2025-12-02) --end $(or $(END),2026-01-15) --workers $(or $(WORKERS),3)
+
+bench-detector:
+	uv run python -m horus.eval.detector_bench
+
+gate-m2: check
+	uv run python scripts/gate_m2.py
 
 record:
 	nohup caffeinate -i uv run python scripts/record_live.py > data/raw/live/nohup-opensky.out 2>&1 & echo $$! > data/raw/live/recorder.pid

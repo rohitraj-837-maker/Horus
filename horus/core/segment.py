@@ -86,7 +86,7 @@ def level_flight(
             & (np.abs(v_med) <= p.max_abs_median_vr_fpm)
             & (any_ground == 0)
         )
-    ok = np.nan_to_num(ok, nan=0).astype(bool)
+    ok = np.nan_to_num(ok, nan=0).astype(bool) & inside_data(alt, w)
 
     trim = int(round(p.trim_s / step_s))
     min_len = int(np.ceil(p.min_segment_s / step_s))
@@ -106,6 +106,22 @@ def level_flight(
         else float("nan")
     )
     return Segments(seg_id, runs, share)
+
+
+def inside_data(x: NDArray[np.floating], max_gap: int) -> NDArray[np.bool_]:
+    """True at grid points that lie within the observed data: an observation at or
+    before and at or after the point, no more than `max_gap` samples apart.
+
+    Without this, a centred window gives "level" verdicts up to half a window
+    beyond the last observation, and the end trim is spent on empty grid points
+    instead of on the climb or descent next to a data edge or coverage gap."""
+    obs = np.isfinite(np.asarray(x, dtype=float))
+    n = len(obs)
+    idx = np.arange(n)
+    prev = np.maximum.accumulate(np.where(obs, idx, -1))
+    nxt = np.minimum.accumulate(np.where(obs, idx, n)[::-1])[::-1]
+    out: NDArray[np.bool_] = (prev >= 0) & (nxt < n) & ((nxt - prev) <= max_gap)
+    return out
 
 
 def mask_outside(x: NDArray[np.floating], seg_id: NDArray[np.int64]) -> NDArray[np.float64]:

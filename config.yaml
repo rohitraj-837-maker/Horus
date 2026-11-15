@@ -74,6 +74,19 @@ match:                       # SPEC §6.1
     exclusion_dist_km: 150.0
     window_s: 1200
 
+hold:                        # change-driven archives (adsb.lol history = readsb traces)
+  max_gap_s: 25              # hold a value until the next point if it comes within this (heartbeat 20 s)
+  msg_types: [adsb_icao, adsr_icao]   # MLAT has an 8 ft/min step and no rate dead band: excluded
+
+bench:                       # SPEC §6.2 detector ablation (B0-B2 at M2)
+  source: adsblol_hist
+  scores_dir: data/derived/scores
+  min_fl: 200                # positive PIREPs must reach FL200 (detector scope)
+  neg_per_day: 1000          # candidate no-PIREP windows drawn per test day
+  seed: 20251202
+  recall_for_precision: 0.5
+  event_resolution_s: 60     # an alarm event = a run of consecutive alarmed minutes on one aircraft
+
 eval:
   rates_s: [1, 5, 10]
   nowcast_horizon_s: 900

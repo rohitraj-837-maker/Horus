@@ -75,3 +75,22 @@ def observe_every(x: np.ndarray, k: int) -> np.ndarray:
     out = np.full(len(x), np.nan)
     out[::k] = x[::k]
     return out
+
+
+def readsb_thin(
+    t: np.ndarray, vr: np.ndarray, deadband: float = 200.0, heartbeat_s: float = 20.0
+) -> np.ndarray:
+    """Indices readsb would store for a 1 s vertical-rate feed (globe_index.c rule):
+    a point when |vr - last stored| >= `deadband` (and then the previous, buffered
+    sample too), or a lone point once `heartbeat_s` has elapsed. Matches the archive:
+    heartbeat gaps are ~20 s, rate triggers come as ~1 s pairs (data_notes.md)."""
+    keep = [0]
+    for i in range(1, len(t)):
+        last = keep[-1]
+        if abs(vr[i] - vr[last]) >= deadband:
+            if i - 1 > last:
+                keep.append(i - 1)  # the buffered state before the trigger
+            keep.append(i)
+        elif t[i] - t[last] >= heartbeat_s:
+            keep.append(i)
+    return np.asarray(keep, dtype=np.int64)

@@ -59,8 +59,12 @@ def _observed(x: NDArray[np.floating]) -> NDArray[np.int64]:
     return np.flatnonzero(np.isfinite(x))
 
 
-def flicker_mask(vr_fpm: NDArray[np.floating], step_fpm: float = 64.0) -> NDArray[np.bool_]:
-    """True at single-sample +-step toggles between consecutive observations."""
+def flicker_mask(
+    vr_fpm: NDArray[np.floating], step_fpm: float = 64.0, max_gap: int | None = None
+) -> NDArray[np.bool_]:
+    """True at single-sample +-step toggles between consecutive observations.
+    With `max_gap`, observations more than `max_gap` samples apart are not
+    neighbours (e.g. the last sample of one held piece and the first of the next)."""
     vr = np.asarray(vr_fpm, dtype=float)
     idx = _observed(vr)
     out = np.zeros(len(vr), dtype=bool)
@@ -69,7 +73,10 @@ def flicker_mask(vr_fpm: NDArray[np.floating], step_fpm: float = 64.0) -> NDArra
     o = vr[idx]
     jump = np.abs(np.abs(o[1:-1] - o[:-2]) - step_fpm) <= STEP_TOL_FPM
     back = np.abs(o[2:] - o[:-2]) <= STEP_TOL_FPM
-    out[idx[1:-1][jump & back]] = True
+    hit = jump & back
+    if max_gap is not None:
+        hit &= (idx[1:-1] - idx[:-2] <= max_gap) & (idx[2:] - idx[1:-1] <= max_gap)
+    out[idx[1:-1][hit]] = True
     return out
 
 
@@ -103,7 +110,7 @@ def residual_stats(vr_fpm: NDArray[np.floating], step_s: float, p: ResidualParam
     w_st = rolling.window_samples(p.w_stat_s, step_s)
     trend = rolling.median(vr, w_tr, p.min_samples_stat)
     resid = vr - trend
-    flick = flicker_mask(vr, p.step_fpm)
+    flick = flicker_mask(vr, p.step_fpm, max_gap=w_tr)
     weights = np.where(flick, p.flicker_weight, 1.0)
     var_raw = rolling.weighted_var(resid, weights, w_st, p.min_samples_stat)
     var = sheppard(var_raw, p.step_fpm) if p.sheppard else var_raw.copy()
@@ -112,10 +119,14 @@ def residual_stats(vr_fpm: NDArray[np.floating], step_s: float, p: ResidualParam
 
 
 def accel_g(
-    time_s: NDArray[np.floating], vr_fpm: NDArray[np.floating]
+    time_s: NDArray[np.floating],
+    vr_fpm: NDArray[np.floating],
+    max_dt_s: float | None = None,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Vertical acceleration (g) between consecutive observations, placed at the
-    later sample, plus the time step used (s). NaN where there is no previous obs."""
+    later sample, plus the time step used (s). NaN where there is no previous obs,
+    or where the previous obs is more than `max_dt_s` earlier (e.g. across the gap
+    between two held pieces)."""
     t = np.asarray(time_s, dtype=float)
     vr = np.asarray(vr_fpm, dtype=float)
     idx = _observed(vr)
@@ -123,7 +134,12 @@ def accel_g(
     dt = np.full(len(vr), np.nan)
     if len(idx) >= 2:
         d_t = t[idx[1:]] - t[idx[:-1]]
-        a[idx[1:]] = (vr[idx[1:]] - vr[idx[:-1]]) / d_t / FPM_S_PER_G
+        acc = (vr[idx[1:]] - vr[idx[:-1]]) / d_t / FPM_S_PER_G
+        if max_dt_s is not None:
+            far = ~(d_t <= max_dt_s)
+            acc[far] = np.nan
+            d_t = np.where(far, np.nan, d_t)
+        a[idx[1:]] = acc
         dt[idx[1:]] = d_t
     return a, dt
 
@@ -135,13 +151,19 @@ def accel_rms(
     w_stat_s: float,
     min_samples: int,
     quant_step_fpm: float | None = None,
+    max_dt_s: float | None = None,
 ) -> NDArray[np.float64]:
     """RMS vertical acceleration (g) over W_stat. With `quant_step_fpm` (B1),
     subtract the quantisation noise mean square 2 D^2/12/dt^2 (floor at 0)."""
-    a, dt = accel_g(time_s, vr_fpm)
+    a, dt = accel_g(time_s, vr_fpm, max_dt_s)
     w = rolling.window_samples(w_stat_s, step_s)
     ms = rolling.mean_square(a, w, min_samples)
     if quant_step_fpm is not None:
         q = 2.0 * quant_step_fpm**2 / 12.0 / dt**2 / FPM_S_PER_G**2
-        ms = np.maximum(ms - np.nan_to_num(rolling.mean(q, w, 1)), 0.0)
+        qm = np.nan_to_num(rolling.mean(q, w, 1))
+        excess = ms - qm
+        # Rolling means carry ~1e-12 relative round-off; a window whose mean square
+        # equals the noise floor is exactly 0, not 1e-10 g of residue.
+        excess[excess <= 1e-9 * np.fmax(qm, ms)] = 0.0
+        ms = excess
     return np.sqrt(ms)

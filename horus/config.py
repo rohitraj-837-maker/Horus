@@ -129,6 +129,23 @@ class Eval:
 
 
 @dataclass(frozen=True)
+class Hold:
+    max_gap_s: int
+    msg_types: list[str]
+
+
+@dataclass(frozen=True)
+class Bench:
+    source: str
+    scores_dir: str
+    min_fl: int
+    neg_per_day: int
+    seed: int
+    recall_for_precision: float
+    event_resolution_s: int
+
+
+@dataclass(frozen=True)
 class Splits:
     """Inclusive ISO date ranges. Time-based only (SPEC §3): train before test."""
 
@@ -181,6 +198,8 @@ class Config:
     grid: Grid
     winds: Winds
     match: Match
+    hold: Hold
+    bench: Bench
     eval: Eval
     splits: Splits
     live: Live

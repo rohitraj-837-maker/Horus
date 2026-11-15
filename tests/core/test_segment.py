@@ -62,3 +62,26 @@ def test_sparse_20s_sampling_still_segments():
 def test_empty_input():
     seg = level_flight(np.array([]), np.array([]), np.array([], bool), 1.0, P)
     assert len(seg.bounds) == 0 and np.isnan(seg.level_share)
+
+
+def test_trim_applies_at_data_edges_even_with_empty_grid_around():
+    # A level track padded with unobserved grid points on both sides: segments must
+    # still start trim_s after the first observation and end trim_s before the last.
+    p = SegmentParams()
+    n, pad = 600, 200
+    alt = np.full(n + 2 * pad, np.nan)
+    alt[pad : pad + n] = 35000.0
+    vr = np.where(np.isfinite(alt), 0.0, np.nan)
+    seg = level_flight(alt, vr, np.zeros(len(alt), bool), 1.0, p)
+    assert seg.bounds.tolist() == [[pad + 30, pad + n - 30]]
+    padless = level_flight(alt[pad:-pad], vr[pad:-pad], np.zeros(n, bool), 1.0, p)
+    assert padless.bounds.tolist() == [[30, n - 30]]
+
+
+def test_inside_data_spans_short_gaps_only():
+    from horus.core.segment import inside_data
+
+    x = np.full(20, np.nan)
+    x[[2, 5, 15]] = 1.0
+    got = inside_data(x, max_gap=4)
+    assert got.tolist() == [i in {2, 3, 4, 5, 15} for i in range(20)]

@@ -101,3 +101,29 @@ def test_accel_ramp_and_b1_correction():
     b0 = residual.accel_rms(np.arange(N, dtype=float), q_noise, 1.0, 15, 6)
     b1 = residual.accel_rms(np.arange(N, dtype=float), q_noise, 1.0, 15, 6, quant_step_fpm=64)
     assert np.nanmean(b1) < np.nanmean(b0)
+
+
+def test_accel_max_dt_masks_differences_across_gaps() -> None:
+    t = np.array([0.0, 1.0, 200.0, 201.0])
+    vr = np.array([0.0, 64.0, 6400.0, 6464.0])
+    a, dt = residual.accel_g(t, vr, max_dt_s=1.5)
+    assert np.isnan(a[0]) and np.isnan(a[2]) and np.isnan(dt[2])
+    assert a[1] == a[3] == 64.0 / residual.FPM_S_PER_G
+    a_all, _ = residual.accel_g(t, vr)
+    assert np.isfinite(a_all[2])  # without the guard the gap is differenced
+
+
+def test_flicker_is_not_detected_across_pieces() -> None:
+    vr = np.array([0.0, 0.0, 64.0] + [np.nan] * 50 + [0.0, 0.0, 0.0])
+    assert residual.flicker_mask(vr)[2]  # without a gap limit: 0, 64, (gap) 0 = toggle
+    assert not residual.flicker_mask(vr, max_gap=31).any()
+
+
+def test_b1_is_exactly_zero_at_the_quantisation_floor() -> None:
+    # Alternating +-1 step every second: mean square of accel equals the B1 noise floor
+    # 2 D^2/12 only on average; a pure quantisation staircase gives ms <= floor -> 0.
+    t = np.arange(4000, dtype=float)
+    vr = np.where((np.arange(4000) // 7) % 2 == 0, 0.0, 64.0)
+    b1 = residual.accel_rms(t, vr, 1.0, 15.0, 6, quant_step_fpm=64.0, max_dt_s=1.5)
+    assert np.nanmin(b1) == 0.0
+    assert (b1[np.isfinite(b1)] == 0.0).mean() > 0.5
