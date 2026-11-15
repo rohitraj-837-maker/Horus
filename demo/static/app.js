@@ -35,7 +35,7 @@ const S = {
   view: "overview", radarReady: false,
   basemap: null, index: [], sc: null, about: null, overview: null,
   t: 0, playing: false, speed: 60, flMin: 180, flMax: 450,
-  folds: { more: false, weights: false, pireps: true },
+  folds: { more: false, pireps: false },
   selected: -1, pinned: null, filterCs: "", showPireps: true, showField: false, showTrail: true,
   vp: { scale: 1, ox: 0, oy: 0, w: 0, h: 0, dpr: 1 }, baseLayer: null, hover: -1, lastJ: -1, lastListI: -1,
 };
@@ -139,16 +139,6 @@ function renderOverview() {
   for (const i of document.querySelectorAll(".device-legend i")) i.style.background = COL.sev[+i.dataset.sev];
   $("problem").innerHTML = O.problem.map((x, i) => `
     <article class="card reveal" data-delay="${i}"><span class="n">0${i + 1}</span><h3>${esc(x.title)}</h3><p>${esc(x.text)}</p></article>`).join("");
-  const sw = [
-    () => `<div class="swatches">${COL.sev.map((c, i) => `<i data-c="${i}"></i>`).join("")}<i data-c="na"></i></div>`,
-    () => '<div class="swatches"><i data-fade="1"></i></div>',
-    () => '<div class="swatches"><i class="ring" data-ring="MOD"></i><i class="ring" data-ring="SEV"></i><i class="dash"></i></div>',
-  ];
-  $("readGuide").innerHTML = O.read_guide.map((x, i) => `
-    <article class="card reveal" data-delay="${i}"><span class="n">0${i + 1}</span><h3>${esc(x.title)}</h3><p>${sub(x.text)}</p>${sw[i] ? sw[i]() : ""}</article>`).join("");
-  for (const e of $("readGuide").querySelectorAll("[data-c]")) e.style.background = e.dataset.c === "na" ? COL.na : COL.sev[+e.dataset.c];
-  for (const e of $("readGuide").querySelectorAll("[data-fade]")) { e.style.width = "64px"; e.style.background = `linear-gradient(90deg, ${rgba(COL.sev[2], 0.15)}, ${COL.sev[2]})`; }
-  for (const e of $("readGuide").querySelectorAll("[data-ring]")) e.style.borderColor = COL.tb[e.dataset.ring];
   $("scenGallery").innerHTML = O.scenarios.map((c, i) => `
     <button type="button" class="card scard reveal" data-delay="${i % 2}" data-open="${esc(c.id)}" aria-label="Open ${esc(c.title)} in the radar">
       <canvas data-thumb="${esc(c.id)}" aria-hidden="true"></canvas>
@@ -183,13 +173,13 @@ function drawThumb(cv, D) {
   const pad = 10, sc = Math.min((r.width - 2 * pad) / (x1 - x0), (r.height - 2 * pad) / (y1 - y0));
   const ox = (r.width - (x1 - x0) * sc) / 2 - x0 * sc, oy = (r.height + (y1 - y0) * sc) / 2 + y0 * sc;
   const P = (lon, lat) => { const [x, y] = ALB(lon, lat); return [ox + x * sc, oy - y * sc]; };
-  const bg = g.createLinearGradient(0, 0, 0, r.height); bg.addColorStop(0, "#030918"); bg.addColorStop(1, "#0a1836");
+  const bg = g.createLinearGradient(0, 0, 0, r.height); bg.addColorStop(0, "#050505"); bg.addColorStop(1, "#0b0b0c");
   g.fillStyle = bg; g.fillRect(0, 0, r.width, r.height);
   const land = new Path2D();
   for (const st of S.basemap.states) for (const ring of st.rings) {
     ring.forEach(([lon, lat], i) => { const [x, y] = P(lon, lat); i ? land.lineTo(x, y) : land.moveTo(x, y); }); land.closePath();
   }
-  g.fillStyle = "rgba(30, 48, 84, 0.5)"; g.fill(land); g.strokeStyle = "rgba(120, 170, 240, 0.18)"; g.lineWidth = 0.5; g.stroke(land);
+  g.fillStyle = "rgba(255, 255, 255, 0.06)"; g.fill(land); g.strokeStyle = "rgba(255, 255, 255, 0.14)"; g.lineWidth = 0.5; g.stroke(land);
   g.lineCap = "round";
   for (const pass of [0, 1, 2, 3]) {           // draw rough segments last so they sit on top
     for (const a of D.aircraft) {
@@ -298,13 +288,13 @@ function previewProject() {
   PV.vp = { w: r.width, h: r.height, dpr, P };
   const off = document.createElement("canvas"); off.width = cv.width; off.height = cv.height;
   const c = off.getContext("2d"); c.scale(dpr, dpr);
-  const g = c.createLinearGradient(0, 0, 0, r.height); g.addColorStop(0, "#030918"); g.addColorStop(1, "#0a1836");
+  const g = c.createLinearGradient(0, 0, 0, r.height); g.addColorStop(0, "#050505"); g.addColorStop(1, "#0b0b0c");
   c.fillStyle = g; c.fillRect(0, 0, r.width, r.height);
   const land = new Path2D();
   for (const st of S.basemap.states) for (const ring of st.rings) {
     ring.forEach(([lon, lat], i) => { const [x, y] = P(lon, lat); i ? land.lineTo(x, y) : land.moveTo(x, y); }); land.closePath();
   }
-  c.fillStyle = "rgba(30, 48, 84, 0.55)"; c.fill(land); c.strokeStyle = "rgba(120, 170, 240, 0.22)"; c.lineWidth = 0.6; c.stroke(land);
+  c.fillStyle = "rgba(255, 255, 255, 0.065)"; c.fill(land); c.strokeStyle = "rgba(255, 255, 255, 0.16)"; c.lineWidth = 0.6; c.stroke(land);
   PV.base = off;
   for (const a of PV.data.aircraft) {
     const n = a.cols.t.length; a.px = new Float32Array(n); a.py = new Float32Array(n);
@@ -492,8 +482,7 @@ async function loadScenario(id, { autoSelect = true } = {}) {
 function renderScenarioCard() {
   const sv = S.sc.severity;
   $("scenarioCard").innerHTML = `
-    <h3>${esc(S.sc.title)}</h3>
-    <p>${esc(S.sc.blurb)}</p>
+    <h3 title="${esc(S.sc.blurb)}">${esc(S.sc.title)}</h3>
     <div class="legend" title="σ_corr thresholds ${sv.edges.join(" / ")} ft/min — placeholders until M3">
       ${sv.labels.map((l, i) => `<span><i class="dot" data-sev="${i}"></i>${esc(l)}</span>`).join("")}
       <span><i class="dot" data-sev="na"></i>Climbing</span>
@@ -569,7 +558,7 @@ function drawCallouts(i, visible) {
   if (S.hover >= 0 && S.hover !== S.selected && visible.includes(S.hover)) order.push(S.hover);
   visible.filter((k) => !order.includes(k) && S.sc.aircraft[k].cols.sev[i] >= 2)
     .sort((p, q) => (S.sc.aircraft[q].cols.sc[i] ?? 0) - (S.sc.aircraft[p].cols.sc[i] ?? 0))
-    .slice(0, 8).forEach((k) => order.push(k));
+    .slice(0, 3).forEach((k) => order.push(k));
   const blocked = overlayRects().map(({ x, y, w, h }) => ({ x: x - 4, y: y - 4, w: w + 8, h: h + 8 }));
   const glyphs = visible.map((k) => ({ k, x: S.sc.aircraft[k].x[i] - 9, y: S.sc.aircraft[k].y[i] - 9, w: 18, h: 18 }));
   const placed = [];
@@ -824,17 +813,17 @@ function updateInspectorLive() {
       ${row("σ<sub>raw</sub> <em>before Δ²/12</em>", fmt(c.sr[j], 0, " ft/min"))}
       ${row("Injected σ <em>synthetic truth</em>", fmt(c.truth[j], 0, " ft/min"))}
     </div>
-    <details class="fold" data-fold="more"${open("more")}><summary>More metrics<small>flicker, B1, context</small></summary>
+    <details class="fold" data-fold="more"${open("more")}><summary>More detail<small>flicker, B1, class weights</small></summary>
       <div class="group">
         ${row("Flicker samples <em>61 s</em>", fmt(c.flk[j], 0))}
         ${row("B1 vertical-accel RMS", fmt(c.b1[j], 3, " g"))}
         ${row("Altitude deviation <em>vs 2-min median</em>", fmt(c.adev[j], 0, " ft"))}
         ${row("Heading rate <em>descriptive</em>", fmt(c.hrate[j], 2, " °/s"))}
         ${row("GS variability <em>wind-gradient proxy</em>", fmt(c.gsd[j], 1, " kt"))}
-      </div></details>
-    <details class="fold" data-fold="weights"${open("weights")}><summary>Class weights<small>uncalibrated</small></summary>
-      <div class="group">${w === null ? row("Not assessed outside level flight", "—")
-        : sv.labels.map((l, k) => `<div class="row wbar"><span>${esc(l)}</span><span class="track"><span class="fill" data-k="${k}" data-w="${(w[k] * 100).toFixed(1)}"></span></span><span class="v">${Math.round(w[k] * 100)}%</span></div>`).join("")}</div></details>
+      </div>
+      <div class="group fold-gap">${w === null ? row("Class weights: not assessed outside level flight", "—")
+        : sv.labels.map((l, k) => `<div class="row wbar"><span>${esc(l)}</span><span class="track"><span class="fill" data-k="${k}" data-w="${(w[k] * 100).toFixed(1)}"></span></span><span class="v">${Math.round(w[k] * 100)}%</span></div>`).join("")}</div>
+      <p class="footnote">Class weights are an uncalibrated preview, not a probability.</p></details>
     <details class="fold" data-fold="pireps"${open("pireps")}><summary>Pilot reports nearby<small>${ms.length} in window</small></summary>
       <div class="group">${ms.length === 0 ? row("None within ±10 min · 40 km · ±2,000 ft", "—") : ms.map((r) => `
         <div class="row pirep"><div class="row-top"><span class="k"><b data-tb="${esc(r.p.tb)}">${esc(r.p.tb)}</b> · ${esc(r.p.by)}</span>

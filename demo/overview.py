@@ -228,25 +228,6 @@ PROBLEM = [
     },
 ]
 
-READ_GUIDE = [
-    {
-        "title": "Colour = roughness",
-        "text": "Green, yellow, orange, red: the Sheppard-corrected vertical-rate jitter "
-        "(σ_corr), on placeholder thresholds until M3. Grey means climbing or descending, "
-        "where Horus does not score.",
-    },
-    {
-        "title": "Trail = last 10 minutes",
-        "text": "Each trail keeps the colour it had at that moment, so you can see where a "
-        "flight entered and left rough air.",
-    },
-    {
-        "title": "Rings = pilot reports",
-        "text": "Synthetic PIREPs fade over 30 minutes. The dashed blue ring around the "
-        "selected flight is the SPEC matching radius (40 km).",
-    },
-]
-
 # Status as recorded in PROGRESS.md on 2026-11-15
 MILESTONES = [
     {"m": "M0", "title": "Setup", "status": "done", "note": "uv, config, schema, gates"},
@@ -332,7 +313,6 @@ def overview() -> dict[str, Any]:
         "pipeline": PIPELINE,
         "maths": maths(),
         "scenarios": scenario_cards(),
-        "read_guide": READ_GUIDE,
         "benchmarks": BENCHMARKS,
         "milestones": MILESTONES,
         "milestones_as_of": MILESTONES_AS_OF,

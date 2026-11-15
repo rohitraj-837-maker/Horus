@@ -72,7 +72,7 @@ def test_overview_endpoint(base_url):
 
 def test_landing_detail_sections():
     o = overview.overview()
-    assert len(o["problem"]) == 3 and len(o["read_guide"]) == 3
+    assert len(o["problem"]) == 3 and "read_guide" not in o
     assert [m["m"] for m in o["milestones"]] == [f"M{i}" for i in range(8)]
     assert {m["status"] for m in o["milestones"]} <= {"done", "active", "planned"}
     assert any("synthetic" in x.lower() for x in o["limitations"])

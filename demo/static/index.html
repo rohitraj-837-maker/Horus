@@ -47,7 +47,6 @@
           <div class="device-legend"><span><i data-sev="0"></i>Smooth</span><span><i data-sev="1"></i>Light</span><span><i data-sev="2"></i>Moderate</span><span><i data-sev="3"></i>Severe</span></div>
         </div>
       </div>
-      <span class="pill-badge big reveal">Synthetic Preview Data · M3 Pending</span>
     </section>
 
     <section class="block">
@@ -93,23 +92,19 @@
     </section>
 
     <section class="block">
-      <div class="block-head reveal"><h2>How to read the radar</h2><p>Three things to look at.</p></div>
-      <div id="readGuide" class="trio guide"></div>
-    </section>
-
-    <section class="block">
-      <div class="block-head reveal"><h2>Benchmark plan</h2><p>Validated against pilot reports after the M1 gate. Empty until then — nothing here is estimated.</p></div>
-      <div class="card table-card reveal"><table id="bench" class="bench"></table></div>
-    </section>
-
-    <section class="block">
-      <div class="block-head reveal"><h2>Roadmap</h2><p id="roadmapAsOf">Setup plus seven weekly milestones, each closed by an automated gate.</p></div>
+      <div class="block-head reveal"><h2>Where it stands</h2><p id="roadmapAsOf">Setup plus seven weekly milestones, each closed by an automated gate.</p></div>
       <ol id="roadmap" class="roadmap"></ol>
-    </section>
-
-    <section class="block">
-      <div class="block-head reveal"><h2>Honest limits</h2><p>What this preview does not show yet.</p></div>
-      <ul id="limits" class="limits card reveal"></ul>
+      <div class="folds reveal">
+        <details class="more">
+          <summary>Benchmark plan</summary>
+          <p class="fold-lede">Validated against pilot reports after the M1 gate. Empty until then — nothing here is estimated.</p>
+          <div class="card table-card"><table id="bench" class="bench"></table></div>
+        </details>
+        <details class="more">
+          <summary>Honest limits</summary>
+          <ul id="limits" class="limits card"></ul>
+        </details>
+      </div>
     </section>
 
     <section class="cta reveal">
