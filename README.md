@@ -15,20 +15,13 @@ Status: under construction (see `SPEC.md` and `PROGRESS.md`). Headline results w
 make demo        # http://127.0.0.1:8765/  (no internet needed)
 ```
 
-Restrained dark design: black, white and one gold accent, hairline rules, light Geist display type (SIL OFL, bundled so it stays offline), with interactive labs. It opens on an **Overview** page (architecture, the maths, the benchmark plan and four
-preview metrics computed live from the synthetic scenarios, an animated mini-radar, an
-interactive quantisation playground, a scenario gallery, a glossary, and the roadmap with the benchmark plan and honest limits;
-each pipeline stage opens a what / why / by-the-numbers explainer with a hands-on lab: credit budget,
-sampling cadence, m/s → 64 ft/min rounding, the signal chain on a real scenario flight, and a
-draggable detection threshold over the synthetic σ_corr distributions), then a **Live Radar Demo**
-console: a dark three-pane view with flight strips sorted by σ_corr, a flat 2D airspace
-map with playback and filters, and a telemetry inspector. It auto-selects the scenario's
-most turbulent flight at its sustained peak; the inspector adds a plain-English summary and a
-full-hour altitude profile with the scored (level-flight) stretches shaded. **All aircraft, turbulence and PIREPs in the demo
-are synthetic.** Every score is computed by Horus's real detector code (level-flight
-segmentation, vertical-rate residual, Sheppard correction, B1 acceleration RMS) on those
-synthetic flights; severity colours use placeholder thresholds until milestone M3
-calibrates them. The page loads nothing from the internet (the server sends a
+Designed from a study of related sites (docs/design-brief.md): aviationweather.gov conventions for the radar
+(bottom timeline, layer strip, flight levels, caret PIREP symbols, AWC moderate/severe colours), the calm
+label-plus-statement structure of the user's reference sites, and a night-sky opening scene. The overview walks
+through the problem, five pipeline steps with hands-on labs, computed proof numbers, four synthetic skies, a dated
+comparison with published turbulence products, and the roadmap. **All aircraft, turbulence and PIREPs are
+synthetic**; every number shown is computed from the bundled data or read from `config.yaml`. Horus reports
+roughness in ft/min (σ_corr), not EDR. The page loads nothing from the internet (the server sends a
 same-origin-only Content-Security-Policy). `make gate-demo` checks the endpoints, the
 offline guarantee and the release bundle.
 

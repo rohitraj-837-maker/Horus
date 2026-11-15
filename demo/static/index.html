@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-view="overview" data-theme="dark">
+<html lang="en" data-view="overview">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -9,184 +9,144 @@
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <div class="sky" aria-hidden="true"><div class="stars"></div><div class="stars far"></div><div class="horizon"></div></div>
-
-  <header class="toolbar">
-    <div class="tb-left">
-      <img class="app-icon" src="/static/icon.svg" alt="" width="20" height="20">
-      <span class="app-title">Horus</span>
-      <span class="tb-note">Research prototype · synthetic data</span>
+  <header class="top">
+    <a class="brand" href="#" data-view-link="overview" aria-label="Horus overview">
+      <img src="/static/icon.svg" alt="" width="18" height="18"><span>Horus</span>
+    </a>
+    <nav class="views" role="tablist" aria-label="View">
+      <button type="button" role="tab" data-view="overview" aria-selected="true">Overview</button>
+      <button type="button" role="tab" data-view="radar" aria-selected="false">Radar</button>
+    </nav>
+    <div class="top-right">
+      <span class="utc num" id="utc" title="Current time, UTC">--:--Z</span>
+      <button class="btn btn-small only-overview" type="button" data-go="radar">Start the radar</button>
+      <button class="btn btn-small only-radar" type="button" id="legendBtn" aria-expanded="false" aria-controls="legend">Legend</button>
     </div>
-    <div class="tb-center">
-      <div id="views" class="segmented" role="tablist" aria-label="View">
-        <span class="seg-thumb" aria-hidden="true"></span>
-        <button type="button" role="tab" data-view="overview" aria-selected="true">Overview</button>
-        <button type="button" role="tab" data-view="radar" aria-selected="false">Live radar</button>
-      </div>
-    </div>
-    <div class="tb-right">
-      <button id="aboutBtn" class="btn btn-line btn-sm only-radar" type="button">Guide &amp; sources</button>
-      <button class="btn btn-line btn-sm only-overview" type="button" data-go="radar">Launch radar</button>
-    </div>
-  </header>  <main id="overview" class="overview" aria-label="Overview">
-    <section class="hero">
-      <canvas id="preview" class="hero-sky" aria-label="Synthetic flights crossing a jet-stream turbulence band"></canvas>
-      <div class="hero-inner">
-        <p class="eyebrow reveal">Horus · clear-air turbulence radar</p>
-        <h1 class="display reveal">Turbulence is invisible.<br>Aircraft already feel it.</h1>
-        <p class="lede reveal">Every airliner broadcasts its vertical rate. In rough air that number jitters. Horus measures the jitter, removes the rounding that fakes it, and shows where the air is rough — no new sensors.</p>
-        <div class="hero-ctas reveal">
-          <button class="btn btn-gold" type="button" data-go="radar">Launch the radar</button>
-          <a class="btn btn-line" href="#how">How it works</a>
-        </div>
-      </div>
-      <div class="hero-foot">
-        <span>Jet Stream · synthetic replay <b id="previewClock" class="num">+00:00</b></span>
-        <span class="device-legend"><span><i data-sev="0"></i>Smooth</span><span><i data-sev="1"></i>Light</span><span><i data-sev="2"></i>Moderate</span><span><i data-sev="3"></i>Severe</span></span>
+  </header>
+
+  <!-- ============================================================ OVERVIEW -->
+  <main id="overview" aria-label="Overview">
+    <section class="scene" aria-label="Introduction">
+      <canvas id="scene" aria-hidden="true"></canvas>
+      <h1 class="scene-a fade">Clear air<br>hides turbulence</h1>
+      <p class="scene-b fade" aria-hidden="true">Every airliner<br>already feels it</p>
+      <div class="scene-cta fade">
+        <button class="btn btn-solid" type="button" data-go="radar">Start the radar</button>
+        <p class="scene-caption">Synthetic jet-stream hour. Each light is an aircraft; orange and red ones are in rough air.</p>
       </div>
     </section>
 
-    <section class="block">
-      <div class="block-head reveal"><p class="eyebrow">Why it matters</p><h2 class="statement">The worst turbulence leaves no trace on radar.</h2><p class="lede">Turbulence is a major cause of in-flight injuries. Clear-air turbulence has no cloud to see and no rain to echo.</p></div>
-      <div id="problem" class="cols cols-3"></div>
+    <section class="sec">
+      <p class="label fade">The problem</p>
+      <h2 class="headline fade">Crews learn about turbulence from other pilots — after someone has already hit it.</h2>
+      <div id="problem" class="row3 fade"></div>
     </section>
 
-    <section class="block">
-      <div class="block-head reveal"><p class="eyebrow">The proof so far</p><h2 class="statement">Tested on skies where we know the answer.</h2><p class="lede">Synthetic flights through turbulence of known strength, scored by the real detector code. Real, pilot-report-validated numbers come after the first milestone gate.</p></div>
-      <div id="kpis" class="cols cols-4 kpis"></div>
-    </section>
-
-    <section id="how" class="block">
-      <div class="block-head reveal"><p class="eyebrow">One pipeline, end to end</p><h2 class="statement">From a public broadcast to a turbulence score.</h2><p class="lede">Five stages. Select one to see what it does, why it exists, and try it.</p></div>
-      <div id="glassStage" class="stages reveal">
-        <ol id="pipeline" class="stage-tabs" role="tablist" aria-label="Pipeline stages"><span class="track-thumb" aria-hidden="true"></span></ol>
-        <div id="stageDetail" class="stage-panel" role="tabpanel" aria-live="polite"></div>
+    <section class="sec" id="how">
+      <p class="label fade">How Horus sees it</p>
+      <h2 class="headline fade">Five steps, from a public broadcast to a roughness score.</h2>
+      <p class="intro fade">Pick a step. Each one says what it does, why it exists, and lets you try it with real parameters.</p>
+      <div class="steps fade">
+        <ol id="steps" class="step-list" role="tablist" aria-label="Pipeline steps"></ol>
+        <div id="stepPanel" class="step-panel" role="tabpanel" aria-live="polite"></div>
       </div>
     </section>
 
-    <section class="block">
-      <div class="block-head reveal"><p class="eyebrow">The key idea</p><h2 class="statement">Rounding looks like turbulence. So we take it out.</h2><p class="lede">ADS-B reports vertical rate in steps of 64 ft/min. That rounding adds jitter of its own; Sheppard's correction subtracts exactly that amount.</p></div>
-      <div class="play reveal">
-        <div class="play-ctrl">
-          <label for="sigmaIn">True turbulence <span class="num" id="sigmaOut">60 ft/min</span></label>
-          <input id="sigmaIn" class="slider" type="range" min="10" max="400" step="5" value="60">
-          <p class="play-formula num">σ²<sub>corr</sub> = σ²<sub>raw</sub> − Δ²/12 &nbsp;·&nbsp; Δ = 64 ft/min</p>
-          <p id="playNote" class="play-note"></p>
-        </div>
-        <div class="play-bars" aria-live="polite">
-          <div class="pb"><span>True</span><div class="pb-track"><i id="pbTrue"></i></div><b id="pvTrue" class="num"></b></div>
-          <div class="pb"><span>Measured</span><div class="pb-track"><i id="pbRaw"></i></div><b id="pvRaw" class="num"></b></div>
-          <div class="pb"><span>Corrected</span><div class="pb-track"><i id="pbCorr"></i></div><b id="pvCorr" class="num"></b></div>
-          <p class="fine">Expected values from Sheppard's approximation (σ²<sub>raw</sub> ≈ σ² + Δ²/12); it holds within 2% for σ ≥ 40 ft/min in our synthetic tests.</p>
-        </div>
-      </div>
-      <details class="more reveal">
-        <summary><span>All the maths, with values from <span class="num">config.yaml</span></span></summary>
-        <div id="maths" class="math-list"></div>
-      </details>
+    <section class="sec">
+      <p class="label fade">The proof so far</p>
+      <h2 class="headline fade">Tested on skies where we know the answer.</h2>
+      <p class="intro fade">Synthetic flights through turbulence of known strength, scored by the real detector code. Every number below is computed from the bundled data when the page loads.</p>
+      <div id="kpis" class="row4 fade"></div>
     </section>
 
-    <section class="block">
-      <div class="block-head reveal"><p class="eyebrow">Try it</p><h2 class="statement">Four skies. One answer key.</h2><p class="lede">Each scenario is an hour of synthetic traffic through a known turbulence field. Drag to browse; open one in the radar.</p></div>
-      <div class="carousel" id="scenCarousel" aria-label="Scenarios: drag or scroll sideways">
-        <div id="scenGallery" class="carousel-track"></div>
-      </div>
+    <section class="sec">
+      <p class="label fade">Try it</p>
+      <h2 class="headline fade">Four synthetic skies.</h2>
+      <p class="intro fade">Each is an hour of traffic through a turbulence field we built, so the detector's answers can be checked. Open one in the radar.</p>
+      <div id="skies" class="skies fade"></div>
     </section>
 
-    <section class="block">
-      <div class="block-head reveal"><p class="eyebrow">Glossary</p><h2 class="statement">Ten words, in plain English.</h2></div>
-      <dl id="glossary" class="glossary"></dl>
+    <section class="sec">
+      <p class="label fade">How it compares</p>
+      <h2 class="headline fade">Others use aircraft as sensors too. Horus shows its working.</h2>
+      <p class="intro fade" id="compareNote">What each source says about itself on its public pages.</p>
+      <div class="table-wrap fade"><table id="compare" class="compare"></table></div>
     </section>
 
-    <section class="block">
-      <div class="block-head reveal"><p class="eyebrow">Where it stands</p><h2 class="statement">Built in public, one gate at a time.</h2><p id="roadmapAsOf" class="lede">Setup plus seven weekly milestones, each closed by an automated gate.</p></div>
-      <ol id="roadmap" class="roadmap"></ol>
-      <div class="folds reveal">
-        <details class="more">
-          <summary>Benchmark plan</summary>
-          <p class="fold-lede">Validated against pilot reports after the M1 gate. Empty until then — nothing here is estimated.</p>
-          <div class="table-card"><table id="bench" class="bench"></table></div>
-        </details>
-        <details class="more">
-          <summary>Honest limits</summary>
-          <ul id="limits" class="limits"></ul>
-        </details>
-        <details class="more">
-          <summary>Data sources &amp; attribution</summary>
-          <div id="attribs" class="attrib-card"></div>
-        </details>
+    <section class="sec">
+      <p class="label fade">Where it stands</p>
+      <h2 class="headline fade">Built one gate at a time.</h2>
+      <p class="intro fade" id="roadmapNote"></p>
+      <ol id="roadmap" class="roadmap fade"></ol>
+      <div class="folds fade">
+        <details><summary>Benchmark plan</summary><p class="fold-note">Validated against pilot reports after the M1 gate. Empty until then; nothing here is estimated.</p><div class="table-wrap"><table id="bench" class="plain"></table></div></details>
+        <details><summary><span>All the maths, with values from <span class="num">config.yaml</span></span></summary><div id="maths" class="maths"></div></details>
+        <details><summary>Glossary</summary><dl id="glossary" class="glossary"></dl></details>
+        <details><summary>Honest limits</summary><ul id="limits" class="limits"></ul></details>
+        <details><summary>Data sources and attribution</summary><div id="sources" class="sources"></div></details>
       </div>
     </section>
 
-    <section class="cta reveal">
-      <p class="eyebrow">See it run</p>
-      <h2 class="statement">An hour of sky, scored second by second.</h2>
-      <button class="btn btn-gold" type="button" data-go="radar">Launch the radar</button>
+    <section class="closing">
+      <h2 class="closing-line fade">See an hour of sky, scored second by second.</h2>
+      <button class="btn btn-solid fade" type="button" data-go="radar">Start the radar</button>
     </section>
 
-    <footer class="page-foot">Horus · MIT License · © 2026 Rohit Raj · Research prototype — not for operational use · Runs fully offline</footer>
+    <footer class="foot">
+      <span>Horus · MIT License · © 2026 Rohit Raj</span>
+      <span>Research prototype — not for operational use · Runs fully offline</span>
+    </footer>
   </main>
 
-  <!-- 2. Interactive: radar console -->
-  <div id="radar" class="window radar" aria-label="Live radar demo">
-    <canvas id="map" aria-label="Flat 2D airspace map of the continental US"></canvas>
+  <!-- ============================================================ RADAR -->
+  <div id="radar" aria-label="Radar">
+    <canvas id="map" aria-label="Map of the continental US with synthetic flights coloured by detected roughness"></canvas>
 
-    <div id="scenarios" class="segmented scen glass" role="tablist" aria-label="Scenario">
-      <span class="seg-thumb" aria-hidden="true"></span>
-    </div>
-
-    <aside id="flightPane" class="pane left glass" aria-label="Flights">
-      <section id="scenarioCard" class="pane-card"></section>
-      <div class="pane-h"><span>Flights</span><span class="num">roughness</span></div>
-      <ul id="flightList" class="flight-list" role="listbox" aria-label="Flights, roughest first"></ul>
+    <aside class="panel left" aria-label="Flights">
+      <div class="panel-head">
+        <label class="label" for="scenarioSel">Scenario</label>
+        <select id="scenarioSel" class="select"></select>
+        <p id="scenarioBlurb" class="blurb"></p>
+      </div>
+      <p class="label list-label">Roughest now</p>
+      <ul id="flights" class="flights" role="listbox" aria-label="Flights, roughest first"></ul>
     </aside>
 
-    <section class="capsule glass" aria-label="Playback and filters">
-      <div class="cap-row">
-        <button id="playBtn" class="round-btn" type="button" aria-label="Play">
-          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path id="playIcon" d="M4 2.5v11l9-5.5z"/></svg>
-        </button>
-        <span id="clock" class="num clock">+00:00</span>
-        <input id="scrub" class="slider" type="range" min="0" max="3590" value="0" aria-label="Timeline">
-        <span class="num clock dim">+60:00</span>
-        <div id="speed" class="segmented mini" role="radiogroup" aria-label="Playback speed">
-          <span class="seg-thumb" aria-hidden="true"></span>
-          <button type="button" role="radio" data-speed="1">1×</button>
-          <button type="button" role="radio" data-speed="10">10×</button>
-          <button type="button" role="radio" data-speed="60">60×</button>
-        </div>
-      </div>
-      <div class="cap-row">
-        <div class="fl-range">
-          <span class="cap-label">Altitude</span>
-          <div class="dual">
-            <input id="flMin" type="range" min="180" max="450" step="10" value="180" aria-label="Lowest flight level">
-            <input id="flMax" type="range" min="180" max="450" step="10" value="450" aria-label="Highest flight level">
-          </div>
-          <span id="flLabel" class="num cap-value">FL180–FL450</span>
-        </div>
-        <select id="callsign" class="popup" aria-label="Flight"><option value="">All Flights</option></select>
-        <div class="toggles">
-          <button id="tgPireps" class="toggle-pill" type="button" aria-pressed="true">PIREPs</button>
-          <button id="tgField" class="toggle-pill" type="button" aria-pressed="false">Turbulence Field</button>
-          <button id="tgTrail" class="toggle-pill" type="button" aria-pressed="true">Trail</button>
-        </div>
-      </div>
-    </section>
-
-    <aside id="inspector" class="inspector pane right glass" aria-label="Flight inspector"></aside>
-    <div class="map-legal">Synthetic data · Map: Natural Earth</div>
-  </div>
-
-  <div id="sheet" class="sheet-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
-    <div class="sheet">
-      <div class="sheet-head">
-        <h2 id="sheetTitle">Guide &amp; sources</h2>
-        <button id="closeSheet" class="text-btn" type="button">Done</button>
-      </div>
-      <div id="aboutContent" class="sheet-body"></div>
+    <div class="layers" role="toolbar" aria-label="Layers">
+      <button type="button" data-layer="trails" aria-pressed="true" title="Trails: last 10 minutes">Trails</button>
+      <button type="button" data-layer="pireps" aria-pressed="true" title="Synthetic pilot reports">PIREPs</button>
+      <button type="button" data-layer="field" aria-pressed="false" title="The turbulence field the scenario injected (the answer key)">Field</button>
+      <button type="button" data-layer="labels" aria-pressed="true" title="Callsign labels">Labels</button>
     </div>
+
+    <aside id="inspector" class="panel right" aria-label="Selected flight"></aside>
+
+    <div class="timeline" aria-label="Playback">
+      <button id="play" class="play" type="button" aria-label="Play"><svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path id="playIcon" d="M4 2.5v11l9-5.5z"/></svg></button>
+      <span id="clock" class="num clock">T+00:00</span>
+      <div class="scrub">
+        <input id="scrub" type="range" min="0" max="3590" value="0" aria-label="Time within the scenario hour">
+        <div id="ticks" class="ticks" aria-hidden="true"></div>
+      </div>
+      <div class="speed" role="radiogroup" aria-label="Playback speed">
+        <button type="button" role="radio" data-speed="10" aria-checked="false">10×</button>
+        <button type="button" role="radio" data-speed="60" aria-checked="true">60×</button>
+        <button type="button" role="radio" data-speed="180" aria-checked="false">180×</button>
+      </div>
+      <div class="flrange" aria-label="Flight-level filter">
+        <span class="label">FL</span>
+        <div class="dual">
+          <input id="flMin" type="range" min="180" max="450" step="10" value="180" aria-label="Lowest flight level">
+          <input id="flMax" type="range" min="180" max="450" step="10" value="450" aria-label="Highest flight level">
+        </div>
+        <span id="flLabel" class="num">180–450</span>
+      </div>
+    </div>
+
+    <div id="legend" class="legend-pop hidden" role="dialog" aria-label="Legend"></div>
+    <p class="map-note">Synthetic data · Natural Earth outlines</p>
   </div>
+
   <script src="/static/app.js"></script>
 </body>
 </html>

@@ -470,6 +470,55 @@ def scenario_cards() -> list[dict[str, Any]]:
     return out
 
 
+# "How it compares": statements are taken from each source's own public pages (checked on the
+# date below) or, for PIREPs, from SPEC §1 and reports/data_notes.md.
+# No judgement beyond what is published.
+COMPARE_CHECKED = "2026-11-15"
+COMPARE_COLUMNS = ["Signal", "Output", "Method", "Validation shown"]
+COMPARE = [
+    {
+        "name": "Pilot reports (PIREPs)",
+        "kind": "Public, aviationweather.gov",
+        "cells": [
+            "A pilot's verbal report",
+            "Light / Moderate / Severe at one place and time",
+            "Human judgement",
+            "They are the ground truth, but sparse, late and subjective",
+        ],
+    },
+    {
+        "name": "Aireon INSIGHTS Turbulence",
+        "kind": "Commercial",
+        "cells": [
+            "Space-based ADS-B",
+            "Peak EDR per aircraft each minute, delivered within six minutes",
+            "NCAR turbulence algorithm, per aircraft type",
+            "None on the product page (a white paper is linked)",
+        ],
+    },
+    {
+        "name": "SkyPath",
+        "kind": "Commercial",
+        "cells": [
+            "Crowdsourced app sensors, plus ADS-B vertical rate and other sources",
+            "Turbulence layer, alerts and a 12-hour nowcast",
+            "Not described on the public pages",
+            "Accuracy percentages quoted without saying how they were measured",
+        ],
+    },
+    {
+        "name": "Horus",
+        "kind": "Research prototype",
+        "self": True,
+        "cells": [
+            "Public ADS-B vertical rate (OpenSky, adsb.lol)",
+            "Roughness σ_corr per aircraft (ft/min), not EDR; a 3-D nowcast is planned",
+            "Every step described on this page and in the code",
+            "Synthetic checks now; PIREP validation with a time split after the M1 gate",
+        ],
+    },
+]
+
 OPENSKY_DAILY_CREDITS = 4000  # authenticated API client allowance (reports/data_notes.md)
 
 
@@ -492,6 +541,7 @@ def lab_params() -> dict[str, Any]:
 def overview() -> dict[str, Any]:
     return {
         "lab": lab_params(),
+        "compare": {"checked": COMPARE_CHECKED, "columns": COMPARE_COLUMNS, "rows": COMPARE},
         "problem": PROBLEM,
         "glossary": GLOSSARY,
         "read_guide": READ_GUIDE,

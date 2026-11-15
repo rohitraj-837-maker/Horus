@@ -111,3 +111,12 @@ def test_lab_params_come_from_config():
     # the live recorder's 90 s poll fits the daily budget; 30 s would not
     calls = lambda s: 86400 / s * lab["credit_cost"]  # noqa: E731
     assert calls(lab["poll_interval_s"]) <= lab["daily_credits"] < calls(30)
+
+
+def test_compare_table_is_dated_and_complete():
+    c = overview.overview()["compare"]
+    assert c["checked"] == overview.COMPARE_CHECKED
+    for row in c["rows"]:
+        assert len(row["cells"]) == len(c["columns"]) and all(row["cells"])
+    horus = [r for r in c["rows"] if r.get("self")]
+    assert len(horus) == 1 and "not EDR" in horus[0]["cells"][1]
