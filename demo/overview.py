@@ -81,6 +81,7 @@ def kpis() -> list[dict[str, Any]]:
     return [
         {
             "label": "PIREP Correlation Rate",
+            "short": "of synthetic pilot reports matched by a detection",
             "value": f"{matched / total:.0%}" if total else "—",
             "detail": f"{matched} / {total} synthetic MOD+ reports matched by a ≥ Moderate "
             f"detection (±{turb[0]['match']['window_s'] // 60} min, "
@@ -90,12 +91,14 @@ def kpis() -> list[dict[str, Any]]:
         },
         {
             "label": "σ_corr Recovery",
+            "short": "of the injected turbulence strength recovered",
             "value": f"{min(ratios):.2f}–{max(ratios):.2f}",
             "detail": "median recovered ÷ injected σ in turbulent air, three scenarios",
             "caveat": "Synthetic band-limited turbulence, quantised to 64 ft/min.",
         },
         {
             "label": "σ_corr Calm-Air Baseline",
+            "short": "jitter left in smooth air after the correction",
             "value": f"{np.percentile(sc, 95):.0f}",
             "unit": "ft/min p95",
             "detail": f"raw p95 {np.percentile(sr, 95):.0f} · median {np.median(sr):.1f} → "
@@ -105,6 +108,7 @@ def kpis() -> list[dict[str, Any]]:
         },
         {
             "label": "Calm-Air False-Alarm Rate",
+            "short": "of smooth-air samples wrongly flagged",
             "value": f"{fa_corr:.3%}",
             "detail": f"level samples ≥ Light ({light:.0f} ft/min) in calm air; raw σ {fa_raw:.3%}",
             "caveat": "At this threshold Sheppard changes the rate little; its effect is the "

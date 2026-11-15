@@ -25,6 +25,8 @@ One entry per milestone gate. A milestone is **complete** only when its `make ga
 
 - **2026-11-15: Demo restructured as a product flow (Rohit).** Landing = Overview (hero, 4 KPI cards, pipeline stepper, maths from config.yaml, benchmark plan with empty cells); second tab = Live Radar Demo (always dark, flight strips + map + inspector, auto-selects the most turbulent flight by 70 s mean σ_corr). KPIs are computed from the synthetic scenarios (`demo/overview.py`): PIREP correlation 39/39 (synthetic, checks the matching pipeline only), σ recovery 0.97–0.98, calm-air σ_corr p95 48 ft/min (raw 51; median −19%), calm-air false alarms ≥ Light 0.011% with or without Sheppard. Requested wording not used: "adsb.lol 1 Hz" (measured ~20 s), "Horus Classifier" (SPEC: type-normalised detector), "False Positive Reduction" (not supported at the Light threshold).
 
+- **2026-11-15: Demo restyled (Rohit): dark sky theme, less clutter, depth like Argus.** Dark only (toggle removed); twilight-sky backdrop; scroll reveals, breathing hero glow, tilting live mini-radar, staged stepper, KPI count-up (all disabled under prefers-reduced-motion). KPI cards show one number + one line, details on demand; inspector opens with a plain-English summary, secondary metrics folded (open state kept during playback); flight list shows severity words. Quantisation playground shows Sheppard *expected values* and the σ < 40 ft/min limit.
+
 ## M1 — Ingestion ⏳ code done, gate waiting on elapsed time
 
 `make gate-m1 DAY=2026-11-14` (2026-11-15 01:5x AEDT): ruff ✔, mypy ✔, **pytest 110 passed** (1 Trino test deselected until access), then:

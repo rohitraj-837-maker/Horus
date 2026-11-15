@@ -1,19 +1,21 @@
 <!doctype html>
-<html lang="en" data-view="overview">
+<html lang="en" data-view="overview" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="color-scheme" content="light dark">
+  <meta name="color-scheme" content="dark">
   <title>Horus Turbulence Demo</title>
   <link rel="icon" href="/static/icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+  <div class="sky" aria-hidden="true"><div class="stars"></div><div class="stars far"></div><div class="horizon"></div></div>
+
   <header class="toolbar glass">
     <div class="tb-left">
       <img class="app-icon" src="/static/icon.svg" alt="" width="22" height="22">
       <span class="app-title">Horus</span>
-      <span class="pill-badge" title="Simulated aircraft and turbulence; real benchmarks arrive with M2/M3">Synthetic Preview Data · M3 Pending</span>
+      <span class="pill-badge" title="Simulated aircraft and turbulence; real benchmarks arrive with M2/M3">Synthetic Preview · M3 Pending</span>
     </div>
     <div class="tb-center">
       <div id="views" class="segmented" role="tablist" aria-label="View">
@@ -23,61 +25,82 @@
       </div>
     </div>
     <div class="tb-right">
-      <div id="appearance" class="segmented small only-overview" role="radiogroup" aria-label="Appearance">
-        <span class="seg-thumb" aria-hidden="true"></span>
-        <button type="button" role="radio" data-theme="auto">Auto</button>
-        <button type="button" role="radio" data-theme="light">Light</button>
-        <button type="button" role="radio" data-theme="dark">Dark</button>
-      </div>
       <button id="aboutBtn" class="tb-button only-radar" type="button">Sources</button>
+      <button class="tb-button only-overview" type="button" data-go="radar">Launch Radar</button>
     </div>
   </header>
 
-  <!-- 1. Landing: architecture & benchmarks -->
-  <main id="overview" class="overview" aria-label="Architecture and benchmarks">
+  <!-- 1. Landing: what Horus is, how it works, what we can already show -->
+  <main id="overview" class="overview" aria-label="Overview">
     <section class="hero">
-      <p class="eyebrow">Research prototype · continental US</p>
-      <h1>Horus: Clear-Air Turbulence Radar</h1>
-      <p class="lede">Detects turbulence from the vertical-rate jitter that every airliner already broadcasts over ADS-B, and validates it against pilot reports.</p>
-      <span class="pill-badge big">Synthetic Preview Data · M3 Pending</span>
+      <p class="eyebrow reveal">Research prototype · continental US</p>
+      <h1 class="reveal">Horus: Clear-Air Turbulence&nbsp;Radar</h1>
+      <p class="lede reveal">Every airliner broadcasts its vertical rate. Horus reads the jitter in that signal to find rough air — with no extra sensors.</p>
+      <div class="hero-ctas reveal">
+        <button class="pill-btn" type="button" data-go="radar">Launch Radar Console</button>
+        <a class="pill-link" href="#how">How it works ›</a>
+      </div>
+      <div class="stage reveal">
+        <div id="device" class="device">
+          <div class="device-bar"><i></i><i></i><i></i><span>Jet Stream · synthetic replay</span><span id="previewClock" class="num">+00:00</span></div>
+          <canvas id="preview" aria-label="Animated preview of synthetic flights crossing a jet-stream turbulence band"></canvas>
+          <div class="device-legend"><span><i data-sev="0"></i>Smooth</span><span><i data-sev="1"></i>Light</span><span><i data-sev="2"></i>Moderate</span><span><i data-sev="3"></i>Severe</span></div>
+        </div>
+      </div>
+      <span class="pill-badge big reveal">Synthetic Preview Data · M3 Pending</span>
     </section>
 
     <section class="block">
-      <div class="block-head"><h2>Preview metrics</h2><p>Computed live from the bundled synthetic scenarios with the real detector code.</p></div>
+      <div class="block-head reveal"><h2>What we can show today</h2><p>Measured on synthetic flights, with the real detector code.</p></div>
       <div id="kpis" class="kpis"></div>
     </section>
 
-    <section class="block">
-      <div class="block-head"><h2>Architecture</h2><p>From public broadcasts to a turbulence score, one stage at a time.</p></div>
+    <section id="how" class="block">
+      <div class="block-head reveal"><h2>How it works</h2><p>Five stages from public broadcast to turbulence score.</p></div>
       <ol id="pipeline" class="stepper"></ol>
     </section>
 
     <section class="block">
-      <div class="block-head"><h2>The maths</h2><p>Every parameter below is read from <span class="num">config.yaml</span>, the same values the detector runs with.</p></div>
-      <div id="maths" class="math-list"></div>
+      <div class="block-head reveal"><h2>The key idea: undo the rounding</h2><p>ADS-B rounds vertical rate to 64 ft/min steps. That rounding looks like turbulence unless you remove it.</p></div>
+      <div class="play card reveal">
+        <div class="play-ctrl">
+          <label for="sigmaIn">True turbulence <span class="num" id="sigmaOut">60 ft/min</span></label>
+          <input id="sigmaIn" class="slider" type="range" min="10" max="400" step="5" value="60">
+          <p class="play-formula num">σ²<sub>corr</sub> = σ²<sub>raw</sub> − Δ²/12 &nbsp;·&nbsp; Δ = 64 ft/min</p>
+          <p id="playNote" class="play-note"></p>
+        </div>
+        <div class="play-bars" aria-live="polite">
+          <div class="pb"><span>True</span><div class="pb-track"><i id="pbTrue"></i></div><b id="pvTrue" class="num"></b></div>
+          <div class="pb"><span>Measured (raw)</span><div class="pb-track"><i id="pbRaw"></i></div><b id="pvRaw" class="num"></b></div>
+          <div class="pb"><span>Corrected</span><div class="pb-track"><i id="pbCorr"></i></div><b id="pvCorr" class="num"></b></div>
+          <p class="fine">Expected values from Sheppard's approximation (σ²<sub>raw</sub> ≈ σ² + Δ²/12). In our synthetic tests it holds within 2% for σ ≥ 40 ft/min.</p>
+        </div>
+      </div>
+      <details class="more reveal">
+        <summary>All the maths, with values from <span class="num">config.yaml</span></summary>
+        <div id="maths" class="math-list"></div>
+      </details>
     </section>
 
     <section class="block">
-      <div class="block-head"><h2>Benchmark plan</h2><p>PIREP-validated ablation rows (SPEC §8). Filled in after the M1 gate.</p></div>
-      <div class="card table-card"><table id="bench" class="bench"></table></div>
-      <p id="benchNote" class="fine"></p>
+      <div class="block-head reveal"><h2>Benchmark plan</h2><p>Validated against pilot reports after the M1 gate. Empty until then — nothing here is estimated.</p></div>
+      <div class="card table-card reveal"><table id="bench" class="bench"></table></div>
     </section>
 
-    <section class="cta">
+    <section class="cta reveal">
       <h2>See it run.</h2>
-      <p>Four synthetic scenarios, scored second by second by the same code that will run on real traffic.</p>
-      <button id="launchBtn" class="cta-btn" type="button">Launch Radar Console</button>
+      <p>Four synthetic skies, scored second by second by the code that will run on real traffic.</p>
+      <button class="pill-btn" type="button" data-go="radar">Launch Radar Console</button>
     </section>
 
-    <section class="block">
-      <div class="block-head"><h2>Data sources &amp; attribution</h2></div>
-      <div id="attribs" class="card attrib-card"></div>
-    </section>
-
+    <details class="more foot-more">
+      <summary>Data sources &amp; attribution</summary>
+      <div id="attribs" class="attrib-card"></div>
+    </details>
     <footer class="page-foot">Horus · MIT License · © 2026 Rohit Raj · Research prototype — not for operational use · Runs fully offline</footer>
   </main>
 
-  <!-- 2. Interactive: ATC-style radar console (always dark) -->
+  <!-- 2. Interactive: radar console -->
   <div id="radar" class="window radar" aria-label="Live radar demo">
     <canvas id="map" aria-label="Flat 2D airspace map of the continental US"></canvas>
 
@@ -87,8 +110,8 @@
 
     <aside id="flightPane" class="pane left glass" aria-label="Flights">
       <section id="scenarioCard" class="pane-card"></section>
-      <div class="pane-h"><span>Flights</span><span class="num dim">σ<sub>corr</sub> ft/min</span></div>
-      <ul id="flightList" class="flight-list" role="listbox" aria-label="Flights by current turbulence"></ul>
+      <div class="pane-h"><span>Flights</span><span class="num">roughness</span></div>
+      <ul id="flightList" class="flight-list" role="listbox" aria-label="Flights, roughest first"></ul>
     </aside>
 
     <section class="capsule glass" aria-label="Playback and filters">
