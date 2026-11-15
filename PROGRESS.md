@@ -21,6 +21,8 @@ One entry per milestone gate. A milestone is **complete** only when its `make ga
 
 - **2026-11-15: Project renamed TurbCast → Horus (Rohit).** Package `turbcast` → `horus` (`git mv`, history kept), imports, tests, scripts, docs, config and demo. **The repository folder stays `~/turbcast` until the live recorder stops** (after the M1 gate): the recorder's working directory and its absolute output paths point there, so moving the folder mid-run would break it. Rename the folder afterwards with `mv ~/turbcast ~/horus` and run `uv sync`.
 
+- **2026-11-15: Offline demo + push bundle (Rohit's request; not a milestone).** `demo/` is a stdlib server with a single-page macOS-style UI (Apple HIG styling, light/dark, flat 2D Albers map, no external requests, CSP same-origin). **Synthetic data only**: four scenarios of synthetic aircraft and turbulence, scored by the real `horus.core` (segment → residual → Sheppard, B1); severity thresholds are labelled placeholders until M3; no real track or PIREP metric is shown before the M1 gate. Self-check on the synthetic truth: recovered/injected σ median 0.97–0.98, calm-air p95 σ_corr 48–49 ft/min. `make bundle` → `dist/horus-push-bundle.tar.gz` (+ manifest), tested by extracting into a clean directory and running the suite there. `make gate-demo` = lint, types, demo tests, bundle tests, bundle build, clean git tree. Also fixed: `.gitignore` `data/` matched `demo/data/` (now `/data/`); repository has an MIT `LICENSE`.
+
 ## M1 — Ingestion ⏳ code done, gate waiting on elapsed time
 
 `make gate-m1 DAY=2026-11-14` (2026-11-15 01:5x AEDT): ruff ✔, mypy ✔, **pytest 110 passed** (1 Trino test deselected until access), then:

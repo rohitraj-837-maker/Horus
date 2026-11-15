@@ -32,7 +32,8 @@ horus/ingest/  network + file I/O → canonical Parquet
 horus/core/    pure algorithms: geo, segment, residual, normalise, detect, grid
 horus/eval/    PIREP matching, negatives, benchmarks, plots
 horus/api/     FastAPI + live loop
-web/              MapLibre front end
+web/              MapLibre front end (M6)
+demo/             offline demo: stdlib server + static UI + synthetic scenarios (not a milestone)
 scripts/          CLI entry points (recorder, fetchers, fits)
 reports/          benchmark tables + figures (committed)
 data/, models/    gitignored (small JSON in models/ allowed)
@@ -47,6 +48,8 @@ uv run ruff check .           # lint
 uv run mypy horus/core     # types (core only)
 make gate-m1 … gate-m7        # milestone acceptance gates
 make bench                    # performance benchmark
+make demo / make bundle       # offline demo; dist/horus-push-bundle.tar.gz
+make gate-demo                # demo + bundle gate (needs a clean git tree)
 ```
 
 ## Status

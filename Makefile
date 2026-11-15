@@ -1,4 +1,4 @@
-.PHONY: setup test lint types check gate-m0 gate-m1 record recorder-status trino-smoke
+.PHONY: setup test lint types check gate-m0 gate-m1 record recorder-status trino-smoke demo demo-data bundle gate-demo
 
 setup:
 	uv sync
@@ -31,3 +31,24 @@ recorder-status:
 
 trino-smoke:
 	uv run python scripts/fetch_trino_history.py --smoke-test
+
+# Offline demo (synthetic data, real core); prints the localhost URL
+demo:
+	uv run python -m demo.server
+
+# Regenerate the bundled synthetic scenarios (deterministic)
+demo-data:
+	uv run python -m demo.scenarios
+
+# Single-file push bundle: dist/horus-push-bundle.tar.gz + dist/PUSH_MANIFEST.txt
+bundle:
+	uv run python scripts/package_release.py
+
+# Demo gate: lint, types, demo endpoint/offline tests, bundle + clean-extraction test, clean tree
+gate-demo: lint
+	uv run mypy horus/core demo scripts/package_release.py
+	uv run pytest -q tests/demo
+	uv run pytest -q -m bundle
+	uv run python scripts/package_release.py
+	@test -z "$$(git status --porcelain)" || { echo "gate-demo: FAIL (uncommitted changes)"; git status --short; exit 1; }
+	@echo "gate-demo: PASS"

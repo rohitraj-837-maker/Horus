@@ -40,11 +40,13 @@ packages = ["horus"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
 markers = [
     "trino: needs OpenSky Trino research credentials",
     "network: hits a live external API",
+    "bundle: builds the push bundle and runs the suite from a clean extraction (make gate-demo)",
 ]
-addopts = "-m 'not trino and not network'"
+addopts = "-m 'not trino and not network and not bundle'"
 asyncio_default_fixture_loop_scope = "function"
 
 [tool.ruff]

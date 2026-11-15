@@ -5,7 +5,7 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 .env
-data/
+/data/
 models/*
 !models/*.json
 reports/figures/*.tmp
@@ -13,3 +13,4 @@ reports/figures/*.tmp
 credentials.json
 .claude/settings.local.json
 claude/settings.local.json
+dist/

@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <title>Horus Turbulence Demo</title>
+  <link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="window">
+    <canvas id="map" aria-label="Flat 2D airspace map of the continental US"></canvas>
+
+    <header class="toolbar glass">
+      <div class="tb-left">
+        <img class="app-icon" src="/static/icon.svg" alt="" width="22" height="22">
+        <span class="app-title">Horus</span>
+        <span class="pill-badge" title="Simulated aircraft and turbulence; severity thresholds are uncalibrated until milestone M3">Synthetic Preview · M3 Pending</span>
+      </div>
+      <div class="tb-center">
+        <div id="scenarios" class="segmented" role="tablist" aria-label="Scenario">
+          <span class="seg-thumb" aria-hidden="true"></span>
+        </div>
+      </div>
+      <div class="tb-right">
+        <div id="appearance" class="segmented small" role="radiogroup" aria-label="Appearance">
+          <span class="seg-thumb" aria-hidden="true"></span>
+          <button type="button" role="radio" data-theme="auto">Auto</button>
+          <button type="button" role="radio" data-theme="light">Light</button>
+          <button type="button" role="radio" data-theme="dark">Dark</button>
+        </div>
+        <button id="aboutBtn" class="tb-button" type="button">Architecture</button>
+      </div>
+    </header>
+
+    <section id="scenarioCard" class="float-card glass" aria-live="polite"></section>
+
+    <section class="capsule glass" aria-label="Playback and filters">
+      <div class="cap-row">
+        <button id="playBtn" class="round-btn" type="button" aria-label="Play">
+          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path id="playIcon" d="M4 2.5v11l9-5.5z"/></svg>
+        </button>
+        <span id="clock" class="num clock">+00:00</span>
+        <input id="scrub" class="slider" type="range" min="0" max="3590" value="0" aria-label="Timeline">
+        <span class="num clock dim">+60:00</span>
+        <div id="speed" class="segmented mini" role="radiogroup" aria-label="Playback speed">
+          <span class="seg-thumb" aria-hidden="true"></span>
+          <button type="button" role="radio" data-speed="1">1×</button>
+          <button type="button" role="radio" data-speed="10">10×</button>
+          <button type="button" role="radio" data-speed="60">60×</button>
+        </div>
+      </div>
+      <div class="cap-row">
+        <div class="fl-range">
+          <span class="cap-label">Altitude</span>
+          <div class="dual">
+            <input id="flMin" type="range" min="180" max="450" step="10" value="180" aria-label="Lowest flight level">
+            <input id="flMax" type="range" min="180" max="450" step="10" value="450" aria-label="Highest flight level">
+          </div>
+          <span id="flLabel" class="num cap-value">FL180–FL450</span>
+        </div>
+        <select id="callsign" class="popup" aria-label="Flight"><option value="">All Flights</option></select>
+        <div class="toggles">
+          <button id="tgPireps" class="toggle-pill" type="button" aria-pressed="true">PIREPs</button>
+          <button id="tgField" class="toggle-pill" type="button" aria-pressed="false">Turbulence Field</button>
+          <button id="tgTrail" class="toggle-pill" type="button" aria-pressed="true">Trail</button>
+        </div>
+      </div>
+    </section>
+
+    <aside id="inspector" class="inspector glass" aria-label="Flight inspector"></aside>
+
+    <div class="map-legal">Synthetic data · Map: Natural Earth</div>
+  </div>
+
+  <div id="sheet" class="sheet-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="sheet">
+      <div class="sheet-head">
+        <h2 id="sheetTitle">Architecture</h2>
+        <button id="closeSheet" class="text-btn" type="button">Done</button>
+      </div>
+      <div id="aboutContent" class="sheet-body"></div>
+    </div>
+  </div>
+  <script src="/static/app.js"></script>
+</body>
+</html>
