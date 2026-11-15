@@ -108,3 +108,28 @@ def test_pirep_windows_filters_level_region_and_flight_level() -> None:
     w = match.pirep_windows(p, CFG, 4)
     assert len(w) == 2  # LGT, outside CONUS, below FL200 dropped
     assert w["alt_lo_ft"].tolist() == [33000.0, 18000.0]
+
+
+def test_unlocated_events_are_ignored() -> None:
+    got = match.near_any_event(
+        np.array([T0]),
+        np.array([40.0]),
+        np.array([-100.0]),
+        np.array([T0, T0]),
+        np.array([np.nan, 40.0]),
+        np.array([-100.0, -100.0]),
+        600,
+        10.0,
+    )
+    assert got.tolist() == [True]
+    none = match.near_any_event(
+        np.array([T0]),
+        np.array([40.0]),
+        np.array([-100.0]),
+        np.array([T0]),
+        np.array([np.nan]),
+        np.array([np.nan]),
+        600,
+        10.0,
+    )
+    assert none.tolist() == [False]

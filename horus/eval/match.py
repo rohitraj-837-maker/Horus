@@ -45,6 +45,8 @@ def pirep_windows(pireps: pd.DataFrame, cfg: Config, min_level: int) -> pd.DataF
     p = pireps
     m = (
         (p["tb_max"] >= min_level)
+        & np.isfinite(p["lat"].to_numpy(float))
+        & np.isfinite(p["lon"].to_numpy(float))
         & p["lat"].between(r.lat_min, r.lat_max)
         & p["lon"].between(r.lon_min, r.lon_max)
         & (p["fl_hi"] >= cfg.bench.min_fl)
@@ -80,9 +82,15 @@ def near_any_event(
     out = np.zeros(len(minute), dtype=bool)
     if len(minute) == 0 or len(ev_time) == 0:
         return out
-    order = np.argsort(ev_time, kind="stable")
-    et = np.asarray(ev_time, dtype=float)[order]
-    exyz = unit_xyz(np.asarray(ev_lat)[order], np.asarray(ev_lon)[order])
+    et_all = np.asarray(ev_time, dtype=float)
+    elat, elon = np.asarray(ev_lat, dtype=float), np.asarray(ev_lon, dtype=float)
+    fin = np.isfinite(et_all) & np.isfinite(elat) & np.isfinite(elon)  # unlocated reports
+    et_all, elat, elon = et_all[fin], elat[fin], elon[fin]
+    if len(et_all) == 0:
+        return out
+    order = np.argsort(et_all, kind="stable")
+    et = et_all[order]
+    exyz = unit_xyz(elat[order], elon[order])
     oxyz = unit_xyz(np.asarray(lat), np.asarray(lon))
     r = chord(dist_km)
     rows_by_minute = pd.Series(np.arange(len(minute))).groupby(minute).indices
