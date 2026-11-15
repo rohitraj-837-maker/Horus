@@ -137,9 +137,84 @@ function renderOverview() {
       <br><a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">${esc(x.url)}</a></p>`).join("") +
     `<p class="attrib">${esc(A.disclaimer)}</p>`;
   for (const i of document.querySelectorAll(".device-legend i")) i.style.background = COL.sev[+i.dataset.sev];
+  $("problem").innerHTML = O.problem.map((x, i) => `
+    <article class="card reveal" data-delay="${i}"><span class="n">0${i + 1}</span><h3>${esc(x.title)}</h3><p>${esc(x.text)}</p></article>`).join("");
+  const sw = [
+    () => `<div class="swatches">${COL.sev.map((c, i) => `<i data-c="${i}"></i>`).join("")}<i data-c="na"></i></div>`,
+    () => '<div class="swatches"><i data-fade="1"></i></div>',
+    () => '<div class="swatches"><i class="ring" data-ring="MOD"></i><i class="ring" data-ring="SEV"></i><i class="dash"></i></div>',
+  ];
+  $("readGuide").innerHTML = O.read_guide.map((x, i) => `
+    <article class="card reveal" data-delay="${i}"><span class="n">0${i + 1}</span><h3>${esc(x.title)}</h3><p>${sub(x.text)}</p>${sw[i] ? sw[i]() : ""}</article>`).join("");
+  for (const e of $("readGuide").querySelectorAll("[data-c]")) e.style.background = e.dataset.c === "na" ? COL.na : COL.sev[+e.dataset.c];
+  for (const e of $("readGuide").querySelectorAll("[data-fade]")) { e.style.width = "64px"; e.style.background = `linear-gradient(90deg, ${rgba(COL.sev[2], 0.15)}, ${COL.sev[2]})`; }
+  for (const e of $("readGuide").querySelectorAll("[data-ring]")) e.style.borderColor = COL.tb[e.dataset.ring];
+  $("scenGallery").innerHTML = O.scenarios.map((c, i) => `
+    <button type="button" class="card scard reveal" data-delay="${i % 2}" data-open="${esc(c.id)}" aria-label="Open ${esc(c.title)} in the radar">
+      <canvas data-thumb="${esc(c.id)}" aria-hidden="true"></canvas>
+      <div class="sc-body"><h3>${esc(c.title)}</h3><p>${esc(c.blurb)}</p>
+        <div class="stats"><span><b>${c.aircraft}</b> flights</span><span><b>${c.patches}</b> turbulence patches</span>
+          <span><b>${c.mod_plus}</b> / ${c.pireps} PIREPs MOD+</span>${c.recovery === null ? "" : `<span>σ recovered <b>${c.recovery.toFixed(2)}</b></span>`}</div>
+        <span class="open">Open in radar ›</span></div>
+    </button>`).join("");
+  for (const b of $("scenGallery").querySelectorAll("[data-open]")) b.addEventListener("click", () => openScenario(b.dataset.open));
+  setupThumbs();
+  const done = { done: "Done", active: "In progress", planned: "Planned" };
+  $("roadmapAsOf").textContent = `Setup plus seven weekly milestones, each closed by an automated gate. Status as of ${O.milestones_as_of}.`;
+  $("roadmap").innerHTML = O.milestones.map((m, i) => `
+    <li class="${m.status} reveal" data-delay="${i % 4}"><div class="node" title="${done[m.status]}">${m.status === "done" ? "✓" : esc(m.m)}</div>
+      <h4>${esc(m.title)}</h4><p>${esc(m.note)}</p></li>`).join("");
+  $("limits").innerHTML = O.limitations.map((x) => `<li>${sub(x)}</li>`).join("");
   observeReveals();
   setupPlayground();
   setupTilt();
+}
+
+// gallery thumbnails: the whole hour of every flight, coloured by detected severity (lazy)
+function drawThumb(cv, D) {
+  const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  if (r.width < 2) return;
+  cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
+  const g = cv.getContext("2d"); g.scale(dpr, dpr);
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  for (const st of S.basemap.states) for (const ring of st.rings) for (const [lon, lat] of ring) {
+    const [x, y] = ALB(lon, lat); x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y);
+  }
+  const pad = 10, sc = Math.min((r.width - 2 * pad) / (x1 - x0), (r.height - 2 * pad) / (y1 - y0));
+  const ox = (r.width - (x1 - x0) * sc) / 2 - x0 * sc, oy = (r.height + (y1 - y0) * sc) / 2 + y0 * sc;
+  const P = (lon, lat) => { const [x, y] = ALB(lon, lat); return [ox + x * sc, oy - y * sc]; };
+  const bg = g.createLinearGradient(0, 0, 0, r.height); bg.addColorStop(0, "#030918"); bg.addColorStop(1, "#0a1836");
+  g.fillStyle = bg; g.fillRect(0, 0, r.width, r.height);
+  const land = new Path2D();
+  for (const st of S.basemap.states) for (const ring of st.rings) {
+    ring.forEach(([lon, lat], i) => { const [x, y] = P(lon, lat); i ? land.lineTo(x, y) : land.moveTo(x, y); }); land.closePath();
+  }
+  g.fillStyle = "rgba(30, 48, 84, 0.5)"; g.fill(land); g.strokeStyle = "rgba(120, 170, 240, 0.18)"; g.lineWidth = 0.5; g.stroke(land);
+  g.lineCap = "round";
+  for (const pass of [0, 1, 2, 3]) {           // draw rough segments last so they sit on top
+    for (const a of D.aircraft) {
+      const c = a.cols;
+      for (let j = 1; j < c.t.length; j++) {
+        const s = c.sev[j];
+        if ((pass === 0 && s > 0) || (pass > 0 && s !== pass)) continue;
+        const [xa, ya] = P(c.lon[j - 1], c.lat[j - 1]), [xb, yb] = P(c.lon[j], c.lat[j]);
+        g.strokeStyle = s < 0 ? rgba(COL.na, 0.35) : rgba(COL.sev[Math.max(s, 0)], s >= 2 ? 0.95 : 0.55); g.lineWidth = s >= 2 ? 2 : 1.1;
+        g.beginPath(); g.moveTo(xa, ya); g.lineTo(xb, yb); g.stroke();
+      }
+    }
+  }
+}
+function setupThumbs() {
+  const cvs = [...document.querySelectorAll("[data-thumb]")];
+  const load = async (cv) => { try { drawThumb(cv, await getJSON(`/api/scenario/${encodeURIComponent(cv.dataset.thumb)}`)); } catch { /* thumbnail is decoration */ } };
+  // local files only: load shortly after first paint rather than depending on scroll callbacks
+  setTimeout(() => cvs.forEach(load), 250);
+}
+async function openScenario(id) {
+  S.pendingScenario = id;
+  if (S.view === "radar" && S.radarReady) { setPlaying(false); await loadScenario(id); return; }
+  await setView("radar");
+  if (S.radarReady && S.sc && S.sc.id !== id) { setPlaying(false); await loadScenario(id); }
 }
 
 // reveal-on-scroll (fade + rise) and a staged count-up for KPI numbers
@@ -680,6 +755,31 @@ function chartSVG(a, j, width) {
     <rect x="0" y="0" width="${plotW}" height="${Ht}" fill="transparent" data-hit="1"/>
   </svg>`;
 }
+function profileSVG(a, j, width) {
+  // altitude over the whole hour; level-flight (scored) samples shaded, coloured by severity
+  const c = a.cols, n = c.t.length, W = Math.max(200, Math.floor(width)), H = 46;
+  // at least a 4,000 ft span, so ±25 ft encoder jitter in level flight stays flat and climbs read as steps
+  const alts = c.alt.filter((v) => v !== null), mid = (Math.min(...alts) + Math.max(...alts)) / 2;
+  const half = Math.max(2000, (Math.max(...alts) - Math.min(...alts)) / 2 + 300), lo = mid - half, hi = mid + half;
+  const X = (k) => (k / (n - 1)) * W, Y = (v) => H - 3 - ((v - lo) / Math.max(1, hi - lo)) * (H - 8);
+  let bands = "";
+  for (let k = 0; k < n; k++) {
+    if (c.seg[k] !== 1) continue;
+    const col = c.sev[k] < 0 ? COL.na : COL.sev[c.sev[k]];
+    bands += `<rect x="${X(k).toFixed(1)}" y="0" width="${(W / n + 0.6).toFixed(2)}" height="${H}" fill="${col}" fill-opacity=".16"/>`;
+  }
+  let d = "";
+  c.alt.forEach((v, k) => { if (v !== null) d += `${d ? "L" : "M"}${X(k).toFixed(1)},${Y(v).toFixed(1)}`; });
+  const pi = idxAt(S.t);
+  return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Altitude profile over the hour">
+    ${bands}<path d="${d}" fill="none" stroke="${COL.label}" stroke-opacity=".75" stroke-width="1.4"/>
+    <line x1="${X(pi).toFixed(1)}" x2="${X(pi).toFixed(1)}" y1="0" y2="${H}" stroke="${COL.label3}" stroke-width="1"/>
+    <line x1="${X(j).toFixed(1)}" x2="${X(j).toFixed(1)}" y1="0" y2="${H}" stroke="${COL.accent}" stroke-width="1.5"/>
+    <text x="3" y="11" font-size="9.5" fill="${COL.label3}" font-family="${UI_FONT}">FL${Math.round(hi / 100)}</text>
+    <text x="3" y="${H - 4}" font-size="9.5" fill="${COL.label3}" font-family="${UI_FONT}">FL${Math.round(lo / 100)}</text>
+  </svg>`;
+}
+
 function updateInspectorLive() {
   const live = $("insLive");
   if (S.selected < 0 || !live || !S.sc) return;
@@ -715,6 +815,7 @@ function updateInspectorLive() {
       <div class="ch"><span>Roughness (σ<sub>corr</sub>) · last 10 min</span><b>${fmt(c.sc[j], 0)}<span> ft/min</span></b></div>
       <div id="chartHost"></div>
       <div class="chart-key"><span><i></i>σ<sub>corr</sub></span><span><i class="dash"></i>Injected σ (truth)</span><span><i class="res"></i>VR residual</span></div>
+      <div class="profile"><div class="ph"><span>Flight profile · full hour</span><span>shaded = level flight (scored)</span></div><div id="profileHost"></div></div>
     </div>
     <div class="section-h">Detector <small>used by Horus</small></div>
     <div class="group">
@@ -746,6 +847,8 @@ function updateInspectorLive() {
   for (const r of live.querySelectorAll(".row-top")) { r.style.display = "flex"; r.style.justifyContent = "space-between"; r.style.gap = "10px"; }
   const host = $("chartHost");
   host.innerHTML = chartSVG(a, j, host.clientWidth || 360);
+  const ph = $("profileHost");
+  ph.innerHTML = profileSVG(a, j, ph.clientWidth || 360);
   host.querySelector("[data-hit]").addEventListener("click", (ev) => {
     const r = ev.currentTarget.getBoundingClientRect();
     const j0 = Math.max(0, j - WINDOW_SAMPLES + 1);
@@ -790,13 +893,36 @@ canvas.addEventListener("click", (ev) => {
   const hit = pick(ev.clientX - r.left, ev.clientY - r.top);
   if (hit) { $("callsign").value = ""; S.filterCs = ""; select(hit.k, hit.j); }
 });
+const mapTip = document.createElement("div");
+mapTip.className = "map-tip hidden";
+$("radar").appendChild(mapTip);
+function pickPirep(mx, my) {
+  if (!S.sc || !S.showPireps) return null;
+  let best = null, bd = 14 * 14;
+  for (const p of S.sc.pireps) {
+    const age = S.t - p.t;
+    if (age < 0 || age > PIREP_SHOW_S || p.fl < S.flMin || p.fl > S.flMax) continue;
+    const d = (p.x - mx) ** 2 + (p.y - my) ** 2;
+    if (d < bd) { bd = d; best = p; }
+  }
+  return best;
+}
 canvas.addEventListener("mousemove", (ev) => {
   const r = canvas.getBoundingClientRect();
+  const pp = pickPirep(ev.clientX - r.left, ev.clientY - r.top);
+  if (pp && !pick(ev.clientX - r.left, ev.clientY - r.top)) {
+    mapTip.innerHTML = `<b data-tb="${esc(pp.tb)}">${esc(pp.tb)}</b> pilot report · ${esc(pp.by)} · FL${pp.fl} · ${Math.round((S.t - pp.t) / 60)} min ago<span class="txt">${esc(pp.text)}</span>`;
+    mapTip.querySelector("[data-tb]").style.color = COL.tb[pp.tb];
+    mapTip.style.left = `${Math.min(ev.clientX - r.left + 14, r.width - 300)}px`;
+    mapTip.style.top = `${ev.clientY - r.top + 14}px`;
+    mapTip.classList.remove("hidden");
+  } else mapTip.classList.add("hidden");
   const hit = pick(ev.clientX - r.left, ev.clientY - r.top);
   const h = hit ? hit.k : -1;
   canvas.style.cursor = hit ? "pointer" : "default";
   if (h !== S.hover) { S.hover = h; if (!S.playing) draw(); }
 });
+canvas.addEventListener("mouseleave", () => { mapTip.classList.add("hidden"); });
 canvas.addEventListener("mouseleave", () => { if (S.hover !== -1) { S.hover = -1; if (!S.playing) draw(); } });
 
 let last = null;
@@ -888,13 +1014,28 @@ $("sheet").addEventListener("click", (e) => { if (e.target.id === "sheet") close
 // ---------------------------------------------------------------- boot
 const H = new URLSearchParams(location.hash.slice(1)); // deep links: view, scenario, t, sel, pin, field, fl, about, theme
 
+function maybeCoach() {
+  let seen = false;
+  try { seen = localStorage.getItem("horus-coach") === "1"; } catch { /* storage unavailable */ }
+  if (seen || H.get("coach") === "0") return;
+  const tip = document.createElement("div");
+  tip.className = "coach"; tip.setAttribute("role", "status");
+  tip.innerHTML = '<b>Flights are listed roughest first.</b> Click any flight, or a point on its trail, to see why Horus scored it. <b>Space</b> plays the hour.<br><button type="button">Got it</button>';
+  $("radar").appendChild(tip);
+  tip.querySelector("button").addEventListener("click", () => {
+    tip.remove();
+    try { localStorage.setItem("horus-coach", "1"); } catch { /* storage unavailable */ }
+  });
+}
+
 async function initRadar() {
   const seg = $("scenarios");
   seg.insertAdjacentHTML("beforeend", S.index.map((s) => `<button type="button" role="tab" data-id="${esc(s.id)}" aria-selected="false" title="${esc(s.title)}">${esc(SHORT[s.id] || s.title)}</button>`).join(""));
   for (const b of seg.querySelectorAll("button")) b.addEventListener("click", () => { setPlaying(false); loadScenario(b.dataset.id); });
   for (const b of $("speed").querySelectorAll("button")) b.setAttribute("aria-checked", String(+b.dataset.speed === S.speed));
   fitView();
-  const sid = S.index.some((s) => s.id === H.get("scenario")) ? H.get("scenario") : DEFAULT_SCENARIO;
+  const want = S.pendingScenario || H.get("scenario");
+  const sid = S.index.some((s) => s.id === want) ? want : DEFAULT_SCENARIO;
   const k = H.get("sel");
   await loadScenario(sid, { autoSelect: !k });
   if (H.has("t")) S.t = Math.max(0, Math.min(S.sc.duration_s - S.sc.stride_s, +H.get("t") || 0));
@@ -909,6 +1050,7 @@ async function initRadar() {
   renderFlightList.force = true;
   draw();
   if (H.get("about") === "1") openSheet();
+  maybeCoach();
 }
 
 async function boot() {

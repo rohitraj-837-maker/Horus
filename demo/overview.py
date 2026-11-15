@@ -210,10 +210,131 @@ BENCHMARKS = {
 }
 
 
+PROBLEM = [
+    {
+        "title": "Invisible to radar",
+        "text": "Clear-air turbulence has no clouds or precipitation, so weather radar "
+        "cannot see it.",
+    },
+    {
+        "title": "Reports are sparse and late",
+        "text": "Crews mostly learn about it from other pilots' verbal reports (PIREPs): sparse, "
+        "delayed and subjective.",
+    },
+    {
+        "title": "Every airliner is already a sensor",
+        "text": "Each aircraft broadcasts its vertical rate over ADS-B about once a second. "
+        "Rough air makes that signal jitter.",
+    },
+]
+
+READ_GUIDE = [
+    {
+        "title": "Colour = roughness",
+        "text": "Green, yellow, orange, red: the Sheppard-corrected vertical-rate jitter "
+        "(σ_corr), on placeholder thresholds until M3. Grey means climbing or descending, "
+        "where Horus does not score.",
+    },
+    {
+        "title": "Trail = last 10 minutes",
+        "text": "Each trail keeps the colour it had at that moment, so you can see where a "
+        "flight entered and left rough air.",
+    },
+    {
+        "title": "Rings = pilot reports",
+        "text": "Synthetic PIREPs fade over 30 minutes. The dashed blue ring around the "
+        "selected flight is the SPEC matching radius (40 km).",
+    },
+]
+
+# Status as recorded in PROGRESS.md on 2026-11-15
+MILESTONES = [
+    {"m": "M0", "title": "Setup", "status": "done", "note": "uv, config, schema, gates"},
+    {
+        "m": "M1",
+        "title": "Ingestion",
+        "status": "active",
+        "note": "Gate passes after 24 h recorder run",
+    },
+    {
+        "m": "M2",
+        "title": "Segment, residual, B0–B2",
+        "status": "active",
+        "note": "Core built; benchmarks after M1",
+    },
+    {
+        "m": "M3",
+        "title": "Type normalisation, B3",
+        "status": "planned",
+        "note": "Calibrated thresholds",
+    },
+    {
+        "m": "M4",
+        "title": "Nowcast grid + winds",
+        "status": "planned",
+        "note": "Fitted decay half-life",
+    },
+    {
+        "m": "M5",
+        "title": "Advection, negative evidence",
+        "status": "planned",
+        "note": "make bench < 2 s",
+    },
+    {"m": "M6", "title": "Live API + map", "status": "planned", "note": "< 10 s end to end"},
+    {
+        "m": "M7",
+        "title": "Hardening + demo",
+        "status": "planned",
+        "note": "CI, README numbers, deploy",
+    },
+]
+MILESTONES_AS_OF = "2026-11-15"
+
+LIMITATIONS = [
+    "Everything in this demo is synthetic. Real PIREP-validated numbers arrive after the M1 gate.",
+    "Severity thresholds (90 / 180 / 320 ft/min) are placeholders until M3 calibrates them on "
+    "the training month.",
+    "ADS-B rounds vertical rate to 64 ft/min. Below about 40 ft/min the correction over-corrects, "
+    "so small values only mean “near zero”.",
+    "Only level flight is scored; climbs and descents are not assessed.",
+    "Real feeds are coarser than the demo: live OpenSky about every 90 s, adsb.lol history about "
+    "every 20 s. 1 Hz needs OpenSky Trino, where query access is still pending.",
+    "Continental US only, because the validation labels (US PIREPs) exist only there.",
+]
+
+
+@lru_cache(maxsize=1)
+def scenario_cards() -> list[dict[str, Any]]:
+    index = json.loads((DATA / "scenarios.json").read_text())
+    out = []
+    for s in index:
+        d = _load(s["id"])
+        rec = d["check"]["median_recovered_over_injected"]
+        out.append(
+            {
+                "id": s["id"],
+                "title": s["title"],
+                "blurb": s["blurb"],
+                "aircraft": len(d["aircraft"]),
+                "pireps": len(d["pireps"]),
+                "mod_plus": sum(p["tb"] in ("MOD", "SEV") for p in d["pireps"]),
+                "patches": len(d["patches"]),
+                "recovery": rec,
+            }
+        )
+    return out
+
+
 def overview() -> dict[str, Any]:
     return {
+        "problem": PROBLEM,
         "kpis": kpis(),
         "pipeline": PIPELINE,
         "maths": maths(),
+        "scenarios": scenario_cards(),
+        "read_guide": READ_GUIDE,
         "benchmarks": BENCHMARKS,
+        "milestones": MILESTONES,
+        "milestones_as_of": MILESTONES_AS_OF,
+        "limitations": LIMITATIONS,
     }

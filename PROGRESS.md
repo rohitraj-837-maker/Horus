@@ -27,6 +27,8 @@ One entry per milestone gate. A milestone is **complete** only when its `make ga
 
 - **2026-11-15: Demo restyled (Rohit): dark sky theme, less clutter, depth like Argus.** Dark only (toggle removed); twilight-sky backdrop; scroll reveals, breathing hero glow, tilting live mini-radar, staged stepper, KPI count-up (all disabled under prefers-reduced-motion). KPI cards show one number + one line, details on demand; inspector opens with a plain-English summary, secondary metrics folded (open state kept during playback); flight list shows severity words. Quantisation playground shows Sheppard *expected values* and the σ < 40 ft/min limit.
 
+- **2026-11-15: Demo finished (detail pass).** Overview adds The problem (from SPEC §1, no injury statistics), a scenario gallery (stats counted from the data, full-hour thumbnails, opens the scenario in the radar), How to read the radar, Roadmap M0–M7 (status as of today), Honest limits. Radar adds a full-hour altitude profile (scored stretches shaded), PIREP hover cards and a one-time tip. README screenshots in docs/img. Tagged demo-v2.
+
 ## M1 — Ingestion ⏳ code done, gate waiting on elapsed time
 
 `make gate-m1 DAY=2026-11-14` (2026-11-15 01:5x AEDT): ruff ✔, mypy ✔, **pytest 110 passed** (1 Trino test deselected until access), then:

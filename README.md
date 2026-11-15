@@ -8,16 +8,21 @@ Status: under construction (see `SPEC.md` and `PROGRESS.md`). Headline results w
 
 ## Offline demo
 
+![Horus demo, Overview page (synthetic data)](docs/img/horus-overview.png)
+![Horus demo, Live Radar console (synthetic data)](docs/img/horus-radar.png)
+
 ```bash
 make demo        # http://127.0.0.1:8765/  (no internet needed)
 ```
 
 Dark, night-sky styling throughout. It opens on an **Overview** page (architecture, the maths, the benchmark plan and four
-preview metrics computed live from the synthetic scenarios, an animated mini-radar, and an
-interactive quantisation playground), then a **Live Radar Demo**
+preview metrics computed live from the synthetic scenarios, an animated mini-radar, an
+interactive quantisation playground, a scenario gallery, a how-to-read guide, the roadmap and
+an honest-limits list), then a **Live Radar Demo**
 console: a dark three-pane view with flight strips sorted by σ_corr, a flat 2D airspace
 map with playback and filters, and a telemetry inspector. It auto-selects the scenario's
-most turbulent flight at its sustained peak. **All aircraft, turbulence and PIREPs in the demo
+most turbulent flight at its sustained peak; the inspector adds a plain-English summary and a
+full-hour altitude profile with the scored (level-flight) stretches shaded. **All aircraft, turbulence and PIREPs in the demo
 are synthetic.** Every score is computed by Horus's real detector code (level-flight
 segmentation, vertical-rate residual, Sheppard correction, B1 acceleration RMS) on those
 synthetic flights; severity colours use placeholder thresholds until milestone M3

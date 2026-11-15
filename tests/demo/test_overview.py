@@ -68,3 +68,22 @@ def test_overview_endpoint(base_url):
     with urllib.request.urlopen(f"{base_url}/api/overview", timeout=10) as r:
         body = json.loads(r.read())
     assert [len(body[k]) for k in ("kpis", "pipeline", "maths")] == [4, 5, 5]
+
+
+def test_landing_detail_sections():
+    o = overview.overview()
+    assert len(o["problem"]) == 3 and len(o["read_guide"]) == 3
+    assert [m["m"] for m in o["milestones"]] == [f"M{i}" for i in range(8)]
+    assert {m["status"] for m in o["milestones"]} <= {"done", "active", "planned"}
+    assert any("synthetic" in x.lower() for x in o["limitations"])
+    assert any("placeholder" in x.lower() for x in o["limitations"])
+
+
+def test_scenario_cards_are_counted_from_the_data():
+    for card in overview.scenario_cards():
+        d = overview._load(card["id"])
+        assert card["aircraft"] == len(d["aircraft"]) and card["pireps"] == len(d["pireps"])
+        assert card["mod_plus"] == sum(p["tb"] in ("MOD", "SEV") for p in d["pireps"])
+        assert card["recovery"] == d["check"]["median_recovered_over_injected"]
+    calm = next(c for c in overview.scenario_cards() if c["id"] == "calm")
+    assert calm["patches"] == 0 and calm["mod_plus"] == 0
