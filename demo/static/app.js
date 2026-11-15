@@ -110,7 +110,7 @@ async function setView(v, { push = true } = {}) {
 function renderOverview() {
   const O = S.overview;
   $("kpis").innerHTML = O.kpis.map((k, i) => `
-    <article class="card kpi reveal" data-delay="${i}">
+    <article class="card kpi reveal" data-delay="${i}" data-acc="${["green", "blue", "purple", "orange"][i % 4]}">
       <span class="k-value${k.value.length > 6 ? " long" : ""}" data-count="${esc(k.value)}">${esc(k.value)}${k.unit ? `<span class="k-unit">${esc(k.unit)}</span>` : ""}</span>
       <span class="k-short">${sub(k.short || "")}</span>
       <span class="k-label">${sub(k.label)}</span>
@@ -118,12 +118,17 @@ function renderOverview() {
         <p class="k-detail">${sub(k.detail)}</p><p class="k-caveat">${sub(k.caveat)}</p></details>
     </article>`).join("");
   const cls = { built: "built", "core built": "core", planned: "planned" };
-  $("pipeline").innerHTML = O.pipeline.map((p) => `
-    <li class="step">
+  $("pipeline").innerHTML = O.pipeline.map((p, i) => `
+    <li class="step" role="tab" tabindex="0" data-i="${i}" data-acc="${esc(p.color || "blue")}" aria-selected="false">
       <div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[p.icon] || ""}</svg></div>
       <div><h3>${esc(p.title)}</h3><p>${esc(p.detail)}</p>
         <span class="st ${cls[p.status]}">${esc(p.status)}</span>${p.note ? `<span class="st-note">${esc(p.note)}</span>` : ""}</div>
     </li>`).join("");
+  for (const li of $("pipeline").querySelectorAll(".step")) {
+    li.addEventListener("click", () => selectStage(+li.dataset.i));
+    li.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectStage(+li.dataset.i); } });
+  }
+  selectStage(3);
   $("maths").innerHTML = O.maths.map((m) => `
     <div class="math${m.highlight ? " hl" : ""}"><h3>${esc(m.title)}</h3>
       <div class="formula">${sub(m.formula)}</div><div class="m-note">${sub(m.note)}</div></div>`).join("");
@@ -138,16 +143,18 @@ function renderOverview() {
     `<p class="attrib">${esc(A.disclaimer)}</p>`;
   for (const i of document.querySelectorAll(".device-legend i")) i.style.background = COL.sev[+i.dataset.sev];
   $("problem").innerHTML = O.problem.map((x, i) => `
-    <article class="card reveal" data-delay="${i}"><span class="n">0${i + 1}</span><h3>${esc(x.title)}</h3><p>${esc(x.text)}</p></article>`).join("");
+    <article class="card reveal" data-delay="${i}" data-acc="${esc(x.color || "blue")}"><div class="ico">0${i + 1}</div><h3>${esc(x.title)}</h3><p>${esc(x.text)}</p></article>`).join("");
   $("scenGallery").innerHTML = O.scenarios.map((c, i) => `
-    <button type="button" class="card scard reveal" data-delay="${i % 2}" data-open="${esc(c.id)}" aria-label="Open ${esc(c.title)} in the radar">
+    <button type="button" class="card scard reveal" data-delay="${i % 2}" data-open="${esc(c.id)}" data-acc="${SCEN_COL[c.id] || "blue"}" aria-label="Open ${esc(c.title)} in the radar">
       <canvas data-thumb="${esc(c.id)}" aria-hidden="true"></canvas>
-      <div class="sc-body"><h3>${esc(c.title)}</h3><p>${esc(c.blurb)}</p>
+      <div class="sc-body"><span class="sc-chip">${esc(SCEN_CHIP[c.id] || "Scenario")}</span><h3>${esc(c.title)}</h3><p>${esc(c.blurb)}</p>
         <div class="stats"><span><b>${c.aircraft}</b> flights</span><span><b>${c.patches}</b> turbulence patches</span>
           <span><b>${c.mod_plus}</b> / ${c.pireps} PIREPs MOD+</span>${c.recovery === null ? "" : `<span>σ recovered <b>${c.recovery.toFixed(2)}</b></span>`}</div>
         <span class="open">Open in radar ›</span></div>
     </button>`).join("");
   for (const b of $("scenGallery").querySelectorAll("[data-open]")) b.addEventListener("click", () => openScenario(b.dataset.open));
+  $("glossary").innerHTML = O.glossary.map((g, i) => `
+    <div class="gloss reveal" data-delay="${i % 2}" data-acc="${esc(g.color || "blue")}"><dt>${sub(g.term)}</dt><dd>${sub(g.text)}</dd></div>`).join("");
   setupThumbs();
   const done = { done: "Done", active: "In progress", planned: "Planned" };
   $("roadmapAsOf").textContent = `Setup plus seven weekly milestones, each closed by an automated gate. Status as of ${O.milestones_as_of}.`;
@@ -158,6 +165,21 @@ function renderOverview() {
   observeReveals();
   setupPlayground();
   setupTilt();
+}
+
+const SCEN_COL = { "jet-cat": "orange", convective: "red", calm: "green", "pirep-replay": "purple" };
+const SCEN_CHIP = { "jet-cat": "Clear-air turbulence", convective: "Thunderstorms", calm: "Control: no turbulence", "pirep-replay": "Validation" };
+
+function selectStage(i) {
+  const p = S.overview.pipeline[i];
+  for (const li of $("pipeline").querySelectorAll(".step")) li.setAttribute("aria-selected", String(+li.dataset.i === i));
+  const d = $("stageDetail");
+  d.dataset.acc = p.color || "blue";
+  d.innerHTML = `
+    <div class="sd-title"><h3>${i + 1}. ${esc(p.title)}</h3><span class="st ${{ built: "built", "core built": "core", planned: "planned" }[p.status]}">${esc(p.status)}</span></div>
+    <div><h4>What it does</h4><p>${sub(p.what)}</p></div>
+    <div><h4>Why it exists</h4><p>${sub(p.why)}</p></div>
+    <div class="sd-facts"><h4>By the numbers</h4><ul>${p.facts.map((f) => `<li>${sub(f)}</li>`).join("")}</ul></div>`;
 }
 
 // gallery thumbnails: the whole hour of every flight, coloured by detected severity (lazy)
@@ -779,7 +801,7 @@ function updateInspectorLive() {
   const sev = c.sev[j], sv = S.sc.severity, w = classWeights(c.sc[j]);
   const ms = matches(a, j), m = S.sc.match;
   const sevPill = sev < 0 ? '<span class="sev-pill na">Not Assessed</span>' : `<span class="sev-pill s${sev}">${esc(sv.labels[sev])}</span>`;
-  const row = (k, v) => `<div class="row"><span class="k">${k}</span><span class="v">${v}</span></div>`;
+  const row = (k, v, tip = "") => `<div class="row"${tip ? ` title="${esc(tip)}"` : ""}><span class="k">${k}</span><span class="v">${v}</span></div>`;
   const ns = c.lat[j] >= 0 ? "N" : "S", ew = c.lon[j] < 0 ? "W" : "E";
   const fl = Math.round(c.alt[j] / 100);
   const story = c.seg[j] !== 1
@@ -791,14 +813,14 @@ function updateInspectorLive() {
     <div class="hdr"><div><div class="callsign">${esc(a.callsign)}</div>
       <div class="subtitle">${a.size === "medium_jet" ? "Medium jet" : "Medium turboprop"} · Synthetic flight ·
         <span class="num">${fmt(Math.abs(c.lat[j]), 2)}°${ns} ${fmt(Math.abs(c.lon[j]), 2)}°${ew}</span></div></div>${sevPill}</div>
-    <p class="story">${story}</p>
+    <p class="story" data-sev="${sev}">${story}</p>
     <div class="meta-line"><span class="num">${mmss(c.t[j])} · ${S.pinned !== null ? "Pinned" : "Live"}</span>
       ${S.pinned !== null ? '<button id="unpin" class="text-btn" type="button">Follow Playhead</button>' : "<span>Click the chart to pin a moment</span>"}</div>
     <div class="tele">
-      <div><b>FL${fmt(c.alt[j] / 100, 0)}</b><span>Altitude</span></div>
-      <div><b>${fmt(c.gs[j], 0)} kt</b><span>Speed</span></div>
-      <div><b>${fmt(c.hdg[j], 0)}°</b><span>Heading</span></div>
-      <div><b>${fmt(c.vr[j], 0)}</b><span>VR ft/min</span></div>
+      <div title="Flight level: barometric altitude in hundreds of feet"><b>FL${fmt(c.alt[j] / 100, 0)}</b><span>Altitude</span></div>
+      <div title="Ground speed in knots"><b>${fmt(c.gs[j], 0)} kt</b><span>Speed</span></div>
+      <div title="Direction of travel, degrees from true north"><b>${fmt(c.hdg[j], 0)}°</b><span>Heading</span></div>
+      <div title="Vertical rate as broadcast, rounded to 64 ft/min steps"><b>${fmt(c.vr[j], 0)}</b><span>VR ft/min</span></div>
     </div>
     <div class="chart-card">
       <div class="ch"><span>Roughness (σ<sub>corr</sub>) · last 10 min</span><b>${fmt(c.sc[j], 0)}<span> ft/min</span></b></div>
@@ -808,18 +830,18 @@ function updateInspectorLive() {
     </div>
     <div class="section-h">Detector <small>used by Horus</small></div>
     <div class="group">
-      ${row("Level-flight segment", c.seg[j] === 1 ? "Yes" : "No · climb/descent")}
-      ${row("σ<sub>corr</sub> <em>after Δ²/12</em>", fmt(c.sc[j], 0, " ft/min"))}
-      ${row("σ<sub>raw</sub> <em>before Δ²/12</em>", fmt(c.sr[j], 0, " ft/min"))}
-      ${row("Injected σ <em>synthetic truth</em>", fmt(c.truth[j], 0, " ft/min"))}
+      ${row("Level-flight segment", c.seg[j] === 1 ? "Yes" : "No · climb/descent", "Only level flight is scored: at or above FL200, altitude within 300 ft over 2 minutes, median vertical rate within ±200 ft/min")}
+      ${row("σ<sub>corr</sub> <em>after Δ²/12</em>", fmt(c.sc[j], 0, " ft/min"), "Jitter in vertical rate (15 s window) after removing the 31 s trend and the rounding variance Δ²/12. This is what sets the colour")}
+      ${row("σ<sub>raw</sub> <em>before Δ²/12</em>", fmt(c.sr[j], 0, " ft/min"), "The same jitter before the rounding correction; always slightly larger")}
+      ${row("Injected σ <em>synthetic truth</em>", fmt(c.truth[j], 0, " ft/min"), "The turbulence strength the simulation put here. Real data has no such answer key")}
     </div>
     <details class="fold" data-fold="more"${open("more")}><summary>More detail<small>flicker, B1, class weights</small></summary>
       <div class="group">
-        ${row("Flicker samples <em>61 s</em>", fmt(c.flk[j], 0))}
-        ${row("B1 vertical-accel RMS", fmt(c.b1[j], 3, " g"))}
-        ${row("Altitude deviation <em>vs 2-min median</em>", fmt(c.adev[j], 0, " ft"))}
-        ${row("Heading rate <em>descriptive</em>", fmt(c.hrate[j], 2, " °/s"))}
-        ${row("GS variability <em>wind-gradient proxy</em>", fmt(c.gsd[j], 1, " kt"))}
+        ${row("Flicker samples <em>61 s</em>", fmt(c.flk[j], 0), "Single-sample ±64 ft/min toggles (encoder noise) in the last minute; they count half")}
+        ${row("B1 vertical-accel RMS", fmt(c.b1[j], 3, " g"), "Baseline detector: RMS vertical acceleration with the rounding noise removed")}
+        ${row("Altitude deviation <em>vs 2-min median</em>", fmt(c.adev[j], 0, " ft"), "Descriptive only: how far altitude sits from its 2-minute median")}
+        ${row("Heading rate <em>descriptive</em>", fmt(c.hrate[j], 2, " °/s"), "Descriptive only: how fast the heading is changing")}
+        ${row("GS variability <em>wind-gradient proxy</em>", fmt(c.gsd[j], 1, " kt"), "Descriptive only: ground-speed wobble over a minute, a rough hint of wind changes")}
       </div>
       <div class="group fold-gap">${w === null ? row("Class weights: not assessed outside level flight", "—")
         : sv.labels.map((l, k) => `<div class="row wbar"><span>${esc(l)}</span><span class="track"><span class="fill" data-k="${k}" data-w="${(w[k] * 100).toFixed(1)}"></span></span><span class="v">${Math.round(w[k] * 100)}%</span></div>`).join("")}</div>
@@ -831,6 +853,8 @@ function updateInspectorLive() {
           <span class="txt">${esc(r.p.text)}</span></div>`).join("")}</div>
       <p class="footnote">Window ±${m.window_s / 60} min · ${m.dist_km} km · ±${m.alt_ft.toLocaleString()} ft from config.yaml (SPEC §6.1), drawn as the dashed ring on the map.</p></details>
     <p class="legal-line">Horus · MIT License · © 2026 Rohit Raj · Research prototype — not for operational use</p>`;
+  const st = live.querySelector(".story");
+  if (st) st.style.setProperty("--story", sev < 0 ? COL.na : COL.sev[sev]);
   for (const f of live.querySelectorAll(".fill")) { f.style.width = `${f.dataset.w}%`; f.style.background = COL.sev[+f.dataset.k]; }
   for (const b of live.querySelectorAll("[data-tb]")) b.style.color = COL.tb[b.dataset.tb];
   for (const r of live.querySelectorAll(".row-top")) { r.style.display = "flex"; r.style.justifyContent = "space-between"; r.style.gap = "10px"; }
@@ -985,6 +1009,8 @@ document.addEventListener("keydown", (e) => {
 function openSheet() {
   const A = S.about, cls = { built: "built", "core built": "core", planned: "planned" };
   $("aboutContent").innerHTML = `
+    <div class="section-h">How to read the radar</div>
+    <div class="guide-grid">${S.overview.read_guide.map((g) => `<div class="guide-card" data-acc="${esc(g.color || "blue")}"><b>${esc(g.title)}</b><span>${sub(g.text)}</span></div>`).join("")}</div>
     ${A.stages.map((s) => `<div class="section-h">${esc(s.name)}</div><div class="group">${s.items.map((it) =>
       `<div class="row"><span class="k">${esc(it.label)}${it.note ? ` <em>${esc(it.note)}</em>` : ""}</span><span class="st ${cls[it.status]}">${esc(it.status)} · ${esc(it.m)}</span></div>`).join("")}</div>`).join("")}
     <div class="section-h">Attribution</div>

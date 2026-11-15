@@ -15,10 +15,10 @@ Status: under construction (see `SPEC.md` and `PROGRESS.md`). Headline results w
 make demo        # http://127.0.0.1:8765/  (no internet needed)
 ```
 
-Black, Apple-style design throughout. It opens on an **Overview** page (architecture, the maths, the benchmark plan and four
+Black, Apple-style design with colour-coded sections. It opens on an **Overview** page (architecture, the maths, the benchmark plan and four
 preview metrics computed live from the synthetic scenarios, an animated mini-radar, an
-interactive quantisation playground, a scenario gallery, and the roadmap with the benchmark plan
-and honest limits), then a **Live Radar Demo**
+interactive quantisation playground, a scenario gallery, a glossary, and the roadmap with the benchmark plan and honest limits;
+each pipeline stage opens a what / why / by-the-numbers explainer), then a **Live Radar Demo**
 console: a dark three-pane view with flight strips sorted by σ_corr, a flat 2D airspace
 map with playback and filters, and a telemetry inspector. It auto-selects the scenario's
 most turbulent flight at its sustained peak; the inspector adds a plain-English summary and a

@@ -72,7 +72,7 @@ def test_overview_endpoint(base_url):
 
 def test_landing_detail_sections():
     o = overview.overview()
-    assert len(o["problem"]) == 3 and "read_guide" not in o
+    assert len(o["problem"]) == 3 and len(o["read_guide"]) == 6 and len(o["glossary"]) >= 8
     assert [m["m"] for m in o["milestones"]] == [f"M{i}" for i in range(8)]
     assert {m["status"] for m in o["milestones"]} <= {"done", "active", "planned"}
     assert any("synthetic" in x.lower() for x in o["limitations"])
@@ -87,3 +87,10 @@ def test_scenario_cards_are_counted_from_the_data():
         assert card["recovery"] == d["check"]["median_recovered_over_injected"]
     calm = next(c for c in overview.scenario_cards() if c["id"] == "calm")
     assert calm["patches"] == 0 and calm["mod_plus"] == 0
+
+
+def test_every_pipeline_stage_explains_itself():
+    for stage in overview.PIPELINE:
+        assert stage["what"] and stage["why"] and len(stage["facts"]) >= 2
+    detector = overview.PIPELINE[-1]
+    assert detector["status"] == "planned" and "placeholder" in " ".join(detector["facts"])

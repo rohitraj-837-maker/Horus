@@ -25,7 +25,7 @@
       </div>
     </div>
     <div class="tb-right">
-      <button id="aboutBtn" class="tb-button only-radar" type="button">Sources</button>
+      <button id="aboutBtn" class="tb-button only-radar" type="button">Guide &amp; sources</button>
       <button class="tb-button only-overview" type="button" data-go="radar">Launch Radar</button>
     </div>
   </header>
@@ -34,7 +34,7 @@
   <main id="overview" class="overview" aria-label="Overview">
     <section class="hero">
       <p class="eyebrow reveal">Research prototype · continental US</p>
-      <h1 class="reveal">Horus: Clear-Air Turbulence&nbsp;Radar</h1>
+      <h1 class="reveal">Horus: <span class="grad">Clear-Air Turbulence&nbsp;Radar</span></h1>
       <p class="lede reveal">Every airliner broadcasts its vertical rate. Horus reads the jitter in that signal to find rough air — with no extra sensors.</p>
       <div class="hero-ctas reveal">
         <button class="pill-btn" type="button" data-go="radar">Launch Radar Console</button>
@@ -50,22 +50,24 @@
     </section>
 
     <section class="block">
-      <div class="block-head reveal"><h2>The problem</h2><p>Turbulence is a major cause of in-flight injuries, and the worst kind is the one nobody can see.</p></div>
+      <div class="block-head reveal" data-acc="red"><p class="kicker">Why</p><h2>The problem</h2><p>Turbulence is a major cause of in-flight injuries, and the worst kind is the one nobody can see.</p></div>
       <div id="problem" class="trio"></div>
     </section>
 
     <section class="block">
-      <div class="block-head reveal"><h2>What we can show today</h2><p>Measured on synthetic flights, with the real detector code.</p></div>
+      <div class="block-head reveal" data-acc="green"><p class="kicker">Results so far</p><h2>What we can show today</h2><p>Measured on synthetic flights, with the real detector code.</p></div>
       <div id="kpis" class="kpis"></div>
     </section>
 
     <section id="how" class="block">
-      <div class="block-head reveal"><h2>How it works</h2><p>Five stages from public broadcast to turbulence score.</p></div>
-      <ol id="pipeline" class="stepper"></ol>
+      <div class="block-head reveal" data-acc="blue"><p class="kicker">Pipeline</p><h2>How it works</h2><p>Five stages from public broadcast to turbulence score.</p></div>
+      <ol id="pipeline" class="stepper" role="tablist" aria-label="Pipeline stages"></ol>
+      <p class="stepper-hint reveal">Select a stage to see what it does, why it exists, and the numbers behind it.</p>
+      <div id="stageDetail" class="stage-detail card reveal" role="tabpanel" aria-live="polite"></div>
     </section>
 
     <section class="block">
-      <div class="block-head reveal"><h2>The key idea: undo the rounding</h2><p>ADS-B rounds vertical rate to 64 ft/min steps. That rounding looks like turbulence unless you remove it.</p></div>
+      <div class="block-head reveal" data-acc="orange"><p class="kicker">The maths</p><h2>The key idea: undo the rounding</h2><p>ADS-B rounds vertical rate to 64 ft/min steps. That rounding looks like turbulence unless you remove it.</p></div>
       <div class="play card reveal">
         <div class="play-ctrl">
           <label for="sigmaIn">True turbulence <span class="num" id="sigmaOut">60 ft/min</span></label>
@@ -87,12 +89,17 @@
     </section>
 
     <section class="block">
-      <div class="block-head reveal"><h2>Four synthetic skies</h2><p>Each scenario is an hour of synthetic traffic through a known turbulence field. Open one to watch the detector work.</p></div>
+      <div class="block-head reveal" data-acc="purple"><p class="kicker">Try it</p><h2>Four synthetic skies</h2><p>Each scenario is an hour of synthetic traffic through a known turbulence field. Open one to watch the detector work.</p></div>
       <div id="scenGallery" class="gallery"></div>
     </section>
 
     <section class="block">
-      <div class="block-head reveal"><h2>Where it stands</h2><p id="roadmapAsOf">Setup plus seven weekly milestones, each closed by an automated gate.</p></div>
+      <div class="block-head reveal" data-acc="pink"><p class="kicker">Glossary</p><h2>Words used here</h2><p>Every term on this page and in the radar, in one line each.</p></div>
+      <dl id="glossary" class="glossary"></dl>
+    </section>
+
+    <section class="block">
+      <div class="block-head reveal" data-acc="teal"><p class="kicker">Progress</p><h2>Where it stands</h2><p id="roadmapAsOf">Setup plus seven weekly milestones, each closed by an automated gate.</p></div>
       <ol id="roadmap" class="roadmap"></ol>
       <div class="folds reveal">
         <details class="more">
@@ -174,7 +181,7 @@
   <div id="sheet" class="sheet-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
     <div class="sheet">
       <div class="sheet-head">
-        <h2 id="sheetTitle">Sources &amp; status</h2>
+        <h2 id="sheetTitle">Guide &amp; sources</h2>
         <button id="closeSheet" class="text-btn" type="button">Done</button>
       </div>
       <div id="aboutContent" class="sheet-body"></div>

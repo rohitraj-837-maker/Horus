@@ -164,36 +164,152 @@ def maths() -> list[dict[str, Any]]:
 PIPELINE = [
     {
         "icon": "antenna",
+        "color": "blue",
         "title": "OpenSky",
         "detail": "Live state vectors ~90 s · Trino history 1 Hz",
         "status": "built",
         "note": "Trino query access pending",
+        "what": "Pulls a state vector for every aircraft over the continental US: position, "
+        "barometric altitude, vertical rate, ground speed and heading.",
+        "why": "It is free for research, and offers both a live feed and a full-rate history.",
+        "facts": [
+            "One US-wide live request costs 4 of the 4,000 daily credits, so a snapshot "
+            "about every 90 s.",
+            "Vertical rate arrives in m/s and is converted to ft/min; the 64 ft/min ADS-B "
+            "step survives (100% of measured values sit on the grid).",
+            "Full-rate Trino history (~1 Hz) is approved, but OpenSky still refuses queries "
+            "on the account.",
+        ],
     },
     {
         "icon": "archive",
+        "color": "teal",
         "title": "adsb.lol history",
         "detail": "Winter 2025–26 · ~20 s cadence",
         "status": "built",
         "note": "44 / 45 days",
+        "what": "Streams adsb.lol's daily global trace archives (~3.5 GB/day) and keeps only "
+        "aircraft over the US at FL180 and above.",
+        "why": "It covers the winter jet-stream season now, while Trino access is pending.",
+        "facts": [
+            "44 of 45 study days downloaded (2025-12-31 was never published); about 11–12 M "
+            "rows per day.",
+            "Median gap between points at FL200+ is about 19 s, and points are added when "
+            "values change, so it is not 1 Hz.",
+            "97% of rows carry the aircraft type, against 72% from the OpenSky database.",
+        ],
     },
     {
         "icon": "table",
+        "color": "indigo",
         "title": "Parquet store",
         "detail": "Canonical units · hourly partitions · DuckDB",
         "status": "built",
+        "what": "Every source is converted to one schema with the same units (ft, ft/min, kt, "
+        "UTC seconds) and written as partitioned Parquet files.",
+        "why": "The detector reads one aircraft or one day at a time, so an 8 GB laptop can "
+        "process weeks of traffic.",
+        "facts": [
+            "About 12 GB for the 44-day study window.",
+            "PIREPs from the Iowa Environmental Mesonet are parsed from free text; 0.4–1.0% of "
+            "turbulence groups fail to parse.",
+            "Train on 2025-12-02 → 12-31, test on 2026-01-01 → 01-15: a time split, so no test "
+            "day leaks into training.",
+        ],
     },
     {
         "icon": "wave",
+        "color": "orange",
         "title": "Segment · Residual · Δ²/12",
         "detail": "Level flight, vr residual, Sheppard, B1 accel",
         "status": "core built",
+        "what": "Finds stretches of level flight, removes the slow autopilot trend from the "
+        "vertical rate, measures the jitter that is left (σ), and subtracts the variance "
+        "that rounding to 64 ft/min adds (Δ²/12).",
+        "why": "Climbs, descents and rounding all look like turbulence if you skip these steps.",
+        "facts": [
+            "Level flight: at or above FL200, altitude within 300 ft over 2 minutes, median "
+            "vertical rate within ±200 ft/min, 30 s trimmed from each end.",
+            "On synthetic turbulence it recovers 0.97–0.98 of the true σ.",
+            "Below about 40 ft/min the correction over-corrects, so tiny values mean “near zero”.",
+        ],
     },
     {
         "icon": "gauge",
+        "color": "pink",
         "title": "Horus detector",
         "detail": "Per-type normalised score + calibrated threshold",
         "status": "planned",
         "note": "M3",
+        "what": "Turns σ_corr into a score that means the same for every aircraft type, then "
+        "flags turbulence above a threshold chosen on the training month.",
+        "why": "An A380 and an A320 shake differently in the same air, so one raw threshold "
+        "would be unfair to one of them.",
+        "facts": [
+            "Thresholds are fitted on December data only and tested on January.",
+            "Detections then feed a 3-D nowcast grid (H3 cells × 2,000 ft bands) in M4–M5.",
+            "Until then the demo colours use placeholder thresholds of 90 / 180 / 320 ft/min.",
+        ],
+    },
+]
+
+GLOSSARY = [
+    {
+        "term": "ADS-B",
+        "color": "blue",
+        "text": "The radio broadcast every airliner sends about once a second: position, "
+        "altitude, speed and vertical rate.",
+    },
+    {
+        "term": "Vertical rate",
+        "color": "teal",
+        "text": "How fast the aircraft is climbing or descending, in ft/min. Rough air makes it "
+        "jitter.",
+    },
+    {
+        "term": "FL (flight level)",
+        "color": "indigo",
+        "text": "Altitude in hundreds of feet on a standard pressure setting: FL350 ≈ 35,000 ft.",
+    },
+    {
+        "term": "Level flight",
+        "color": "green",
+        "text": "Cruising with steady altitude. Horus only scores these stretches.",
+    },
+    {
+        "term": "PIREP",
+        "color": "purple",
+        "text": "A pilot report of conditions, e.g. “MOD turbulence at FL330”. "
+        "Used as ground truth.",
+    },
+    {
+        "term": "MOD+",
+        "color": "orange",
+        "text": "Moderate or severe turbulence in a PIREP: the events the detector should find.",
+    },
+    {
+        "term": "σ_corr",
+        "color": "yellow",
+        "text": "The jitter in vertical rate after removing the trend and the rounding error. "
+        "Higher = rougher.",
+    },
+    {
+        "term": "Δ²/12",
+        "color": "orange",
+        "text": "The variance that rounding to steps of Δ = 64 ft/min adds (341.3 (ft/min)²). "
+        "Sheppard's correction subtracts it.",
+    },
+    {
+        "term": "Synthetic scenario",
+        "color": "pink",
+        "text": "Simulated aircraft flying through turbulence of known strength, so the "
+        "detector's answer can be checked.",
+    },
+    {
+        "term": "Nowcast",
+        "color": "red",
+        "text": "A map of where turbulence is right now, built from observations, not a "
+        "forecast hours ahead.",
     },
 ]
 
@@ -213,18 +329,61 @@ BENCHMARKS = {
 PROBLEM = [
     {
         "title": "Invisible to radar",
+        "color": "red",
         "text": "Clear-air turbulence has no clouds or precipitation, so weather radar "
         "cannot see it.",
     },
     {
         "title": "Reports are sparse and late",
+        "color": "orange",
         "text": "Crews mostly learn about it from other pilots' verbal reports (PIREPs): sparse, "
         "delayed and subjective.",
     },
     {
         "title": "Every airliner is already a sensor",
+        "color": "green",
         "text": "Each aircraft broadcasts its vertical rate over ADS-B about once a second. "
         "Rough air makes that signal jitter.",
+    },
+]
+
+READ_GUIDE = [
+    {
+        "title": "Colour = roughness",
+        "color": "green",
+        "text": "Green, yellow, orange, red: σ_corr on placeholder thresholds (90 / 180 / 320 "
+        "ft/min) until M3. Grey: climbing or descending, which Horus does not score.",
+    },
+    {
+        "title": "Trail = last 10 minutes",
+        "color": "orange",
+        "text": "Each trail keeps the colour it had at that moment, so you can see where a "
+        "flight entered and left rough air.",
+    },
+    {
+        "title": "Rings = pilot reports",
+        "color": "purple",
+        "text": "Synthetic PIREPs fade over 30 minutes; hover one to read it. The dashed blue "
+        "ring around the selected flight is the 40 km matching radius.",
+    },
+    {
+        "title": "Flight list",
+        "color": "blue",
+        "text": "Every flight, roughest first, with its current level and roughness word. "
+        "Click one to inspect it.",
+    },
+    {
+        "title": "Inspector",
+        "color": "teal",
+        "text": "A plain-English summary, the last 10 minutes of σ_corr against the thresholds, "
+        "the altitude profile for the hour, and the detector's numbers. Hover any row for "
+        "what it means.",
+    },
+    {
+        "title": "Playback",
+        "color": "indigo",
+        "text": "Play the hour at 1×, 10× or 60×, filter by altitude, or pick a flight. Space "
+        "plays and pauses; ← → step a minute.",
     },
 ]
 
@@ -309,6 +468,8 @@ def scenario_cards() -> list[dict[str, Any]]:
 def overview() -> dict[str, Any]:
     return {
         "problem": PROBLEM,
+        "glossary": GLOSSARY,
+        "read_guide": READ_GUIDE,
         "kpis": kpis(),
         "pipeline": PIPELINE,
         "maths": maths(),

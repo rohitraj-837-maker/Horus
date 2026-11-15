@@ -31,6 +31,8 @@ One entry per milestone gate. A milestone is **complete** only when its `make ga
 
 - **2026-11-15: Demo restyle (Rohit): black theme, less clutter.** Blue sky backdrop removed (pure black, neutral greys, Apple-blue accent only); landing reduced from 10 to 7 sections (how-to-read guide dropped, benchmark plan + limits folded under the roadmap); radar labels only selected/hovered + 3 roughest flights, scenario blurb moved to a tooltip, inspector has one 'More detail' fold.
 
+- **2026-11-15: Demo colour + explanation pass (Rohit).** Black background kept; colour comes from Apple system accents per section (kickers, KPI gradients, pipeline icon tiles, scenario chips, glossary). Pipeline stages are selectable and open a what / why / by-the-numbers panel (facts from data_notes.md); glossary of 10 terms; radar 'Guide & sources' sheet with 6 reading cards; hover explanations on every inspector row and tile.
+
 ## M1 — Ingestion ⏳ code done, gate waiting on elapsed time
 
 `make gate-m1 DAY=2026-11-14` (2026-11-15 01:5x AEDT): ruff ✔, mypy ✔, **pytest 110 passed** (1 Trino test deselected until access), then:
