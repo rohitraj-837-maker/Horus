@@ -23,13 +23,15 @@ One entry per milestone gate. A milestone is **complete** only when its `make ga
 
 | Criterion | Status |
 |---|---|
-| Full UTC day of CONUS tracks | ❌ recorder started 2026-11-14 22:51 UTC. First complete UTC day is 2026-11-15, available after 2026-11-16 00:00 UTC |
+| Full UTC day of CONUS tracks | ❌ 2026-11-15 has a 3 h sleep gap; next candidate 2026-11-16 |
 | PIREPs for that day | ✔ (re-run `turbcast.ingest.pireps` for 2026-11-15 once the day closes) |
 | DuckDB per-aircraft series | ✔ |
-| Recorder survives 24 h | ❌ running (PID in `data/raw/live/recorder.pid`); 24 h reached about 2026-11-15 22:52 UTC |
+| Recorder survives 24 h | ❌ running, but laptop sleep 03:45–06:48 UTC Nov 15 resets the clean 24 h window (earliest pass 2026-11-16 06:48 UTC) |
 | Quantisation measured (Open Q1) | ✔ 64 ft/min confirmed on real data |
 
-Re-check: `make gate-m1 DAY=2026-11-15` after 2026-11-16 00:05 UTC (11:05 AEDT).
+**2026-11-15 ~07:30 UTC early gate run:** ruff ✔ mypy ✔ pytest 174 ✔, quantisation ✔ (473,725 rows, 9,928 aircraft, step 64), PIREPs ✔ (partial day). **The recorder lost 03:45 → 06:48 UTC**: macOS `Clamshell Sleep` (lid closed on battery; `caffeinate -i` cannot block it). So 2026-11-15 can't be a full day. `gate_m1.py` now also requires no unplanned recorder gaps inside the gated UTC day (stricter; before, it checked only first-to-last span).
+
+Re-check: `make gate-m1 DAY=2026-11-16` after **2026-11-17 00:05 UTC**, with the Mac on power and awake all of 2026-11-16 UTC. The 24 h recorder check can pass from 2026-11-16 06:48 UTC if there are no further gaps.
 
 Built: `ingest/live.py` (OpenSky OAuth2 + adsb.lol tiling, credit-aware pacing, backoff, hourly Parquet), `ingest/pireps.py` (IEM + AWC, free-text TB parser), `ingest/aircraft_db.py`, `ingest/historical.py` (Trino, tested offline), `ingest/store.py`, `ingest/quantisation.py`, `ingest/audit.py`, scripts, `reports/data_notes.md`.
 

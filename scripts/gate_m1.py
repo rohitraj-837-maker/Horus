@@ -1,6 +1,7 @@
 """Milestone 1 acceptance (SPEC §10, week 1):
 
-1. One full UTC day of CONUS tracks loaded (snapshots span >= 23.5 h of that day).
+1. One full UTC day of CONUS tracks loaded: snapshots span >= 23.5 h of that day AND
+   the recorder audit over that UTC day finds no unplanned gaps (e.g. laptop sleep).
 2. PIREPs for the same day loaded.
 3. DuckDB returns one aircraft's series for that full day.
 4. Live recorder survived 24 h (scripts/check_recorder.py logic).
@@ -38,7 +39,10 @@ def main() -> int:
     t0 = int(datetime(day.year, day.month, day.day, tzinfo=UTC).timestamp())
     results: list[tuple[str, bool, str]] = []
 
-    # 1. full day of tracks
+    polls = audit.read_poll_log(config.resolve(cfg.live.out_dir), args.source)
+
+    # 1. full day of tracks (span AND no unplanned recorder gaps inside the day)
+    day_audit = audit.audit(polls, 24, t0 + 86400)
     try:
         snaps = duckdb.execute(
             f"select min(snapshot_time), max(snapshot_time), count(distinct snapshot_time), "
@@ -50,13 +54,14 @@ def main() -> int:
         snaps = None
     if snaps and snaps[0] is not None:
         span_h = (snaps[1] - snaps[0]) / 3600
-        ok = span_h >= 23.5
+        ok = span_h >= 23.5 and day_audit.bad_gaps == 0
         results.append(
             (
                 "full day of tracks",
                 ok,
                 f"{span_h:.2f} h span, {snaps[2]} snapshots, {snaps[3]:,} rows, "
-                f"{snaps[4]:,} aircraft",
+                f"{snaps[4]:,} aircraft, {day_audit.bad_gaps} unplanned gaps in day "
+                f"(max {day_audit.max_gap_s:.0f} s)",
             )
         )
     else:
@@ -92,7 +97,6 @@ def main() -> int:
         results.append(("per-aircraft series", False, "no aircraft"))
 
     # 4. recorder 24 h
-    polls = audit.read_poll_log(config.resolve(cfg.live.out_dir), args.source)
     res = audit.audit(polls, 24, time.time())
     results.append(
         (
