@@ -5,7 +5,9 @@
 
 Uses `pyopensky.trino.Trino.history()` only (partitioned, explicit columns,
 cached). The first run opens a browser for OpenSky login when settings.conf has a
-username and no password. Data: data/historical/date=YYYY-MM-DD/hour=HH/.
+username and no password; the token is then cached in the macOS Keychain
+(`keyring`) so later hours reuse it. `--forget-login` deletes that cached token.
+Data: data/historical/date=YYYY-MM-DD/hour=HH/.
 
 --smoke-test fetches 2 hours (default 2025-12-02 18:00-20:00 UTC) and writes
 volume/time/memory measurements to reports/data_notes.md so the full download can
@@ -73,6 +75,28 @@ def smoke_report(results: list[dict], cfg: config.Config) -> str:
     )
 
 
+TRINO_HOST = "trino.opensky-network.org"
+
+
+def forget_login() -> int:
+    """Delete the browser-login token that the trino client cached in the macOS
+    Keychain (service `<host>@<username>`, account `token` / `token__N` shards)."""
+    import keyring
+    from keyring.errors import PasswordDeleteError
+    from pyopensky.config import trino_username
+
+    removed = 0
+    for service in {TRINO_HOST, f"{TRINO_HOST}@{trino_username}"}:
+        for account in ["token", *(f"token__{i}" for i in range(64))]:
+            try:
+                keyring.delete_password(service, account)
+                removed += 1
+            except PasswordDeleteError:
+                pass
+    print(f"removed {removed} cached Trino login entr{'y' if removed == 1 else 'ies'}")
+    return 0
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     mode = ap.add_mutually_exclusive_group(required=True)
@@ -80,12 +104,17 @@ def main() -> int:
     mode.add_argument(
         "--multi-day", action="store_true", help="fetch [--start, --end) hour by hour"
     )
+    mode.add_argument(
+        "--forget-login", action="store_true", help="delete the cached browser-login token"
+    )
     ap.add_argument("--start", type=_utc_day, default=None, help="UTC date/time (multi-day, smoke)")
     ap.add_argument("--end", type=_utc_day, default=None, help="UTC date, exclusive (multi-day)")
     ap.add_argument("--min-free-gb", type=float, default=20.0, help="stop if free disk drops below")
     ap.add_argument("--keep-cache", action="store_true", help="keep pyopensky's raw cache files")
     args = ap.parse_args()
 
+    if args.forget_login:
+        return forget_login()
     cfg = config.load()
     if args.smoke_test:
         start = args.start or SMOKE_START
@@ -112,13 +141,14 @@ def main() -> int:
         min_free_gb=args.min_free_gb,
     )
     log = config.resolve(hist.OUT_DIR) / "_log.csv"
+    log.parent.mkdir(parents=True, exist_ok=True)
     pd.DataFrame(results).to_csv(log, mode="a", header=not log.exists(), index=False)
 
     if args.smoke_test:
         body = smoke_report(results, cfg)
         print(body)
         replace_section("data_notes.md", "trino-smoke", body)
-    failed = [r for r in results if r.get("status") in ("failed", "disk_floor")]
+    failed = [r for r in results if r.get("status") in ("failed", "fatal", "disk_floor")]
     return 1 if failed else 0
 
 

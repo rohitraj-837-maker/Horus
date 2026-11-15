@@ -46,16 +46,17 @@ def pyopensky_frame(t0: int = T0) -> pd.DataFrame:
 class HistoryOnly:
     """Records history() calls; has no query() so raw SQL can't slip through."""
 
-    def __init__(self, frame_for=None, fail_times=0):
+    def __init__(self, frame_for=None, fail_times=0, exc=None):
         self.calls = []
         self.frame_for = frame_for or (lambda start: pyopensky_frame(int(start.timestamp())))
         self.fail_times = fail_times
+        self.exc = exc
 
     def history(self, start, stop, *conditions, **kw):
         self.calls.append((start, stop, conditions, kw))
         if self.fail_times:
             self.fail_times -= 1
-            raise RuntimeError("QUERY_QUEUE_FULL")
+            raise self.exc or RuntimeError("QUERY_QUEUE_FULL")
         return self.frame_for(start)
 
 
@@ -158,6 +159,41 @@ def test_run_hours_gives_up_and_logs(tmp_path, region):
     )
     assert res[0]["status"] == "failed" and "QUERY_QUEUE_FULL" in res[0]["error"]
     assert not h.hour_path(HOUR, str(tmp_path)).exists()
+
+
+def permission_denied():
+    """The error OpenSky returned on 2026-11-15 (query 20261115_070044_19043_52riq),
+    built from the real trino + SQLAlchemy classes the way pyopensky raises it."""
+    from sqlalchemy.exc import ProgrammingError
+    from trino.exceptions import TrinoUserError
+
+    orig = TrinoUserError(
+        {
+            "errorType": "USER_ERROR",
+            "errorName": "PERMISSION_DENIED",
+            "message": "Access Denied: Cannot execute query",
+        },
+        "20261115_070044_19043_52riq",
+    )
+    return ProgrammingError("SELECT ...", None, orig)
+
+
+def test_is_fatal():
+    assert h.is_fatal(permission_denied())
+    assert not h.is_fatal(RuntimeError("QUERY_QUEUE_FULL"))
+    assert not h.is_fatal(TimeoutError())
+
+
+def test_run_hours_stops_on_permission_denied(tmp_path, region):
+    waits = []
+    t = HistoryOnly(fail_times=99, exc=permission_denied())
+    hours = h.hours_between(HOUR, HOUR + pd.Timedelta(hours=3))
+    res = h.run_hours(
+        t, hours, region, out_dir=str(tmp_path), sleep=waits.append, log=lambda *_: None
+    )
+    # one query, no retries, no further hours
+    assert len(t.calls) == 1 and waits == []
+    assert [r["status"] for r in res] == ["fatal"] and "PERMISSION_DENIED" in res[0]["error"]
 
 
 def test_run_hours_disk_floor(tmp_path, region):

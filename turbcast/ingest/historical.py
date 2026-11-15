@@ -160,6 +160,19 @@ def hours_between(start: datetime, stop: datetime) -> list[datetime]:
     return out
 
 
+def is_fatal(exc: BaseException) -> bool:
+    """True for errors a retry cannot fix (Trino USER_ERROR: permission denied,
+    bad query). Walks SQLAlchemy's `.orig` and the `__cause__` chain."""
+    seen: set[int] = set()
+    e: BaseException | None = exc
+    while e is not None and id(e) not in seen:
+        seen.add(id(e))
+        if getattr(e, "error_type", None) == "USER_ERROR":
+            return True
+        e = getattr(e, "orig", None) or e.__cause__
+    return False
+
+
 def run_hours(
     trino: Any,
     hours: list[datetime],
@@ -177,6 +190,8 @@ def run_hours(
 
     * Existing hour partitions are skipped.
     * Each hour is retried with exponential backoff before being logged as failed.
+      Fatal errors (`is_fatal`: permission denied, bad query) stop the whole run at
+      once: retrying them only repeats the login and the refusal.
     * pyopensky cache files created by this hour are deleted once our own Parquet
       is written (unless `keep_cache`): the raw cache would otherwise double disk use.
     * Stops before an hour if free disk is below `min_free_gb`.
@@ -216,6 +231,13 @@ def run_hours(
                 }
                 break
             except Exception as e:  # network / cluster errors: back off and retry
+                if is_fatal(e):
+                    res = {
+                        "hour": h.isoformat(),
+                        "status": "fatal",
+                        "error": f"{type(e).__name__}: {e}",
+                    }
+                    break
                 if i == attempts - 1:
                     res = {
                         "hour": h.isoformat(),
@@ -234,4 +256,7 @@ def run_hours(
                 f.unlink(missing_ok=True)
         log(res)
         results.append(res)
+        if res["status"] == "fatal":
+            log("stopping: this error will not go away on retry (see message above)")
+            break
     return results

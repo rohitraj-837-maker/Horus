@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import gzip
 import io
+import re
 import tarfile
 from collections.abc import Callable, Iterable, Iterator
 from datetime import date
@@ -204,12 +205,16 @@ def write_stream(
 # --------------------------------------------------------------------------- download
 
 
+TAR_PART = re.compile(r"\.tar(\.[a-z]{2})?$")
+
+
 def part_urls(client: httpx.Client, day: date) -> list[str]:
     tag = release_tag(day)
     r = client.get(API_TAG_URL.format(year=day.year, tag=tag))
     r.raise_for_status()
     assets = sorted(r.json()["assets"], key=lambda a: a["name"])
-    urls = [a["browser_download_url"] for a in assets if ".tar." in a["name"]]
+    # usually split (`.tar.aa`, `.tar.ab`); some days are one `.tar` (e.g. 2025-12-25)
+    urls = [a["browser_download_url"] for a in assets if TAR_PART.search(a["name"])]
     if not urls:
         raise ValueError(f"no tar parts in release {tag}")
     return urls

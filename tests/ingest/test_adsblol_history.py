@@ -108,6 +108,30 @@ def test_fetch_day_with_mock_transport(tmp_path, tar_bytes, region):
     assert again["skipped"]
 
 
+@pytest.mark.parametrize(
+    "names,expected",
+    [
+        # 2025-12-30: split release (real asset names)
+        (["{t}.tar.ab", "{t}.tar.aa"], ["aa", "ab"]),
+        # 2025-12-25: single-file release (real asset names)
+        (["{t}.tar"], ["tar"]),
+    ],
+)
+def test_part_urls_split_and_single(names, expected):
+    day = pd.Timestamp("2025-12-25").date()
+    tag = ah.release_tag(day)
+
+    def handler(req: httpx.Request) -> httpx.Response:
+        assets = [
+            {"name": n.format(t=tag), "browser_download_url": f"https://dl.test/{n.split('.')[-1]}"}
+            for n in names
+        ]
+        return httpx.Response(200, json={"assets": assets})
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    assert [u.rsplit("/", 1)[1] for u in ah.part_urls(client, day)] == expected
+
+
 def test_release_tag():
     assert ah.release_tag(pd.Timestamp("2026-01-05").date()) == "v2026.01.05-planes-readsb-prod-0"
     assert np.isnan(ah._num("ground")) and ah._num(5) == 5.0 and np.isnan(ah._num(True))
