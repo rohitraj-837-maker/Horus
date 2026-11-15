@@ -17,7 +17,7 @@ make demo        # http://127.0.0.1:8765/  (no internet needed)
 
 Designed from a study of related sites (docs/design-brief.md): aviationweather.gov conventions for the radar
 (bottom timeline, layer strip, flight levels, caret PIREP symbols, AWC moderate/severe colours), the calm
-label-plus-statement structure of the user's reference sites, and a night-sky opening scene. The overview walks
+label-plus-statement structure of well-made product pages, and a night-sky opening scene. The overview walks
 through the problem, five pipeline steps with hands-on labs, computed proof numbers, four synthetic skies, a dated
 comparison with published turbulence products, and the roadmap. **All aircraft, turbulence and PIREPs are
 synthetic**; every number shown is computed from the bundled data or read from `config.yaml`. Horus reports
