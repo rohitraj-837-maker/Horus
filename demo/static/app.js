@@ -193,8 +193,7 @@ function selectStage(i) {
   const p = S.overview.pipeline[i], n = S.overview.pipeline.length;
   for (const li of $("pipeline").querySelectorAll(".gstep")) li.setAttribute("aria-selected", String(+li.dataset.i === i));
   $("glassStage").dataset.acc = p.color || "blue";
-  $("glassStage").style.setProperty("--acc", `var(--c-${p.color || "blue"})`); // beats the stylesheet default
-  const dot = { built: "var(--c-green)", "core built": "var(--c-blue)", planned: "rgba(255,255,255,.4)" }[p.status];
+  const dot = { built: "#fff", "core built": "var(--gold)", planned: "transparent" }[p.status];
   const word = { built: "Built", "core built": "Core built", planned: "Planned" }[p.status] + (p.note ? ` · ${p.note}` : "");
   $("stageDetail").innerHTML = `<div class="gp-fade">
     <div class="gp-head"><div><span class="gp-step">Stage ${i + 1} of ${n}</span><h3>${esc(p.title)}</h3><p class="gp-sub">${esc(p.detail)}</p></div>
@@ -238,7 +237,7 @@ function labCredits(host) {
     const hours = Math.min(24, (L.daily_credits / L.credit_cost) * iv / 3600);
     $("lcV").textContent = `${iv} s`; $("lcCalls").textContent = calls.toLocaleString(); $("lcCred").textContent = cred.toLocaleString();
     $("lcLast").textContent = ok ? "24 h" : `${hours.toFixed(1)} h`;
-    const bar = $("lcBar"); bar.style.width = `${Math.min(100, (cred / (2 * L.daily_credits)) * 100)}%`; bar.style.background = ok ? "var(--c-green)" : "var(--c-red)";
+    const bar = $("lcBar"); bar.style.width = `${Math.min(100, (cred / (2 * L.daily_credits)) * 100)}%`; bar.style.background = ok ? "#fff" : "var(--sev3)";
     $("lcNote").innerHTML = ok
       ? `Fits: ${L.credit_cost} credits per request × ${calls.toLocaleString()} requests stays inside the allowance. The recorder runs at ${L.poll_interval_s} s and also slows itself down using the credits-remaining header.`
       : `Over budget: the credits run out after ${hours.toFixed(1)} h and the recorder goes blind until the 00:00 UTC reset. This is why live data can't be 5–10 s.`;
@@ -442,7 +441,7 @@ function countUp(el) {
   const t0 = performance.now(), dur = 1200;
   const step = (now) => {
     const f = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - f, 3);
-    el.firstChild.nodeValue = f < 1 ? (end * e).toFixed(dec) + m[2] : target;
+    el.firstChild.nodeValue = f < 1 ? Math.max(0, end * e).toFixed(dec) + m[2] : target;
     if (f < 1) requestAnimationFrame(step);
   };
   requestAnimationFrame(step);
@@ -566,19 +565,19 @@ function previewProject() {
   for (const st of S.basemap.states) for (const ring of st.rings) for (const [lon, lat] of ring) {
     const [x, y] = ALB(lon, lat); x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y);
   }
-  const pad = 18, sc = Math.min((r.width - 2 * pad) / (x1 - x0), (r.height - 2 * pad) / (y1 - y0));
-  const ox = (r.width - (x1 - x0) * sc) / 2 - x0 * sc, oy = (r.height + (y1 - y0) * sc) / 2 + y0 * sc;
+  const L = r.width > 900 ? r.width * 0.36 : 16, R = r.width - 24, T = 70, B = r.height - 70;
+  const sc = Math.min((R - L) / (x1 - x0), (B - T) / (y1 - y0));
+  const ox = L + (R - L - (x1 - x0) * sc) / 2 - x0 * sc, oy = T + (B - T + (y1 - y0) * sc) / 2 + y0 * sc;
   const P = (lon, lat) => { const [x, y] = ALB(lon, lat); return [ox + x * sc, oy - y * sc]; };
   PV.vp = { w: r.width, h: r.height, dpr, P };
   const off = document.createElement("canvas"); off.width = cv.width; off.height = cv.height;
   const c = off.getContext("2d"); c.scale(dpr, dpr);
-  const g = c.createLinearGradient(0, 0, 0, r.height); g.addColorStop(0, "#050505"); g.addColorStop(1, "#0b0b0c");
-  c.fillStyle = g; c.fillRect(0, 0, r.width, r.height);
+  c.fillStyle = "#000"; c.fillRect(0, 0, r.width, r.height);
   const land = new Path2D();
   for (const st of S.basemap.states) for (const ring of st.rings) {
     ring.forEach(([lon, lat], i) => { const [x, y] = P(lon, lat); i ? land.lineTo(x, y) : land.moveTo(x, y); }); land.closePath();
   }
-  c.fillStyle = "rgba(255, 255, 255, 0.065)"; c.fill(land); c.strokeStyle = "rgba(255, 255, 255, 0.16)"; c.lineWidth = 0.6; c.stroke(land);
+  c.fillStyle = "rgba(255, 255, 255, 0.035)"; c.fill(land); c.strokeStyle = "rgba(255, 255, 255, 0.10)"; c.lineWidth = 0.6; c.stroke(land);
   PV.base = off;
   for (const a of PV.data.aircraft) {
     const n = a.cols.t.length; a.px = new Float32Array(n); a.py = new Float32Array(n);

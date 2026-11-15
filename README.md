@@ -15,7 +15,7 @@ Status: under construction (see `SPEC.md` and `PROGRESS.md`). Headline results w
 make demo        # http://127.0.0.1:8765/  (no internet needed)
 ```
 
-Dark editorial design (Geist + Instrument Serif, both SIL OFL and bundled so it stays offline), with interactive labs. It opens on an **Overview** page (architecture, the maths, the benchmark plan and four
+Restrained dark design: black, white and one gold accent, hairline rules, light Geist display type (SIL OFL, bundled so it stays offline), with interactive labs. It opens on an **Overview** page (architecture, the maths, the benchmark plan and four
 preview metrics computed live from the synthetic scenarios, an animated mini-radar, an
 interactive quantisation playground, a scenario gallery, a glossary, and the roadmap with the benchmark plan and honest limits;
 each pipeline stage opens a what / why / by-the-numbers explainer with a hands-on lab: credit budget,
