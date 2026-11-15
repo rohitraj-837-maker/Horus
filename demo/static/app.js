@@ -128,9 +128,17 @@ function renderOverview() {
     </li>`).join("");
   for (const li of $("pipeline").querySelectorAll(".gstep")) {
     li.addEventListener("click", () => selectStage(+li.dataset.i));
-    li.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectStage(+li.dataset.i); } });
+    li.addEventListener("keydown", (e) => {
+      const n = O.pipeline.length, i = +li.dataset.i;
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectStage(i); }
+      if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+        e.preventDefault();
+        const k = (i + (e.key === "ArrowRight" ? 1 : n - 1)) % n;
+        selectStage(k); $("pipeline").querySelector(`[data-i="${k}"]`).focus();
+      }
+    });
   }
-  selectStage(3);
+  selectStage(Math.min(O.pipeline.length - 1, Math.max(0, H.has("stage") ? +H.get("stage") : 3)));
   $("maths").innerHTML = O.maths.map((m) => `
     <div class="math${m.highlight ? " hl" : ""}"><h3>${esc(m.title)}</h3>
       <div class="formula">${sub(m.formula)}</div><div class="m-note">${sub(m.note)}</div></div>`).join("");
@@ -165,6 +173,8 @@ function renderOverview() {
       <h4>${esc(m.title)}</h4><p>${esc(m.note)}</p></li>`).join("");
   $("limits").innerHTML = O.limitations.map((x) => `<li>${sub(x)}</li>`).join("");
   observeReveals();
+  setupHoverWeight();
+  setupCarousel();
   setupPlayground();
   setupTilt();
 }
@@ -183,11 +193,13 @@ function selectStage(i) {
   const p = S.overview.pipeline[i], n = S.overview.pipeline.length;
   for (const li of $("pipeline").querySelectorAll(".gstep")) li.setAttribute("aria-selected", String(+li.dataset.i === i));
   $("glassStage").dataset.acc = p.color || "blue";
+  $("glassStage").style.setProperty("--acc", `var(--c-${p.color || "blue"})`); // beats the stylesheet default
   const dot = { built: "var(--c-green)", "core built": "var(--c-blue)", planned: "rgba(255,255,255,.4)" }[p.status];
   const word = { built: "Built", "core built": "Core built", planned: "Planned" }[p.status] + (p.note ? ` · ${p.note}` : "");
   $("stageDetail").innerHTML = `<div class="gp-fade">
     <div class="gp-head"><div><span class="gp-step">Stage ${i + 1} of ${n}</span><h3>${esc(p.title)}</h3><p class="gp-sub">${esc(p.detail)}</p></div>
       <span class="gp-status"><i data-dot="1"></i>${esc(word)}</span></div>
+    <div id="lab" class="gp-lab"></div>
     <div class="gp-body">
       <div><h4>What it does</h4><p>${sub(p.what)}</p></div>
       <div><h4>Why it exists</h4><p>${sub(p.why)}</p></div>
@@ -195,6 +207,184 @@ function selectStage(i) {
     </div></div>`;
   $("stageDetail").querySelector("[data-dot]").style.background = dot;
   placeStageThumb();
+  renderLab(p.lab);
+}
+
+// ---------------------------------------------------------------- pipeline labs (one per stage)
+// Every constant comes from /api/overview.lab (config.yaml or measured notes); the chain and
+// threshold labs use the real detector output stored in the synthetic scenario files.
+const SC_CACHE = {};
+const getScenario = (id) => (SC_CACHE[id] ||= getJSON(`/api/scenario/${encodeURIComponent(id)}`));
+let LAB = { token: 0, chainStep: 1, chainTimer: 0 };
+
+function renderLab(kind) {
+  const host = $("lab");
+  if (!host) return;
+  clearInterval(LAB.chainTimer);
+  const token = ++LAB.token;
+  ({ credits: labCredits, cadence: labCadence, units: labUnits, chain: labChain, threshold: labThreshold }[kind] || (() => {}))(host, token);
+}
+const labHead = (title, hint) => `<div class="lab-head"><span class="lab-badge">Try it</span><b>${title}</b><span class="lab-hint">${hint}</span></div>`;
+
+function labCredits(host) {
+  const L = S.overview.lab;
+  host.innerHTML = `${labHead("Credit budget", "Drag to change how often the US-wide snapshot is requested.")}
+    <div class="lab-row"><label for="lcIn">Snapshot every</label><input id="lcIn" class="slider" type="range" min="15" max="300" step="5" value="${L.poll_interval_s}"><b id="lcV" class="num"></b></div>
+    <div class="meter"><i id="lcBar"></i><span class="meter-mark" title="Daily allowance"></span></div>
+    <div class="lab-stats"><div><b id="lcCalls" class="num"></b><span>snapshots a day</span></div><div><b id="lcCred" class="num"></b><span>credits of ${L.daily_credits.toLocaleString()}</span></div><div><b id="lcLast" class="num"></b><span>credits last</span></div></div>
+    <p id="lcNote" class="lab-note"></p>`;
+  const upd = () => {
+    const iv = +$("lcIn").value, calls = Math.ceil(86400 / iv), cred = calls * L.credit_cost, ok = cred <= L.daily_credits;
+    const hours = Math.min(24, (L.daily_credits / L.credit_cost) * iv / 3600);
+    $("lcV").textContent = `${iv} s`; $("lcCalls").textContent = calls.toLocaleString(); $("lcCred").textContent = cred.toLocaleString();
+    $("lcLast").textContent = ok ? "24 h" : `${hours.toFixed(1)} h`;
+    const bar = $("lcBar"); bar.style.width = `${Math.min(100, (cred / (2 * L.daily_credits)) * 100)}%`; bar.style.background = ok ? "var(--c-green)" : "var(--c-red)";
+    $("lcNote").innerHTML = ok
+      ? `Fits: ${L.credit_cost} credits per request × ${calls.toLocaleString()} requests stays inside the allowance. The recorder runs at ${L.poll_interval_s} s and also slows itself down using the credits-remaining header.`
+      : `Over budget: the credits run out after ${hours.toFixed(1)} h and the recorder goes blind until the 00:00 UTC reset. This is why live data can't be 5–10 s.`;
+  };
+  $("lcIn").addEventListener("input", upd); upd();
+}
+
+function labCadence(host) {
+  const L = S.overview.lab;
+  const modes = [["trino", "Trino · 1 s"], ["adsblol", "adsb.lol · ~20 s"], ["live", "Live · 90 s"]];
+  host.innerHTML = `${labHead("Samples per window", "Pick a feed: how many points fall inside the detector's windows?")}
+    <div class="chips" role="radiogroup" aria-label="Feed">${modes.map(([k, l], i) => `<button type="button" role="radio" data-m="${k}" aria-checked="${i === 1}">${l}</button>`).join("")}</div>
+    <div id="cdSvg" class="lab-svg"></div>
+    <div class="lab-stats"><div><b id="cdStat" class="num"></b><span>points in the ${L.w_stat_s} s σ window</span></div><div><b id="cdTrend" class="num"></b><span>in the ${L.w_trend_s} s trend window</span></div><div><b class="num">${L.min_samples_stat}</b><span>needed for a σ estimate</span></div></div>
+    <p id="cdNote" class="lab-note"></p>`;
+  const gapsAdsb = [20, 19, 2, 20, 8, 20, 19, 20, 2, 20, 19, 8, 20, 20, 19];
+  const times = (m) => {
+    const out = []; let t = 0, k = 0;
+    while (t <= 180) { out.push(t); t += m === "trino" ? 1 : m === "live" ? L.poll_interval_s : gapsAdsb[k++ % gapsAdsb.length]; }
+    return out;
+  };
+  const draw = (m) => {
+    const W = Math.max(280, $("cdSvg").clientWidth || 600), H = 70, X = (t) => 8 + (t / 180) * (W - 16);
+    const c = 90, s0 = c - L.w_stat_s / 2, s1 = c + L.w_stat_s / 2, t0 = c - L.w_trend_s / 2, t1 = c + L.w_trend_s / 2;
+    const ts = times(m), nS = ts.filter((t) => t >= s0 && t <= s1).length, nT = ts.filter((t) => t >= t0 && t <= t1).length;
+    $("cdSvg").innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Sample times over three minutes">
+      <rect x="${X(t0)}" y="8" width="${X(t1) - X(t0)}" height="44" rx="8" fill="rgba(41,151,255,.10)" stroke="rgba(41,151,255,.45)"/>
+      <rect x="${X(s0)}" y="14" width="${X(s1) - X(s0)}" height="32" rx="6" fill="rgba(255,159,10,.16)" stroke="rgba(255,159,10,.7)"/>
+      <line x1="${X(0)}" x2="${X(180)}" y1="30" y2="30" stroke="rgba(255,255,255,.18)"/>
+      ${ts.map((t) => `<circle cx="${X(t).toFixed(1)}" cy="30" r="${m === "trino" ? 1.6 : 3.4}" fill="${t >= s0 && t <= s1 ? "#ff9f0a" : "rgba(255,255,255,.75)"}"/>`).join("")}
+      <text x="${X(0)}" y="66" font-size="10" fill="rgba(255,255,255,.45)" font-family="${UI_FONT}">0 s</text>
+      <text x="${X(180) - 26}" y="66" font-size="10" fill="rgba(255,255,255,.45)" font-family="${UI_FONT}">180 s</text></svg>`;
+    $("cdStat").textContent = nS; $("cdTrend").textContent = nT;
+    $("cdNote").innerHTML = nS >= L.min_samples_stat
+      ? `Enough points: σ can be measured every second. This is what OpenSky Trino would give.`
+      : `Too few points for a ${L.w_stat_s} s window${m === "adsblol" ? " (spacing drawn from measured gaps: 10–90 % = " + L.adsblol_gap_percentiles_s.join(" / ") + " s)" : ""}. Longer, rate-specific windows are part of the M3 benchmark.`;
+  };
+  for (const b of host.querySelectorAll(".chips button")) b.addEventListener("click", () => {
+    for (const x of host.querySelectorAll(".chips button")) x.setAttribute("aria-checked", String(x === b));
+    draw(b.dataset.m);
+  });
+  draw("adsblol");
+}
+
+function labUnits(host) {
+  const L = S.overview.lab, step = L.step_fpm;
+  host.innerHTML = `${labHead("From m/s to the 64 ft/min grid", "Drag a true vertical rate and watch ADS-B round it.")}
+    <div class="lab-row"><label for="unIn">True vertical rate</label><input id="unIn" class="slider" type="range" min="-8" max="8" step="0.05" value="1.3"><b id="unV" class="num"></b></div>
+    <div id="unSvg" class="lab-svg"></div>
+    <div class="lab-stats"><div><b id="unF" class="num"></b><span>ft/min (× ${L.fpm_per_mps.toFixed(3)})</span></div><div><b id="unB" class="num"></b><span>broadcast value</span></div><div><b id="unE" class="num"></b><span>rounding error</span></div></div>
+    <p class="lab-note">Every ADS-B vertical rate lands on a multiple of ${step} ft/min, so the error is always within ±${step / 2}. Spread evenly, that error has variance Δ²/12 = ${(step * step / 12).toFixed(1)} (ft/min)²: the term stage 4 subtracts.</p>`;
+  const upd = () => {
+    const v = +$("unIn").value, f = v * L.fpm_per_mps, b = step * Math.round(f / step), e = f - b;
+    $("unV").textContent = `${v.toFixed(2)} m/s`; $("unF").textContent = f.toFixed(1); $("unB").textContent = `${b.toFixed(0)}`; $("unE").textContent = `${e >= 0 ? "+" : ""}${e.toFixed(1)}`;
+    const W = Math.max(280, $("unSvg").clientWidth || 600), H = 54, lo = Math.floor(f / step) * step - 3 * step, hi = lo + 7 * step;
+    const X = (x) => 10 + ((x - lo) / (hi - lo)) * (W - 20);
+    let ticks = "";
+    for (let t = lo; t <= hi; t += step) ticks += `<line x1="${X(t)}" x2="${X(t)}" y1="16" y2="34" stroke="rgba(255,255,255,.35)"/><text x="${X(t) - 12}" y="50" font-size="10" fill="rgba(255,255,255,.45)" font-family="${UI_FONT}">${t}</text>`;
+    $("unSvg").innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Rounding to the 64 ft/min grid">
+      <line x1="10" x2="${W - 10}" y1="25" y2="25" stroke="rgba(255,255,255,.15)"/>${ticks}
+      <line x1="${X(f)}" x2="${X(b)}" y1="25" y2="25" stroke="#ff9f0a" stroke-width="2"/>
+      <circle cx="${X(f)}" cy="25" r="5" fill="#2997ff"/><circle cx="${X(b)}" cy="25" r="6" fill="none" stroke="#30d158" stroke-width="2"/></svg>`;
+  };
+  $("unIn").addEventListener("input", upd); upd();
+}
+
+async function labChain(host, token) {
+  host.innerHTML = `${labHead("Watch one flight go through the chain", "Step through what the detector does to the signal.")}<div class="lab-svg lab-loading">Loading a flight…</div>`;
+  const D = await getScenario(DEFAULT_SCENARIO);
+  if (token !== LAB.token) return;
+  let best = { k: 0, j: 0, v: -1 };
+  D.aircraft.forEach((a, k) => { const sc = a.cols.sc; for (let j = 3; j < sc.length - 3; j++) { let s = 0, n = 0; for (let q = j - 3; q <= j + 3; q++) if (sc[q] !== null) { s += sc[q]; n++; } if (n >= 5 && s / n > best.v) best = { k, j, v: s / n }; } });
+  const a = D.aircraft[best.k], c = a.cols, j0 = Math.max(0, best.j - 90), j1 = Math.min(c.t.length - 1, best.j + 60);
+  const steps = [
+    ["Raw vertical rate", `What ${a.callsign} broadcasts: steps of ${S.overview.lab.step_fpm} ft/min, autopilot drift and turbulence mixed together.`],
+    ["Trend (31 s median)", "A rolling median follows the slow autopilot drift but ignores fast jitter."],
+    ["Residual", "Raw minus trend: only the fast jitter is left. Calm stretches hug zero; rough air swings wide."],
+    ["σ_corr", "The spread of the residual over 15 s, minus the rounding variance Δ²/12. This number sets the colour."],
+  ];
+  host.innerHTML = `${labHead(`Watch ${esc(a.callsign)} go through the chain`, "Synthetic Jet Stream flight; every 10th second shown.")}
+    <div class="chips" role="tablist">${steps.map(([l], i) => `<button type="button" role="tab" data-s="${i + 1}" aria-checked="${i + 1 === LAB.chainStep}">${i + 1}. ${sub(l)}</button>`).join("")}<button type="button" class="chip-play" id="chPlay">▶ Play</button></div>
+    <div id="chSvg" class="lab-svg"></div><p id="chNote" class="lab-note"></p>`;
+  const draw = () => {
+    const st = LAB.chainStep, W = Math.max(300, $("chSvg").clientWidth || 640), H1 = 120, H2 = 70, G = 12;
+    const X = (k) => 6 + ((k - j0) / (j1 - j0)) * (W - 60);
+    let vmax = 200; for (let k = j0; k <= j1; k++) if (c.vr[k] !== null) vmax = Math.max(vmax, Math.abs(c.vr[k]));
+    const Y = (v) => H1 / 2 - (v / vmax) * (H1 / 2 - 6);
+    const line = (f) => { let d = "", pen = false; for (let k = j0; k <= j1; k++) { const v = f(k); if (v === null || Number.isNaN(v)) { pen = false; continue; } d += `${pen ? "L" : "M"}${X(k).toFixed(1)},${v.toFixed(1)}`; pen = true; } return d; };
+    const raw = line((k) => (c.vr[k] === null ? null : Y(c.vr[k])));
+    const trend = line((k) => (c.vr[k] === null || c.res[k] === null ? null : Y(c.vr[k] - c.res[k])));
+    const resid = line((k) => (c.res[k] === null ? null : Y(c.res[k])));
+    const smax = Math.max(360, ...c.sc.slice(j0, j1 + 1).filter((v) => v !== null)) * 1.05, Ys = (v) => H1 + G + H2 - 4 - (v / smax) * (H2 - 10);
+    const sig = line((k) => (c.sc[k] === null ? null : Ys(c.sc[k])));
+    const thr = st >= 4 ? D.severity.edges.map((e, i) => (e < smax ? `<line x1="6" x2="${W - 54}" y1="${Ys(e)}" y2="${Ys(e)}" stroke="${COL.sev[i + 1]}" stroke-opacity=".7" stroke-dasharray="3 3"/><text x="${W - 50}" y="${Ys(e) + 3}" font-size="9.5" fill="${COL.sev[i + 1]}" font-family="${UI_FONT}">${e}</text>` : "")).join("") : "";
+    $("chSvg").innerHTML = `<svg viewBox="0 0 ${W} ${H1 + G + H2}" width="${W}" height="${H1 + G + H2}" role="img" aria-label="Signal processing chain">
+      <line x1="6" x2="${W - 54}" y1="${Y(0)}" y2="${Y(0)}" stroke="rgba(255,255,255,.12)"/>
+      <path d="${raw}" fill="none" stroke="rgba(255,255,255,${st === 1 ? 0.85 : 0.22})" stroke-width="1.2"/>
+      ${st >= 2 ? `<path class="draw" pathLength="1" d="${trend}" fill="none" stroke="#2997ff" stroke-width="${st === 2 ? 2.4 : 1.4}" stroke-opacity="${st === 2 ? 1 : 0.4}"/>` : ""}
+      ${st >= 3 ? `<path class="draw" pathLength="1" d="${resid}" fill="none" stroke="#ff9f0a" stroke-width="1.6" stroke-opacity="${st === 3 ? 1 : 0.55}"/>` : ""}
+      <text x="${W - 50}" y="14" font-size="9.5" fill="rgba(255,255,255,.45)" font-family="${UI_FONT}">ft/min</text>
+      ${st >= 4 ? `<line x1="6" x2="${W - 54}" y1="${H1 + G + H2 - 4}" y2="${H1 + G + H2 - 4}" stroke="rgba(255,255,255,.12)"/>${thr}<path class="draw" pathLength="1" d="${sig}" fill="none" stroke="#30d158" stroke-width="2"/>
+        <text x="8" y="${H1 + G + 10}" font-size="9.5" fill="rgba(255,255,255,.55)" font-family="${UI_FONT}">σ corr</text>` : `<text x="8" y="${H1 + G + H2 / 2 + 3}" font-size="11" fill="rgba(255,255,255,.3)" font-family="${UI_FONT}">roughness (σ corr) appears at step 4</text>`}
+    </svg>`;
+    $("chNote").innerHTML = sub(steps[st - 1][1]);
+    for (const b of host.querySelectorAll(".chips [data-s]")) b.setAttribute("aria-checked", String(+b.dataset.s === st));
+  };
+  for (const b of host.querySelectorAll(".chips [data-s]")) b.addEventListener("click", () => { clearInterval(LAB.chainTimer); LAB.chainStep = +b.dataset.s; draw(); });
+  $("chPlay").addEventListener("click", () => {
+    clearInterval(LAB.chainTimer); LAB.chainStep = 1; draw();
+    LAB.chainTimer = setInterval(() => { if (LAB.chainStep >= 4) { clearInterval(LAB.chainTimer); return; } LAB.chainStep++; draw(); }, 1700);
+  });
+  draw();
+}
+
+async function labThreshold(host, token) {
+  host.innerHTML = `${labHead("Where should the line go?", "Drag the threshold: catch rough air without flagging smooth air.")}<div class="lab-svg lab-loading">Loading samples…</div>`;
+  const all = await Promise.all(["jet-cat", "convective", "pirep-replay", "calm"].map(getScenario));
+  if (token !== LAB.token) return;
+  const smooth = [], rough = [];
+  for (const D of all) for (const a of D.aircraft) a.cols.sc.forEach((v, k) => {
+    if (v === null || a.cols.seg[k] !== 1) return;
+    if (a.cols.truth[k] <= 30) smooth.push(v); else if (a.cols.truth[k] >= 150) rough.push(v);
+  });
+  host.innerHTML = `${labHead("Where should the line go?", "Synthetic level-flight samples from all four scenarios.")}
+    <div id="thSvg" class="lab-svg"></div>
+    <div class="lab-row"><label for="thIn">Threshold</label><input id="thIn" class="slider" type="range" min="20" max="400" step="5" value="90"><b id="thV" class="num"></b></div>
+    <div class="lab-stats"><div><b id="thCatch" class="num"></b><span>of rough samples caught</span></div><div><b id="thFa" class="num"></b><span>of smooth samples flagged</span></div><div><b class="num">${(smooth.length + rough.length).toLocaleString()}</b><span>samples (smooth ≤ 30, rough ≥ 150 ft/min injected)</span></div></div>
+    <p class="lab-note">On real traffic, M3 chooses this line on December data for a target false-alarm rate per 1,000 flight-hours, then measures it on January. Here the answer key is the injected turbulence.</p>`;
+  const B = 50, max = 500, hist = (arr) => { const h = new Array(B).fill(0); for (const v of arr) h[Math.min(B - 1, Math.floor((v / max) * B))]++; return h.map((x) => x / arr.length); };
+  const hs = hist(smooth), hr = hist(rough), top = Math.max(...hs, ...hr);
+  const upd = () => {
+    const thr = +$("thIn").value, W = Math.max(300, $("thSvg").clientWidth || 640), H = 110;
+    const X = (v) => 8 + (v / max) * (W - 16), Y = (d) => H - 18 - (d / top) * (H - 30);
+    const area = (h) => `M${X(0)},${Y(0)}` + h.map((d, i) => `L${X((i * max) / B)},${Y(d)}L${X(((i + 1) * max) / B)},${Y(d)}`).join("") + `L${X(max)},${Y(0)}Z`;
+    const caught = rough.filter((v) => v >= thr).length / rough.length, fa = smooth.filter((v) => v >= thr).length / smooth.length;
+    $("thSvg").innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="σ_corr distributions of smooth and rough samples">
+      <path d="${area(hs)}" fill="rgba(48,209,88,.28)" stroke="#30d158" stroke-width="1"/>
+      <path d="${area(hr)}" fill="rgba(255,159,10,.24)" stroke="#ff9f0a" stroke-width="1"/>
+      <rect x="${X(thr)}" y="4" width="${X(max) - X(thr)}" height="${H - 22}" fill="rgba(255,69,58,.07)"/>
+      <line x1="${X(thr)}" x2="${X(thr)}" y1="2" y2="${H - 18}" stroke="#fff" stroke-width="2"/>
+      ${[0, 100, 200, 300, 400, 500].map((t) => `<text x="${X(t) - 8}" y="${H - 4}" font-size="9.5" fill="rgba(255,255,255,.45)" font-family="${UI_FONT}">${t}</text>`).join("")}
+      <text x="${X(8)}" y="14" font-size="10.5" fill="#30d158" font-family="${UI_FONT}">smooth air</text>
+      <text x="${X(260)}" y="14" font-size="10.5" fill="#ff9f0a" font-family="${UI_FONT}">rough air</text></svg>`;
+    $("thV").textContent = `${thr} ft/min`; $("thCatch").textContent = `${(caught * 100).toFixed(1)}%`; $("thFa").textContent = `${(fa * 100).toFixed(2)}%`;
+  };
+  $("thIn").addEventListener("input", upd); upd();
 }
 
 // gallery thumbnails: the whole hour of every flight, coloured by detected severity (lazy)
@@ -233,7 +423,7 @@ function drawThumb(cv, D) {
 }
 function setupThumbs() {
   const cvs = [...document.querySelectorAll("[data-thumb]")];
-  const load = async (cv) => { try { drawThumb(cv, await getJSON(`/api/scenario/${encodeURIComponent(cv.dataset.thumb)}`)); } catch { /* thumbnail is decoration */ } };
+  const load = async (cv) => { try { drawThumb(cv, await getScenario(cv.dataset.thumb)); } catch { /* thumbnail is decoration */ } };
   // local files only: load shortly after first paint rather than depending on scroll callbacks
   setTimeout(() => cvs.forEach(load), 250);
 }
@@ -278,6 +468,63 @@ function observeReveals() {
   window.addEventListener("scroll", check, { passive: true });
   requestAnimationFrame(check);
   check();
+}
+
+// hero headline: letters near the pointer get heavier (Geist is a variable font)
+function setupHoverWeight() {
+  const h = $("heroHeading");
+  if (!h || REDUCE || h.dataset.split) return;
+  h.dataset.split = "1";
+  const wrap = (node) => {
+    for (const n of [...node.childNodes]) {
+      if (n.nodeType === 3) {
+        const frag = document.createDocumentFragment();
+        for (const word of n.textContent.split(/(\s+)/)) {
+          if (!word) continue;
+          if (/^\s+$/.test(word)) { frag.appendChild(document.createTextNode(word)); continue; }
+          const w = document.createElement("span"); w.className = "w"; w.style.whiteSpace = "nowrap";
+          for (const ch of word) { const c = document.createElement("span"); c.className = "ch"; c.textContent = ch; w.appendChild(c); }
+          frag.appendChild(w);
+        }
+        n.replaceWith(frag);
+      } else if (n.nodeType === 1 && n.tagName !== "EM") wrap(n);
+    }
+  };
+  wrap(h);
+  const chars = [...h.querySelectorAll(".ch")];
+  let rects = [];
+  const measure = () => { rects = chars.map((c) => { const r = c.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; }); };
+  h.addEventListener("pointerenter", measure);
+  h.addEventListener("pointermove", (e) => {
+    if (!rects.length) measure();
+    chars.forEach((c, i) => {
+      const d = Math.hypot(e.clientX - rects[i][0], e.clientY - rects[i][1]);
+      c.style.fontVariationSettings = `"wght" ${Math.round(300 + 520 * Math.max(0, 1 - d / 170))}`;
+    });
+  });
+  h.addEventListener("pointerleave", () => { for (const c of chars) c.style.fontVariationSettings = ""; rects = []; });
+  window.addEventListener("scroll", () => { rects = []; }, { passive: true });
+}
+
+// scenario carousel: drag to scroll; a drag never counts as a click
+function setupCarousel() {
+  const el = $("scenCarousel");
+  if (!el || el.dataset.ready) return;
+  el.dataset.ready = "1";
+  let down = false, startX = 0, startL = 0, moved = 0;
+  el.addEventListener("pointerdown", (e) => {
+    if (e.pointerType !== "mouse") return; // touch keeps native scrolling
+    down = true; moved = 0; startX = e.clientX; startL = el.scrollLeft;
+  });
+  window.addEventListener("pointermove", (e) => {
+    if (!down) return;
+    const dx = e.clientX - startX; moved = Math.max(moved, Math.abs(dx));
+    if (moved > 4) el.classList.add("dragging");
+    el.scrollLeft = startL - dx;
+  });
+  window.addEventListener("pointerup", () => { down = false; el.classList.remove("dragging"); });
+  el.addEventListener("click", (e) => { if (moved > 4) { e.stopPropagation(); e.preventDefault(); } moved = 0; }, true);
+  el.addEventListener("dragstart", (e) => e.preventDefault());
 }
 
 // quantisation playground: EXPECTED values from Sheppard's approximation (labelled on the page)
@@ -371,7 +618,7 @@ function startPreview() {
 }
 function stopPreview() { if (PV.raf) cancelAnimationFrame(PV.raf); PV.raf = 0; }
 async function initPreview() {
-  PV.data = await getJSON(`/api/scenario/${DEFAULT_SCENARIO}`);
+  PV.data = await getScenario(DEFAULT_SCENARIO);
   PV.t = 1500;
   if (!previewProject()) return;
   drawPreview();

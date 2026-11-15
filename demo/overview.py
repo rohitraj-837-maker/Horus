@@ -164,6 +164,7 @@ def maths() -> list[dict[str, Any]]:
 PIPELINE = [
     {
         "icon": "antenna",
+        "lab": "credits",
         "color": "blue",
         "title": "OpenSky",
         "detail": "Live state vectors ~90 s · Trino history 1 Hz",
@@ -183,6 +184,7 @@ PIPELINE = [
     },
     {
         "icon": "archive",
+        "lab": "cadence",
         "color": "teal",
         "title": "adsb.lol history",
         "detail": "Winter 2025–26 · ~20 s cadence",
@@ -201,6 +203,7 @@ PIPELINE = [
     },
     {
         "icon": "table",
+        "lab": "units",
         "color": "indigo",
         "title": "Parquet store",
         "detail": "Canonical units · hourly partitions · DuckDB",
@@ -219,6 +222,7 @@ PIPELINE = [
     },
     {
         "icon": "wave",
+        "lab": "chain",
         "color": "orange",
         "title": "Segment · Residual · Δ²/12",
         "detail": "Level flight, vr residual, Sheppard, B1 accel",
@@ -236,6 +240,7 @@ PIPELINE = [
     },
     {
         "icon": "gauge",
+        "lab": "threshold",
         "color": "pink",
         "title": "Horus detector",
         "detail": "Per-type normalised score + calibrated threshold",
@@ -465,8 +470,28 @@ def scenario_cards() -> list[dict[str, Any]]:
     return out
 
 
+OPENSKY_DAILY_CREDITS = 4000  # authenticated API client allowance (reports/data_notes.md)
+
+
+def lab_params() -> dict[str, Any]:
+    """Constants the interactive pipeline labs use: all from config.yaml or measured."""
+    cfg = config.load()
+    return {
+        "credit_cost": cfg.live.opensky_bbox_credit_cost,
+        "daily_credits": OPENSKY_DAILY_CREDITS,
+        "poll_interval_s": cfg.live.poll_interval_s,
+        "w_trend_s": cfg.residual.w_trend_s,
+        "w_stat_s": cfg.residual.w_stat_s,
+        "min_samples_stat": cfg.residual.min_samples_stat,
+        "step_fpm": cfg.units.vr_step_fpm,
+        "fpm_per_mps": 60 / 0.3048,
+        "adsblol_gap_percentiles_s": [2, 8, 19, 20, 20],  # 10/25/50/75/90 % at FL200+, measured
+    }
+
+
 def overview() -> dict[str, Any]:
     return {
+        "lab": lab_params(),
         "problem": PROBLEM,
         "glossary": GLOSSARY,
         "read_guide": READ_GUIDE,

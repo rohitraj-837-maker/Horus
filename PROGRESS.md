@@ -33,6 +33,8 @@ One entry per milestone gate. A milestone is **complete** only when its `make ga
 
 - **2026-11-15: Demo colour + explanation pass (Rohit).** Black background kept; colour comes from Apple system accents per section (kickers, KPI gradients, pipeline icon tiles, scenario chips, glossary). Pipeline stages are selectable and open a what / why / by-the-numbers panel (facts from data_notes.md); glossary of 10 terms; radar 'Guide & sources' sheet with 6 reading cards; hover explanations on every inspector row and tile.
 
+- **2026-11-15: Demo interactive labs + studio restyle (Rohit).** Each pipeline stage has a lab computed from config.yaml or the scenario data (credit budget 90 s → 3,840/4,000 credits; samples per 15 s window per feed; m/s → 64 ft/min rounding; raw → trend → residual → σ_corr on SYN216; threshold slider: at 90 ft/min 99.6% of rough vs 0.01% of smooth synthetic samples). Restyled after microdose.studio's design language, dark: Geist + Instrument Serif italic (OFL, bundled, licences in demo/fonts-licenses), left-aligned editorial headings, variable-weight hover headline, draggable scenario carousel, charcoal cards with glass sheen.
+
 ## M1 — Ingestion ⏳ code done, gate waiting on elapsed time
 
 `make gate-m1 DAY=2026-11-14` (2026-11-15 01:5x AEDT): ruff ✔, mypy ✔, **pytest 110 passed** (1 Trino test deselected until access), then:

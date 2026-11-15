@@ -37,6 +37,7 @@ TYPES = {
     ".js": "text/javascript",
     ".css": "text/css",
     ".svg": "image/svg+xml",
+    ".woff2": "font/woff2",  # Geist + Instrument Serif (SIL OFL, demo/fonts-licenses/)
 }
 CSP = (
     "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; "
@@ -58,7 +59,8 @@ class Handler(BaseHTTPRequestHandler):
 
     def _send(self, body: bytes, ctype: str, status: HTTPStatus = HTTPStatus.OK) -> None:
         self.send_response(status)
-        self.send_header("Content-Type", f"{ctype}; charset=utf-8")
+        binary = ctype.startswith(("font/", "image/png"))
+        self.send_header("Content-Type", ctype if binary else f"{ctype}; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Content-Security-Policy", CSP)
         self.send_header("X-Content-Type-Options", "nosniff")

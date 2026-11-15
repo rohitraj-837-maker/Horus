@@ -94,3 +94,20 @@ def test_every_pipeline_stage_explains_itself():
         assert stage["what"] and stage["why"] and len(stage["facts"]) >= 2
     detector = overview.PIPELINE[-1]
     assert detector["status"] == "planned" and "placeholder" in " ".join(detector["facts"])
+
+
+def test_lab_params_come_from_config():
+    cfg = config.load()
+    lab = overview.lab_params()
+    assert lab["credit_cost"] == cfg.live.opensky_bbox_credit_cost
+    assert lab["w_stat_s"] == cfg.residual.w_stat_s and lab["step_fpm"] == cfg.units.vr_step_fpm
+    assert [p["lab"] for p in overview.PIPELINE] == [
+        "credits",
+        "cadence",
+        "units",
+        "chain",
+        "threshold",
+    ]
+    # the live recorder's 90 s poll fits the daily budget; 30 s would not
+    calls = lambda s: 86400 / s * lab["credit_cost"]  # noqa: E731
+    assert calls(lab["poll_interval_s"]) <= lab["daily_credits"] < calls(30)

@@ -33,12 +33,13 @@
   <!-- 1. Landing: what Horus is, how it works, what we can already show -->
   <main id="overview" class="overview" aria-label="Overview">
     <section class="hero">
-      <p class="eyebrow reveal">Research prototype · continental US</p>
-      <h1 class="reveal">Horus: <span class="grad">Clear-Air Turbulence&nbsp;Radar</span></h1>
-      <p class="lede reveal">Every airliner broadcasts its vertical rate. Horus reads the jitter in that signal to find rough air — with no extra sensors.</p>
+      <div class="band" aria-hidden="true"></div>
+      <span class="status-pill reveal"><i></i>Horus · clear-air turbulence radar · synthetic preview</span>
+      <h1 id="heroHeading" class="hero-heading reveal">Finding rough air in the signal every airliner <em>already</em> sends.</h1>
+      <p class="lede reveal">Each aircraft broadcasts its vertical rate. When it flies through turbulence, that number jitters. Horus measures the jitter, removes the rounding that fakes it, and maps where the air is rough — with no extra sensors.</p>
       <div class="hero-ctas reveal">
-        <button class="pill-btn" type="button" data-go="radar">Launch Radar Console</button>
-        <a class="pill-link" href="#how">How it works ›</a>
+        <button class="btn-blue" type="button" data-go="radar">Launch radar console</button>
+        <a class="btn-glass" href="#how">How it works</a>
       </div>
       <div class="stage reveal">
         <div id="device" class="device">
@@ -50,17 +51,17 @@
     </section>
 
     <section class="block">
-      <div class="block-head reveal" data-acc="red"><p class="kicker">Why</p><h2>The problem</h2><p>Turbulence is a major cause of in-flight injuries, and the worst kind is the one nobody can see.</p></div>
+      <div class="block-head reveal" data-acc="red"><p class="kicker"><span class="kn">01</span>Why</p><h2>The worst bumps hide in <em>clear</em> air.</h2><p>Turbulence is a major cause of in-flight injuries, and the worst kind is the one nobody can see.</p></div>
       <div id="problem" class="trio"></div>
     </section>
 
     <section class="block">
-      <div class="block-head reveal" data-acc="green"><p class="kicker">Results so far</p><h2>What we can show today</h2><p>Measured on synthetic flights, with the real detector code.</p></div>
+      <div class="block-head reveal" data-acc="green"><p class="kicker"><span class="kn">02</span>Results so far</p><h2>What we can <em>show</em> today.</h2><p>Measured on synthetic flights, with the real detector code.</p></div>
       <div id="kpis" class="kpis"></div>
     </section>
 
     <section id="how" class="block">
-      <div class="block-head reveal" data-acc="blue"><p class="kicker">Pipeline</p><h2>How it works</h2><p>Five stages from public broadcast to turbulence score.</p></div>
+      <div class="block-head reveal" data-acc="blue"><p class="kicker"><span class="kn">03</span>Pipeline</p><h2>How it <em>works</em>.</h2><p>Five stages from public broadcast to turbulence score.</p></div>
       <div id="glassStage" class="glass-stage reveal">
         <div class="orbs" aria-hidden="true"><i class="orb o1"></i><i class="orb o2"></i></div>
         <ol id="pipeline" class="glass-track" role="tablist" aria-label="Pipeline stages"><span class="track-thumb" aria-hidden="true"></span></ol>
@@ -69,7 +70,7 @@
     </section>
 
     <section class="block">
-      <div class="block-head reveal" data-acc="orange"><p class="kicker">The maths</p><h2>The key idea: undo the rounding</h2><p>ADS-B rounds vertical rate to 64 ft/min steps. That rounding looks like turbulence unless you remove it.</p></div>
+      <div class="block-head reveal" data-acc="orange"><p class="kicker"><span class="kn">04</span>The maths</p><h2>The key idea: undo the <em>rounding</em>.</h2><p>ADS-B rounds vertical rate to 64 ft/min steps. That rounding looks like turbulence unless you remove it.</p></div>
       <div class="play card reveal">
         <div class="play-ctrl">
           <label for="sigmaIn">True turbulence <span class="num" id="sigmaOut">60 ft/min</span></label>
@@ -91,17 +92,20 @@
     </section>
 
     <section class="block">
-      <div class="block-head reveal" data-acc="purple"><p class="kicker">Try it</p><h2>Four synthetic skies</h2><p>Each scenario is an hour of synthetic traffic through a known turbulence field. Open one to watch the detector work.</p></div>
-      <div id="scenGallery" class="gallery"></div>
+      <div class="block-head reveal" data-acc="purple"><p class="kicker"><span class="kn">05</span>Try it</p><h2>Four synthetic <em>skies</em>.</h2><p>Each scenario is an hour of synthetic traffic through a known turbulence field. Open one to watch the detector work.</p></div>
+      <div class="carousel" id="scenCarousel" aria-label="Scenarios: drag or scroll sideways">
+        <div id="scenGallery" class="carousel-track"></div>
+      </div>
+      <p class="drag-hint reveal"><span>Drag</span> or scroll sideways · click a sky to open it in the radar</p>
     </section>
 
     <section class="block">
-      <div class="block-head reveal" data-acc="pink"><p class="kicker">Glossary</p><h2>Words used here</h2><p>Every term on this page and in the radar, in one line each.</p></div>
+      <div class="block-head reveal" data-acc="pink"><p class="kicker"><span class="kn">06</span>Glossary</p><h2>Words used <em>here</em>.</h2><p>Every term on this page and in the radar, in one line each.</p></div>
       <dl id="glossary" class="glossary"></dl>
     </section>
 
     <section class="block">
-      <div class="block-head reveal" data-acc="teal"><p class="kicker">Progress</p><h2>Where it stands</h2><p id="roadmapAsOf">Setup plus seven weekly milestones, each closed by an automated gate.</p></div>
+      <div class="block-head reveal" data-acc="teal"><p class="kicker"><span class="kn">07</span>Progress</p><h2>Where it <em>stands</em>.</h2><p id="roadmapAsOf">Setup plus seven weekly milestones, each closed by an automated gate.</p></div>
       <ol id="roadmap" class="roadmap"></ol>
       <div class="folds reveal">
         <details class="more">
@@ -117,7 +121,7 @@
     </section>
 
     <section class="cta reveal">
-      <h2>See it run.</h2>
+      <h2>Ready to see it <em>run</em>?</h2>
       <p>Four synthetic skies, scored second by second by the code that will run on real traffic.</p>
       <button class="pill-btn" type="button" data-go="radar">Launch Radar Console</button>
     </section>
