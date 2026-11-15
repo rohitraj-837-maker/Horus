@@ -31,6 +31,7 @@ import pyarrow.parquet as pq
 from turbcast import config
 
 IEM_URL = "https://mesonet.agron.iastate.edu/cgi-bin/request/gis/pireps.py"
+IEM_NO_RESULTS = "ERROR: no results found"  # IEM's reply for an empty window
 AWC_URL = "https://aviationweather.gov/api/data/pirep"
 USER_AGENT = "turbcast/0.1 (research prototype)"
 
@@ -234,9 +235,14 @@ def read_iem_csv(text: str) -> pd.DataFrame:
     """Parse IEM PIREP CSV. Quoting is ignored (reports contain stray '"'); fields
     are split from both ends so a comma inside REPORT cannot shift the columns."""
     lines = [ln for ln in text.splitlines() if ln.strip()]
-    if not lines:
+    # IEM answers an empty window with plain text instead of a header-only CSV
+    if not lines or lines[0].startswith(IEM_NO_RESULTS):
         return _cast(pd.DataFrame({f.name: [] for f in PIREP_SCHEMA}))
+    if lines[0].startswith("ERROR"):
+        raise ValueError(f"IEM returned an error: {lines[0][:200]}")
     header = lines[0].split(",")
+    if "ATRCC" not in header:
+        raise ValueError(f"unexpected IEM CSV header: {lines[0][:200]}")
     # VALID,URGENT,AIRCRAFT | REPORT,ICING,TURBULENCE (free text) | ATRCC..LON (clean)
     n_tail = len(header) - header.index("ATRCC")
     rows = []
@@ -373,6 +379,12 @@ def ingest_iem(start: date, end: date, out_dir: str = "data/parquet/pireps") -> 
     Resumable: days already on disk are skipped once final; a day that is not yet
     final (< 6 h after it ends) is always re-fetched so partial files get completed.
     """
+    today = datetime.now(UTC).date()
+    if start > today:
+        raise ValueError(
+            f"{start} has not started yet (now {datetime.now(UTC):%Y-%m-%d %H:%M} UTC)"
+        )
+    end = min(end, today + timedelta(days=1))  # today is fetched as a partial day
     out = config.resolve(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     frames = []
@@ -399,7 +411,11 @@ def main() -> int:
     ap.add_argument("--start", type=date.fromisoformat, required=True)
     ap.add_argument("--end", type=date.fromisoformat, required=True, help="exclusive")
     args = ap.parse_args()
-    df = ingest_iem(args.start, args.end)
+    try:
+        df = ingest_iem(args.start, args.end)
+    except ValueError as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 2
     print(parse_stats(df))
     return 0
 

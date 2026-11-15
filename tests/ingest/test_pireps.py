@@ -150,3 +150,24 @@ def test_empty_inputs():
     assert p.read_awc_json([]).empty
     assert p.read_iem_csv("").empty
     assert np.dtype(p.read_iem_csv("").dtypes["tb_max"]) == np.int8
+
+
+def test_iem_no_results_reply_is_empty():
+    # real IEM reply for a window with no reports (e.g. a day that has not started)
+    df = p.read_iem_csv("ERROR: no results found for your query\n")
+    assert df.empty and list(df.columns) == [f.name for f in p.PIREP_SCHEMA]
+
+
+def test_iem_other_error_or_bad_header_raises():
+    with pytest.raises(ValueError, match="IEM returned an error"):
+        p.read_iem_csv("ERROR: invalid sts\n")
+    with pytest.raises(ValueError, match="unexpected IEM CSV header"):
+        p.read_iem_csv("A,B,C\n1,2,3\n")
+
+
+def test_ingest_iem_refuses_future_day(tmp_path):
+    from datetime import UTC, datetime, timedelta
+
+    future = datetime.now(UTC).date() + timedelta(days=2)
+    with pytest.raises(ValueError, match="has not started yet"):
+        p.ingest_iem(future, future + timedelta(days=1), out_dir=str(tmp_path))
