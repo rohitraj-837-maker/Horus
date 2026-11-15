@@ -34,7 +34,7 @@ trino-smoke:
 
 # Offline demo (synthetic data, real core); prints the localhost URL
 demo:
-	uv run python -m demo.server
+	uv run python -m demo.server $(if $(PORT),--port $(PORT),)
 
 # Regenerate the bundled synthetic scenarios (deterministic)
 demo-data:

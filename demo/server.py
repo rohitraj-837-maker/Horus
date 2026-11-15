@@ -107,12 +107,21 @@ def make_server(port: int = 8765, verbose: bool = False) -> ThreadingHTTPServer:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="Offline Horus demo")
-    ap.add_argument("--port", type=int, default=8765)
+    ap.add_argument("--port", type=int, default=8765, help="first port to try")
     ap.add_argument("--verbose", action="store_true")
     args = ap.parse_args()
-    srv = make_server(args.port, args.verbose)
-    print(f"Horus demo (offline, synthetic data): http://127.0.0.1:{srv.server_port}/")
-    print("Ctrl-C to stop.")
+    srv = None
+    for port in range(args.port, args.port + 20):
+        try:
+            srv = make_server(port, args.verbose)
+            break
+        except OSError:  # port in use (e.g. another project's demo): try the next one
+            print(f"port {port} is busy, trying {port + 1}", file=sys.stderr)
+    if srv is None:
+        print(f"no free port in {args.port}-{args.port + 19}", file=sys.stderr)
+        return 1
+    print(f"Horus demo (offline, synthetic data): http://127.0.0.1:{srv.server_port}/", flush=True)
+    print("Ctrl-C to stop.", flush=True)
     try:
         srv.serve_forever()
     except KeyboardInterrupt:
