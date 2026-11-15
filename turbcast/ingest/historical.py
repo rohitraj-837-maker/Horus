@@ -1,17 +1,19 @@
 """OpenSky Trino (`state_vectors_data4`) full-rate historical ingest.
 
-Status: research access applied for, not yet granted (2026-11-15). The query builder
-and converter are tested offline; `pytest -m trino` fetches one real hour once
-pyopensky credentials are configured.
+Safety rules (OpenSky): queries go through `pyopensky.trino.Trino.history()` only,
+never hand-written SQL. `history()` always adds the `hour` partition bounds, so no
+query scans the whole table. Columns are listed explicitly (`COLUMNS`), the
+altitude filter runs on the server, only dates from 2023 onward are allowed, and
+results go through pyopensky's local cache (`cached=True`).
 
-Row semantics: Trino state vectors sit on a 1 s grid (`time`); when no new message
-arrived the previous values repeat. `contact_age_s = time - lastcontact` marks those
-stale repeats so the residual stage can treat them explicitly.
+Row semantics: state vectors sit on a 1 s grid (`time`). `lastcontact` is when
+OpenSky last heard the aircraft; rows with `time - lastcontact > max_stale_s` are
+stale repeats and are dropped.
 """
 
 from __future__ import annotations
 
-import re
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -24,103 +26,212 @@ from turbcast import schema
 from turbcast.config import Region, resolve
 from turbcast.schema import FPM_PER_MPS, FT_PER_M, KT_PER_MPS, RECORD_SCHEMA
 
-TRINO_COLUMNS = [
+# Explicit column list (minimises cluster scan). lastposupdate is the one addition
+# to the requested set: it gives position age, used to reject stale positions.
+COLUMNS = (
     "time",
     "icao24",
+    "callsign",
     "lat",
     "lon",
     "velocity",
     "heading",
     "vertrate",
-    "callsign",
-    "onground",
     "baroaltitude",
     "geoaltitude",
-    "lastposupdate",
+    "onground",
     "lastcontact",
-]
-MIN_BARO_M = 5500.0  # ~FL180: segmentation needs >= FL200, keep a margin
-OUT_DIR = "data/raw/trino"
+    "lastposupdate",
+)
+MIN_BARO_M = 5500.0  # ~FL180, applied server-side: segmentation needs >= FL200
+MAX_STALE_S = 15.0
+EARLIEST = datetime(2023, 1, 1, tzinfo=UTC)  # OpenSky notice: pre-2023 data offline
+OUT_DIR = "data/historical"
 
 
-def build_query(
-    hour_start: int, region: Region, min_baro_m: float = MIN_BARO_M, icao24: str | None = None
-) -> str:
-    """SQL for one hour partition. All interpolated values are numeric or validated."""
-    if hour_start % 3600:
-        raise ValueError("hour_start must be aligned to an hour (epoch s)")
-    where = [
-        f"hour = {int(hour_start)}",
-        f"time >= {int(hour_start)}",
-        f"time < {int(hour_start) + 3600}",
-        f"lat BETWEEN {float(region.lat_min)} AND {float(region.lat_max)}",
-        f"lon BETWEEN {float(region.lon_min)} AND {float(region.lon_max)}",
-        f"baroaltitude >= {float(min_baro_m)}",
-    ]
-    if icao24 is not None:
-        if not re.fullmatch(r"[0-9a-f]{6}", icao24):
-            raise ValueError(f"bad icao24: {icao24!r}")
-        where.append(f"icao24 = '{icao24}'")
-    return f"SELECT {', '.join(TRINO_COLUMNS)} FROM state_vectors_data4 WHERE " + " AND ".join(
-        where
-    )
+def _epoch_s(col: pd.Series) -> pd.Series:
+    """Epoch seconds from either a datetime column (pyopensky `time`) or numbers."""
+    if pd.api.types.is_datetime64_any_dtype(col) or isinstance(
+        getattr(col.dtype, "pyarrow_dtype", None), pa.TimestampType
+    ):
+        ts = pd.to_datetime(col, utc=True)
+        return (ts - pd.Timestamp(0, tz="UTC")) // pd.Timedelta(seconds=1)
+    return pd.to_numeric(col, errors="coerce")
 
 
-def trino_to_record(df: pd.DataFrame) -> pd.DataFrame:
-    """Convert raw Trino rows (SI units) into RECORD_SCHEMA (ft, ft/min, kt)."""
-    if df.empty:
+def _float(col: pd.Series) -> np.ndarray:
+    return pd.to_numeric(col, errors="coerce").to_numpy(dtype=float, na_value=np.nan)
+
+
+def trino_to_record(df: pd.DataFrame | None, max_stale_s: float = MAX_STALE_S) -> pd.DataFrame:
+    """Convert pyopensky `history()` output (SI units) to RECORD_SCHEMA (ft, ft/min,
+    kt). Drops stale rows (time - lastcontact > max_stale_s) and duplicate keys."""
+    if df is None or df.empty:
         return schema.empty(RECORD_SCHEMA)
-    t = pd.to_numeric(df["time"]).astype(np.int64)
+    t = _epoch_s(df["time"]).to_numpy(dtype=float, na_value=np.nan)
+    contact_age = t - _float(df["lastcontact"])
+    keep = np.isfinite(t) & np.isfinite(contact_age) & (contact_age <= max_stale_s)
+    d = df.loc[keep]
+    t, contact_age = t[keep].astype(np.int64), contact_age[keep]
+    callsign = d["callsign"].astype("object").where(d["callsign"].notna(), None)
     out = pd.DataFrame(
         {
-            "icao24": df["icao24"].astype(str).str.strip().str.lower(),
+            "icao24": d["icao24"].astype(str).str.strip().str.lower().to_numpy(),
             "time": t,
-            "lat": pd.to_numeric(df["lat"], errors="coerce"),
-            "lon": pd.to_numeric(df["lon"], errors="coerce"),
-            "baro_alt_ft": pd.to_numeric(df["baroaltitude"], errors="coerce") * FT_PER_M,
-            "vr_fpm": pd.to_numeric(df["vertrate"], errors="coerce") * FPM_PER_MPS,
-            "gs_kt": pd.to_numeric(df["velocity"], errors="coerce") * KT_PER_MPS,
-            "track_deg": pd.to_numeric(df["heading"], errors="coerce"),
-            "on_ground": df["onground"].fillna(False).astype(bool),
+            "lat": _float(d["lat"]),
+            "lon": _float(d["lon"]),
+            "baro_alt_ft": _float(d["baroaltitude"]) * FT_PER_M,
+            "vr_fpm": _float(d["vertrate"]) * FPM_PER_MPS,
+            "gs_kt": _float(d["velocity"]) * KT_PER_MPS,
+            "track_deg": _float(d["heading"]),
+            "on_ground": d["onground"].astype("boolean").fillna(False).to_numpy(dtype=bool),
             "source": "opensky_trino",
             "rate_hz": 1.0,
-            "callsign": df["callsign"]
-            .astype(object)
-            .where(df["callsign"].notna(), None)
-            .map(lambda v: v.strip() or None if isinstance(v, str) else None),
+            "callsign": [c.strip() or None if isinstance(c, str) else None for c in callsign],
             "typecode": None,
             "snapshot_time": t,
-            "pos_age_s": t - pd.to_numeric(df["lastposupdate"], errors="coerce"),
-            "contact_age_s": t - pd.to_numeric(df["lastcontact"], errors="coerce"),
-            "geo_alt_ft": pd.to_numeric(df["geoaltitude"], errors="coerce") * FT_PER_M,
+            "pos_age_s": t - _float(d["lastposupdate"]),
+            "contact_age_s": contact_age,
+            "geo_alt_ft": _float(d["geoaltitude"]) * FT_PER_M,
             "msg_type": None,
         }
     )
     out = schema.cast(out, RECORD_SCHEMA)
-    return out.sort_values(["icao24", "time"]).drop_duplicates(["icao24", "time"])
+    out = out.sort_values(["icao24", "time"]).drop_duplicates(["icao24", "time"])
+    return out.reset_index(drop=True)
 
 
-def hour_path(hour_start: int, out_dir: str = OUT_DIR) -> Path:
-    ts = pd.Timestamp(hour_start, unit="s", tz="UTC")
-    return resolve(out_dir) / f"date={ts:%Y-%m-%d}" / f"hour={ts:%H}" / "part-0.parquet"
+def check_window(start: datetime, stop: datetime) -> None:
+    if start.tzinfo is None or stop.tzinfo is None:
+        raise ValueError("use timezone-aware UTC datetimes")
+    if start < EARLIEST:
+        raise ValueError(f"OpenSky data before {EARLIEST:%Y-%m-%d} is offline; got {start}")
+    if not start < stop:
+        raise ValueError("start must be before stop")
 
 
-def fetch_hour(
-    trino: Any, hour_start: int, region: Region, out_dir: str = OUT_DIR, overwrite: bool = False
-) -> Path:
-    """Fetch one hour via a pyopensky `Trino` object and write it. Resumable: an
-    existing partition is skipped unless `overwrite`."""
-    path = hour_path(hour_start, out_dir)
-    if path.exists() and not overwrite:
-        return path
-    raw = trino.query(build_query(hour_start, region), cached=False)
-    rec = trino_to_record(raw)
+def fetch_window(
+    trino: Any,
+    start: datetime,
+    stop: datetime,
+    region: Region,
+    min_baro_m: float = MIN_BARO_M,
+    cached: bool = True,
+) -> pd.DataFrame | None:
+    """One `Trino.history()` call for [start, stop) over `region` (no raw SQL).
+
+    `history()` treats stop as inclusive, so one second is taken off to keep
+    consecutive windows from sharing a row."""
+    check_window(start, stop)
+    from pyopensky.schema import StateVectorsData4  # lazy: tests run without a login
+
+    return trino.history(  # type: ignore[no-any-return]
+        pd.Timestamp(start),
+        pd.Timestamp(stop) - pd.Timedelta(seconds=1),
+        StateVectorsData4.baroaltitude >= min_baro_m,
+        bounds=(region.lon_min, region.lat_min, region.lon_max, region.lat_max),
+        selected_columns=COLUMNS,
+        cached=cached,
+    )
+
+
+def hour_path(hour_start: datetime, out_dir: str = OUT_DIR) -> Path:
+    d = resolve(out_dir) / f"date={hour_start:%Y-%m-%d}" / f"hour={hour_start:%H}"
+    return d / "part-0.parquet"
+
+
+def write_record(rec: pd.DataFrame, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(".tmp")
-    pq.write_table(
-        pa.Table.from_pandas(rec, schema=RECORD_SCHEMA, preserve_index=False),
-        tmp,
-        compression="zstd",
-    )
+    table = pa.Table.from_pandas(rec, schema=RECORD_SCHEMA, preserve_index=False)
+    pq.write_table(table, tmp, compression="zstd")
     tmp.replace(path)  # atomic: a crash never leaves a half-written partition
-    return path
+
+
+# --------------------------------------------------------------------------- orchestration
+
+
+def hours_between(start: datetime, stop: datetime) -> list[datetime]:
+    t = pd.Timestamp(start).floor("1h")
+    out = []
+    while t < pd.Timestamp(stop):
+        out.append(t.to_pydatetime())
+        t += pd.Timedelta(hours=1)
+    return out
+
+
+def run_hours(
+    trino: Any,
+    hours: list[datetime],
+    region: Region,
+    out_dir: str = OUT_DIR,
+    cache_dir: Path | None = None,
+    keep_cache: bool = False,
+    min_free_gb: float = 20.0,
+    attempts: int = 4,
+    backoff_s: float = 30.0,
+    sleep: Any = None,
+    log: Any = print,
+) -> list[dict[str, Any]]:
+    """Fetch, convert and write one hour at a time (bounded memory, resumable).
+
+    * Existing hour partitions are skipped.
+    * Each hour is retried with exponential backoff before being logged as failed.
+    * pyopensky cache files created by this hour are deleted once our own Parquet
+      is written (unless `keep_cache`): the raw cache would otherwise double disk use.
+    * Stops before an hour if free disk is below `min_free_gb`.
+    """
+    import shutil
+    import time as _time
+
+    sleep = sleep or _time.sleep
+    results: list[dict[str, Any]] = []
+    for h in hours:
+        path = hour_path(h, out_dir)
+        if path.exists():
+            results.append({"hour": h.isoformat(), "status": "skipped"})
+            continue
+        free_gb = shutil.disk_usage(path.anchor or "/").free / 1e9
+        if free_gb < min_free_gb:
+            log(f"stopping: {free_gb:.1f} GB free < {min_free_gb} GB floor")
+            results.append({"hour": h.isoformat(), "status": "disk_floor"})
+            break
+        before = set(cache_dir.iterdir()) if cache_dir and cache_dir.exists() else set()
+        tic = _time.perf_counter()
+        for i in range(attempts):
+            try:
+                raw = fetch_window(trino, h, h + pd.Timedelta(hours=1), region)
+                n_raw = 0 if raw is None else len(raw)
+                rec = trino_to_record(raw)
+                del raw
+                write_record(rec, path)
+                res = {
+                    "hour": h.isoformat(),
+                    "status": "ok",
+                    "rows_raw": n_raw,
+                    "rows": len(rec),
+                    "aircraft": int(rec["icao24"].nunique()),
+                    "mb": round(path.stat().st_size / 1e6, 1),
+                    "seconds": round(_time.perf_counter() - tic, 1),
+                }
+                break
+            except Exception as e:  # network / cluster errors: back off and retry
+                if i == attempts - 1:
+                    res = {
+                        "hour": h.isoformat(),
+                        "status": "failed",
+                        "error": f"{type(e).__name__}: {e}",
+                    }
+                else:
+                    wait = backoff_s * 2**i
+                    log(
+                        f"{h:%Y-%m-%d %H}h attempt {i + 1} failed "
+                        f"({type(e).__name__}); retry in {wait:.0f} s"
+                    )
+                    sleep(wait)
+        if cache_dir and not keep_cache and res["status"] == "ok" and cache_dir.exists():
+            for f in set(cache_dir.iterdir()) - before:
+                f.unlink(missing_ok=True)
+        log(res)
+        results.append(res)
+    return results

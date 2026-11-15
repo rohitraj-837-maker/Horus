@@ -1,4 +1,4 @@
-.PHONY: setup test lint types check gate-m0 gate-m1 record recorder-status
+.PHONY: setup test lint types check gate-m0 gate-m1 record recorder-status trino-smoke
 
 setup:
 	uv sync
@@ -27,3 +27,6 @@ record:
 
 recorder-status:
 	uv run python scripts/check_recorder.py --hours 24
+
+trino-smoke:
+	uv run python scripts/fetch_trino_history.py --smoke-test

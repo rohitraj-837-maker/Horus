@@ -12,6 +12,9 @@ One entry per milestone gate. A milestone is **complete** only when its `make ga
 - **2026-11-15: M2 benchmark data.** Use adsb.lol daily history (winter 2025–26, ~16–20 s irregular cadence) now, and re-run the same code at 1 Hz when Trino access arrives. Every reported number names its source and rate. (Rohit)
 - **2026-11-15: Gate-order exception.** M2's data-independent core code (synth, geo, segment, residual + synthetic tests) may start before the M1 gate passes. **No M2 benchmark rows until `make gate-m1` is green.** (Rohit)
 
+- **2026-11-15: Trino access approved.** Fetch **CONUS** (SPEC), not the WMKK/OKKK airspaces in the pasted request: only US PIREPs give labels. **Milestones first:** Trino feeds the B0–B3 rows at 1 Hz (M2/M3); LightGBM stays B4 (optional, classification metrics only). (Rohit)
+- **2026-11-15: Trino fetch design.** `Trino.history()` only (no raw SQL); explicit columns; server-side FL180 filter; dates ≥ 2023; `cached=True` with each hour's cache file deleted after our Parquet is written (otherwise the raw cache doubles disk use); **1-hour chunks, not 6-hour** (~9M rows/h at CONUS scale; 6 h would exceed 8 GB RAM); stale rows (`time − lastcontact > 15 s`) dropped; 20 GB free-disk floor. Full download size will be decided from the smoke-test numbers.
+
 ## M1 — Ingestion ⏳ code done, gate waiting on elapsed time
 
 `make gate-m1 DAY=2026-11-14` (2026-11-15 01:5x AEDT): ruff ✔, mypy ✔, **pytest 110 passed** (1 Trino test deselected until access), then:

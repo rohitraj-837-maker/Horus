@@ -51,5 +51,6 @@ make bench                    # performance benchmark
 
 ## Status
 See `PROGRESS.md` (per-milestone gate log) and `reports/data_notes.md` (data findings).
-- Trino research access: **applied, waiting** (as of 2026-11-15). Plan B live archive runs from Week 1.
+- Trino access: **approved 2026-11-15**. Fetch with `scripts/fetch_trino_history.py` (`Trino.history()` only, never raw SQL, dates ≥ 2023, explicit columns, 1 h chunks). pyopensky config on macOS: `~/Library/Application Support/pyopensky/settings.conf`.
+- Plan B sources (live recorder, adsb.lol history) stay in place.
 - Live recorder: `make record`, `make recorder-status`; PID in `data/raw/live/recorder.pid`.
