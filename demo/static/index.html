@@ -61,9 +61,11 @@
 
     <section id="how" class="block">
       <div class="block-head reveal" data-acc="blue"><p class="kicker">Pipeline</p><h2>How it works</h2><p>Five stages from public broadcast to turbulence score.</p></div>
-      <ol id="pipeline" class="stepper" role="tablist" aria-label="Pipeline stages"></ol>
-      <p class="stepper-hint reveal">Select a stage to see what it does, why it exists, and the numbers behind it.</p>
-      <div id="stageDetail" class="stage-detail card reveal" role="tabpanel" aria-live="polite"></div>
+      <div id="glassStage" class="glass-stage reveal">
+        <div class="orbs" aria-hidden="true"><i class="orb o1"></i><i class="orb o2"></i></div>
+        <ol id="pipeline" class="glass-track" role="tablist" aria-label="Pipeline stages"><span class="track-thumb" aria-hidden="true"></span></ol>
+        <div id="stageDetail" class="glass-panel" role="tabpanel" aria-live="polite"></div>
+      </div>
     </section>
 
     <section class="block">

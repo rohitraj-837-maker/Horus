@@ -118,13 +118,15 @@ function renderOverview() {
         <p class="k-detail">${sub(k.detail)}</p><p class="k-caveat">${sub(k.caveat)}</p></details>
     </article>`).join("");
   const cls = { built: "built", "core built": "core", planned: "planned" };
-  $("pipeline").innerHTML = O.pipeline.map((p, i) => `
-    <li class="step" role="tab" tabindex="0" data-i="${i}" data-acc="${esc(p.color || "blue")}" aria-selected="false">
-      <div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[p.icon] || ""}</svg></div>
-      <div><h3>${esc(p.title)}</h3><p>${esc(p.detail)}</p>
-        <span class="st ${cls[p.status]}">${esc(p.status)}</span>${p.note ? `<span class="st-note">${esc(p.note)}</span>` : ""}</div>
+  const stLabel = { built: "Built", "core built": "Core built", planned: "Planned" };
+  const stCls = { built: "built", "core built": "core", planned: "planned" };
+  $("pipeline").innerHTML = '<span class="track-thumb" aria-hidden="true"></span>' + O.pipeline.map((p, i) => `
+    <li class="gstep" role="tab" tabindex="0" data-i="${i}" data-acc="${esc(p.color || "blue")}" aria-selected="false" aria-controls="stageDetail">
+      <span class="gi"><svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[p.icon] || ""}</svg></span>
+      <span class="gt">${esc(p.title)}</span>
+      <span class="gs"><i class="${stCls[p.status]}"></i>${stLabel[p.status]}</span>
     </li>`).join("");
-  for (const li of $("pipeline").querySelectorAll(".step")) {
+  for (const li of $("pipeline").querySelectorAll(".gstep")) {
     li.addEventListener("click", () => selectStage(+li.dataset.i));
     li.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selectStage(+li.dataset.i); } });
   }
@@ -170,16 +172,29 @@ function renderOverview() {
 const SCEN_COL = { "jet-cat": "orange", convective: "red", calm: "green", "pirep-replay": "purple" };
 const SCEN_CHIP = { "jet-cat": "Clear-air turbulence", convective: "Thunderstorms", calm: "Control: no turbulence", "pirep-replay": "Validation" };
 
+function placeStageThumb() {
+  const track = $("pipeline"), on = track && track.querySelector('.gstep[aria-selected="true"]'), th = track && track.querySelector(".track-thumb");
+  if (!on || !th || !track.offsetParent) return;
+  th.style.width = `${on.offsetWidth}px`;
+  th.style.transform = `translateX(${on.offsetLeft}px)`;
+  $("glassStage").style.setProperty("--orb-x", `${((on.offsetLeft + on.offsetWidth / 2) / track.offsetWidth) * 100}%`);
+}
 function selectStage(i) {
-  const p = S.overview.pipeline[i];
-  for (const li of $("pipeline").querySelectorAll(".step")) li.setAttribute("aria-selected", String(+li.dataset.i === i));
-  const d = $("stageDetail");
-  d.dataset.acc = p.color || "blue";
-  d.innerHTML = `
-    <div class="sd-title"><h3>${i + 1}. ${esc(p.title)}</h3><span class="st ${{ built: "built", "core built": "core", planned: "planned" }[p.status]}">${esc(p.status)}</span></div>
-    <div><h4>What it does</h4><p>${sub(p.what)}</p></div>
-    <div><h4>Why it exists</h4><p>${sub(p.why)}</p></div>
-    <div class="sd-facts"><h4>By the numbers</h4><ul>${p.facts.map((f) => `<li>${sub(f)}</li>`).join("")}</ul></div>`;
+  const p = S.overview.pipeline[i], n = S.overview.pipeline.length;
+  for (const li of $("pipeline").querySelectorAll(".gstep")) li.setAttribute("aria-selected", String(+li.dataset.i === i));
+  $("glassStage").dataset.acc = p.color || "blue";
+  const dot = { built: "var(--c-green)", "core built": "var(--c-blue)", planned: "rgba(255,255,255,.4)" }[p.status];
+  const word = { built: "Built", "core built": "Core built", planned: "Planned" }[p.status] + (p.note ? ` · ${p.note}` : "");
+  $("stageDetail").innerHTML = `<div class="gp-fade">
+    <div class="gp-head"><div><span class="gp-step">Stage ${i + 1} of ${n}</span><h3>${esc(p.title)}</h3><p class="gp-sub">${esc(p.detail)}</p></div>
+      <span class="gp-status"><i data-dot="1"></i>${esc(word)}</span></div>
+    <div class="gp-body">
+      <div><h4>What it does</h4><p>${sub(p.what)}</p></div>
+      <div><h4>Why it exists</h4><p>${sub(p.why)}</p></div>
+      <div><h4>By the numbers</h4><ul>${p.facts.map((f) => `<li>${sub(f)}</li>`).join("")}</ul></div>
+    </div></div>`;
+  $("stageDetail").querySelector("[data-dot]").style.background = dot;
+  placeStageThumb();
 }
 
 // gallery thumbnails: the whole hour of every flight, coloured by detected severity (lazy)
@@ -243,7 +258,7 @@ function countUp(el) {
   requestAnimationFrame(step);
 }
 function observeReveals() {
-  const pending = new Set(document.querySelectorAll(".reveal, .stepper"));
+  const pending = new Set(document.querySelectorAll(".reveal"));
   const show = (el) => {
     if (!pending.delete(el)) return;
     setTimeout(() => { el.classList.add("in"); const v = el.querySelector("[data-count]"); if (v) countUp(v); }, +(el.dataset.delay || 0) * 110);
@@ -1080,6 +1095,7 @@ async function boot() {
     placeAllThumbs();
     if (S.view === "radar" && S.radarReady) { fitView(); draw(); S.lastJ = -1; updateInspectorLive(); }
     if (S.view === "overview" && PV.data && previewProject()) drawPreview();
+    if (S.view === "overview") placeStageThumb();
   }).observe(document.body);
 }
 boot().catch((err) => {
