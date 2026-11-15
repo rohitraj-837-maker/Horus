@@ -12,8 +12,11 @@ Status: under construction (see `SPEC.md` and `PROGRESS.md`). Headline results w
 make demo        # http://127.0.0.1:8765/  (no internet needed)
 ```
 
-A flat 2D airspace map with playback, altitude filter, flight picker and a telemetry
-inspector, in light and dark appearance. **All aircraft, turbulence and PIREPs in the demo
+It opens on an **Overview** page (architecture, the maths, the benchmark plan and four
+preview metrics computed live from the synthetic scenarios), then a **Live Radar Demo**
+console: a dark three-pane view with flight strips sorted by σ_corr, a flat 2D airspace
+map with playback and filters, and a telemetry inspector. It auto-selects the scenario's
+most turbulent flight at its sustained peak. **All aircraft, turbulence and PIREPs in the demo
 are synthetic.** Every score is computed by Horus's real detector code (level-flight
 segmentation, vertical-rate residual, Sheppard correction, B1 acceleration RMS) on those
 synthetic flights; severity colours use placeholder thresholds until milestone M3

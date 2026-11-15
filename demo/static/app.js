@@ -1,15 +1,24 @@
-// Horus offline demo. Every request goes to this origin (enforced by the server's CSP).
+// Horus offline demo: Overview landing page, then the Live Radar console.
+// Every request goes to this origin (enforced by the server's CSP).
 "use strict";
 
 const CLASS_CENTRES = [50, 130, 250, 420]; // preview weights only (uncalibrated)
 const PIREP_SHOW_S = 1800;
-const START_T = 1200; // open 20 min in: the detector needs ~2.5 min of level flight first
 const TRAIL_MIN = 10;
 const WINDOW_SAMPLES = 60; // inspector chart: trailing 10 min at 10 s stride
+const DEFAULT_SCENARIO = "jet-cat";
 const SHORT = { "jet-cat": "Jet Stream", convective: "Convective", calm: "Calm Cruise", "pirep-replay": "PIREP Replay" };
 const PLANE_D = "M0,-8 L1.3,-4.6 L1.3,-1.4 L8,2.6 L8,4 L1.3,2.2 L1.1,5.6 L3.4,7.2 L3.4,8.2 L0,7.4 L-3.4,8.2 L-3.4,7.2 L-1.1,5.6 L-1.3,2.2 L-8,4 L-8,2.6 L-1.3,-1.4 L-1.3,-4.6 Z";
 const PLANE = new Path2D(PLANE_D);
 const UI_FONT = "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif";
+// monochrome line icons for the pipeline stepper (drawn here; SF Symbols may not be used on the web)
+const ICONS = {
+  antenna: '<path d="M12 21V11"/><circle cx="12" cy="9" r="2"/><path d="M7.8 13.2a6 6 0 0 1 0-8.4M16.2 4.8a6 6 0 0 1 0 8.4M5 16a10 10 0 0 1 0-14M19 2a10 10 0 0 1 0 14"/>',
+  archive: '<rect x="3" y="4" width="18" height="5" rx="1.5"/><path d="M5 9v9.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V9M10 13h4"/>',
+  table: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9.5h18M3 14.5h18M9 9.5V20"/>',
+  wave: '<path d="M2 12h3l2-6 3 12 3-9 2 6 2-3h5"/>',
+  gauge: '<path d="M4.5 17a8.5 8.5 0 1 1 15 0"/><path d="M12 13l4-4"/><circle cx="12" cy="13" r="1.3"/>',
+};
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -19,22 +28,24 @@ const fmt = (v, d = 0, unit = "") => {
   return `${/^-0(\.0*)?$/.test(s) ? s.slice(1) : s}${unit}`;
 };
 const mmss = (s) => `+${String(Math.floor(s / 60)).padStart(2, "0")}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+const sub = (s) => esc(s).replace(/σ_corr/g, "σ<sub>corr</sub>").replace(/σ²_corr/g, "σ²<sub>corr</sub>").replace(/σ²_raw/g, "σ²<sub>raw</sub>");
 
 // ---------------------------------------------------------------- state
 const S = {
-  basemap: null, index: [], sc: null, about: null,
+  view: "overview", radarReady: false,
+  basemap: null, index: [], sc: null, about: null, overview: null,
   t: 0, playing: false, speed: 60, flMin: 180, flMax: 450,
   selected: -1, pinned: null, filterCs: "", showPireps: true, showField: false, showTrail: true,
-  view: { scale: 1, ox: 0, oy: 0, w: 0, h: 0, dpr: 1 }, baseLayer: null, hover: -1, lastJ: -1,
+  vp: { scale: 1, ox: 0, oy: 0, w: 0, h: 0, dpr: 1 }, baseLayer: null, hover: -1, lastJ: -1, lastListI: -1,
 };
 const canvas = $("map");
 const ctx = canvas.getContext("2d");
 
-// ---------------------------------------------------------------- theme
+// ---------------------------------------------------------------- theme (radar is always dark)
 const THEME_KEY = "horus-demo-theme";
 const darkMQ = window.matchMedia("(prefers-color-scheme: dark)");
-let themePref = "auto";
-try { themePref = localStorage.getItem(THEME_KEY) || "auto"; } catch { /* storage unavailable */ }
+let themePref = "light";
+try { themePref = localStorage.getItem(THEME_KEY) || "light"; } catch { /* storage unavailable */ }
 let COL = {};
 
 function readColors() {
@@ -50,15 +61,11 @@ function readColors() {
   COL.tb = { NEG: COL.na, LGT: COL.sev[1], MOD: COL.sev[2], SEV: COL.sev[3] };
 }
 function applyTheme() {
-  const dark = themePref === "dark" || (themePref === "auto" && darkMQ.matches);
+  const dark = S.view === "radar" || themePref === "dark" || (themePref === "auto" && darkMQ.matches);
   document.documentElement.dataset.theme = dark ? "dark" : "light";
   for (const b of $("appearance").querySelectorAll("button")) b.setAttribute("aria-checked", String(b.dataset.theme === themePref));
   placeThumb($("appearance"));
   readColors();
-  if (S.basemap && S.view.w) {
-    buildBaseLayer();
-    if (S.sc) { renderScenarioCard(); draw(); S.lastJ = -1; updateInspectorLive(); }
-  }
 }
 darkMQ.addEventListener("change", () => { if (themePref === "auto") applyTheme(); });
 
@@ -73,13 +80,69 @@ function rgba(color, a) {
   return `rgba(${r},${g},${b},${a})`;
 }
 
-// ---------------------------------------------------------------- segmented controls
 function placeThumb(seg) {
   const thumb = seg.querySelector(".seg-thumb");
   const on = seg.querySelector('button[aria-checked="true"], button[aria-selected="true"]');
-  if (!thumb || !on) return;
+  if (!thumb || !on || !seg.offsetParent) return;
   thumb.style.width = `${on.offsetWidth}px`;
   thumb.style.transform = `translateX(${on.offsetLeft}px)`;
+}
+const placeAllThumbs = () => { for (const s of document.querySelectorAll(".segmented")) placeThumb(s); };
+
+async function getJSON(url) {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`${url}: ${r.status}`);
+  return r.json();
+}
+
+// ---------------------------------------------------------------- views
+async function setView(v, { push = true } = {}) {
+  S.view = v;
+  document.documentElement.dataset.view = v;
+  for (const b of $("views").querySelectorAll("button")) b.setAttribute("aria-selected", String(b.dataset.view === v));
+  applyTheme();
+  placeAllThumbs();
+  if (push) { try { history.replaceState(null, "", v === "radar" ? "#view=radar" : "#"); } catch { /* file: */ } }
+  window.scrollTo(0, 0);
+  if (v === "radar") {
+    if (!S.radarReady) { S.radarReady = true; await initRadar(); }
+    else { fitView(); draw(); S.lastJ = -1; S.lastListI = -1; updateInspectorLive(); renderFlightList(); }
+  } else {
+    setPlaying(false);
+  }
+}
+
+// ---------------------------------------------------------------- overview (landing)
+function renderOverview() {
+  const O = S.overview;
+  $("kpis").innerHTML = O.kpis.map((k) => `
+    <article class="card kpi">
+      <span class="k-tag">Synthetic</span>
+      <span class="k-label">${sub(k.label)}</span>
+      <span class="k-value">${esc(k.value)}${k.unit ? `<span class="k-unit">${esc(k.unit)}</span>` : ""}</span>
+      <span class="k-detail">${sub(k.detail)}</span>
+      <span class="k-caveat">${sub(k.caveat)}</span>
+    </article>`).join("");
+  const cls = { built: "built", "core built": "core", planned: "planned" };
+  $("pipeline").innerHTML = O.pipeline.map((p) => `
+    <li class="step">
+      <div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[p.icon] || ""}</svg></div>
+      <div><h3>${esc(p.title)}</h3><p>${esc(p.detail)}</p>
+        <span class="st ${cls[p.status]}">${esc(p.status)}</span>${p.note ? `<span class="st-note">${esc(p.note)}</span>` : ""}</div>
+    </li>`).join("");
+  $("maths").innerHTML = O.maths.map((m) => `
+    <div class="math${m.highlight ? " hl" : ""}"><h3>${esc(m.title)}</h3>
+      <div class="formula">${sub(m.formula)}</div><div class="m-note">${sub(m.note)}</div></div>`).join("");
+  const B = O.benchmarks;
+  $("bench").innerHTML = `<thead><tr>${B.columns.map((c, i) => `<th class="${i === 2 || i === 3 ? "num" : ""}">${esc(c)}</th>`).join("")}</tr></thead>
+    <tbody>${B.rows.map((r) => `<tr><td class="row-id">${esc(r[0])}</td><td>${sub(r[1])}</td>
+      <td class="num pending">${r[2] === null ? "pending" : esc(r[2])}</td><td class="num pending">${r[3] === null ? "pending" : esc(r[3])}</td>
+      <td><span class="st planned">${esc(r[4])}</span></td></tr>`).join("")}</tbody>`;
+  $("benchNote").textContent = B.note;
+  const A = S.about;
+  $("attribs").innerHTML = A.attributions.map((x) => `<p class="attrib"><b>${esc(x.name)}</b>${esc(x.text)}
+      <br><a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">${esc(x.url)}</a></p>`).join("") +
+    `<p class="attrib">${esc(A.disclaimer)}</p>`;
 }
 
 // ---------------------------------------------------------------- projection (Albers equal-area conic, CONUS)
@@ -104,19 +167,13 @@ function offset(lat, lon, eKm, nKm) {
   return [lat + nKm / KM_PER_DEG, lon + eKm / (KM_PER_DEG * Math.cos((lat * Math.PI) / 180))];
 }
 
-async function getJSON(url) {
-  const r = await fetch(url);
-  if (!r.ok) throw new Error(`${url}: ${r.status}`);
-  return r.json();
-}
-
-// ---------------------------------------------------------------- layout
+// ---------------------------------------------------------------- radar layout
 function overlayRects() {
-  // floating chrome over the canvas (desktop); none when stacked (narrow)
   const cr = canvas.getBoundingClientRect();
   const out = [];
-  for (const el of [document.querySelector(".toolbar"), $("scenarioCard"), document.querySelector(".capsule"), $("inspector")]) {
-    if (getComputedStyle(el).position !== "absolute") continue;
+  for (const el of [document.querySelector(".toolbar"), $("scenarios"), $("flightPane"), document.querySelector(".capsule"), $("inspector")]) {
+    const pos = getComputedStyle(el).position;
+    if (pos !== "absolute" && pos !== "fixed") continue;
     const r = el.getBoundingClientRect();
     out.push({ x: r.left - cr.left, y: r.top - cr.top, w: r.width, h: r.height, el });
   }
@@ -124,6 +181,7 @@ function overlayRects() {
 }
 function fitView() {
   const rect = canvas.getBoundingClientRect();
+  if (rect.width < 2) return;
   const dpr = window.devicePixelRatio || 1;
   canvas.width = Math.max(1, Math.round(rect.width * dpr));
   canvas.height = Math.max(1, Math.round(rect.height * dpr));
@@ -132,15 +190,15 @@ function fitView() {
     const [x, y] = ALB(lon, lat);
     x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y);
   }
-  // free region: below the toolbar, above the capsule, left of the inspector
   let L = 16, T = 16, R = rect.width - 16, B = rect.height - 16;
   for (const o of overlayRects()) {
-    if (o.el.classList.contains("toolbar")) T = Math.max(T, o.y + o.h + 16);
+    if (o.el.classList.contains("toolbar") || o.el.id === "scenarios") T = Math.max(T, o.y + o.h + 14);
+    else if (o.el.id === "flightPane") L = Math.max(L, o.x + o.w + 16);
     else if (o.el.id === "inspector") R = Math.min(R, o.x - 16);
     else if (o.el.classList.contains("capsule")) B = Math.min(B, o.y - 12);
   }
   const scale = Math.min((R - L) / (x1 - x0), (B - T) / (y1 - y0));
-  S.view = {
+  S.vp = {
     scale, dpr, w: rect.width, h: rect.height,
     ox: L + (R - L - (x1 - x0) * scale) / 2 - x0 * scale,
     oy: T + (B - T + (y1 - y0) * scale) / 2 + y0 * scale,
@@ -150,10 +208,10 @@ function fitView() {
 }
 function toScreen(lon, lat) {
   const [x, y] = ALB(lon, lat);
-  return [S.view.ox + x * S.view.scale, S.view.oy - y * S.view.scale];
+  return [S.vp.ox + x * S.vp.scale, S.vp.oy - y * S.vp.scale];
 }
 function buildBaseLayer() {
-  const { w, h, dpr } = S.view;
+  const { w, h, dpr } = S.vp;
   const off = document.createElement("canvas");
   off.width = Math.max(1, Math.round(w * dpr)); off.height = Math.max(1, Math.round(h * dpr));
   const c = off.getContext("2d");
@@ -175,10 +233,7 @@ function buildBaseLayer() {
     ring.forEach(([lon, lat], i) => { const [x, y] = toScreen(lon, lat); i ? land.lineTo(x, y) : land.moveTo(x, y); });
     land.closePath();
   }
-  c.save();
-  c.shadowColor = COL.dark ? "rgba(0,0,0,0.6)" : "rgba(30,50,80,0.10)"; c.shadowBlur = 18;
   c.fillStyle = COL.land; c.fill(land);
-  c.restore();
   c.strokeStyle = COL.landStroke; c.lineWidth = 0.6; c.stroke(land);
   S.baseLayer = off;
 }
@@ -192,10 +247,23 @@ function projectScenario() {
   }
   for (const p of S.sc.pireps) { const [x, y] = toScreen(p.lon, p.lat); p.x = x; p.y = y; }
 }
-async function loadScenario(id) {
+function mostTurbulent() {
+  // the flight with the highest sustained σ_corr (70 s mean, ≥ 5 of 7 samples), and when:
+  // a single 15 s estimate can spike, so one sample would overstate the turbulence
+  let best = { k: 0, j: 0, v: -1 };
+  S.sc.aircraft.forEach((a, k) => {
+    const sc = a.cols.sc;
+    for (let j = 3; j < sc.length - 3; j++) {
+      let sum = 0, n = 0;
+      for (let q = j - 3; q <= j + 3; q++) if (sc[q] !== null) { sum += sc[q]; n += 1; }
+      if (n >= 5 && sum / n > best.v) best = { k, j, v: sum / n };
+    }
+  });
+  return best;
+}
+async function loadScenario(id, { autoSelect = true } = {}) {
   S.sc = await getJSON(`/api/scenario/${encodeURIComponent(id)}`);
-  S.t = Math.min(START_T, S.sc.duration_s - S.sc.stride_s);
-  S.selected = -1; S.pinned = null; S.filterCs = ""; S.lastJ = -1;
+  S.selected = -1; S.pinned = null; S.filterCs = ""; S.lastJ = -1; S.lastListI = -1;
   projectScenario();
   $("callsign").innerHTML = '<option value="">All Flights</option>' + S.sc.aircraft.map((a, i) => ({ a, i }))
     .sort((p, q) => p.a.callsign.localeCompare(q.a.callsign))
@@ -203,25 +271,55 @@ async function loadScenario(id) {
   $("scrub").max = String(S.sc.duration_s - S.sc.stride_s);
   for (const b of $("scenarios").querySelectorAll("button")) b.setAttribute("aria-selected", String(b.dataset.id === id));
   placeThumb($("scenarios"));
-  renderScenarioCard(); renderInspector(); draw();
+  renderScenarioCard();
+  if (autoSelect) {
+    const m = mostTurbulent();
+    S.t = S.sc.aircraft[m.k].cols.t[m.j];
+    select(m.k);
+  } else {
+    S.t = Math.min(1200, S.sc.duration_s - S.sc.stride_s);
+    renderInspector(); draw();
+  }
+  renderFlightList();
 }
 function renderScenarioCard() {
   const ck = S.sc.check, sv = S.sc.severity, rec = ck.median_recovered_over_injected;
-  const ranges = [`< ${sv.edges[0]}`, `${sv.edges[0]}–${sv.edges[1]}`, `${sv.edges[1]}–${sv.edges[2]}`, `≥ ${sv.edges[2]}`];
   $("scenarioCard").innerHTML = `
     <h3>${esc(S.sc.title)}</h3>
     <p>${esc(S.sc.blurb)}</p>
     <div class="card-check">Core self-check · ${rec === null ? "no turbulent air injected" :
-      `recovered/injected σ <b>${rec.toFixed(2)}</b> (${ck.turbulent_samples.toLocaleString()} s)`} · calm-air p95 σ<sub>corr</sub> <b>${fmt(ck.smooth_p95_sigma_corr, 0)}</b> ft/min</div>
+      `recovered/injected σ <b>${rec.toFixed(2)}</b>`} · calm p95 σ<sub>corr</sub> <b>${fmt(ck.smooth_p95_sigma_corr, 0)}</b></div>
     <div class="legend">
-      ${sv.labels.map((l, i) => `<span title="${ranges[i]} ft/min"><i class="dot" data-sev="${i}"></i>${esc(l)}</span>`).join("")}
+      ${sv.labels.map((l, i) => `<span><i class="dot" data-sev="${i}"></i>${esc(l)}</span>`).join("")}
       <span><i class="dot" data-sev="na"></i>Not assessed</span>
       <span><i class="ring" data-ring="1"></i>PIREP</span>
-      <span class="legend-note">σ<sub>corr</sub> thresholds ${sv.edges.join(" / ")} ft/min are placeholders until M3.</span>
+      <span class="legend-note">Thresholds ${sv.edges.join(" / ")} ft/min are placeholders until M3.</span>
     </div>`;
   for (const d of $("scenarioCard").querySelectorAll("[data-sev]")) d.style.background = d.dataset.sev === "na" ? COL.na : COL.sev[+d.dataset.sev];
   for (const d of $("scenarioCard").querySelectorAll("[data-ring]")) { d.style.borderColor = COL.sev[2]; d.style.background = rgba(COL.sev[2], 0.18); }
 }
+
+// ---------------------------------------------------------------- flight strips
+function renderFlightList() {
+  if (!S.sc) return;
+  const i = idxAt(S.t);
+  if (i === S.lastListI && !renderFlightList.force) return;
+  renderFlightList.force = false;
+  S.lastListI = i;
+  const rows = S.sc.aircraft.map((a, k) => ({ a, k, v: a.cols.sc[i], sev: a.cols.sev[i], alt: a.cols.alt[i] }))
+    .sort((p, q) => (q.v ?? -1) - (p.v ?? -1) || p.a.callsign.localeCompare(q.a.callsign));
+  $("flightList").innerHTML = rows.map((r) => `
+    <li role="option" data-k="${r.k}" aria-selected="${r.k === S.selected}" class="${inFL(r.alt) ? "" : "out"}">
+      <i class="dot" data-sev="${r.sev}"></i><span class="cs">${esc(r.a.callsign)}</span>
+      <span class="fl">FL${fmt(r.alt / 100, 0)}</span><span class="sg">${fmt(r.v, 0)}</span></li>`).join("");
+  for (const d of $("flightList").querySelectorAll(".dot")) d.style.background = sevColor(+d.dataset.sev);
+}
+$("flightList").addEventListener("click", (e) => {
+  const li = e.target.closest("li");
+  if (!li) return;
+  $("callsign").value = ""; S.filterCs = "";
+  select(+li.dataset.k);
+});
 
 // ---------------------------------------------------------------- drawing
 const nSamples = () => S.sc.aircraft[0].cols.t.length;
@@ -250,7 +348,6 @@ function drawField(t) {
     }
   }
 }
-
 function roundRect(x, y, w, h, r) {
   ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
   ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
@@ -258,7 +355,6 @@ function roundRect(x, y, w, h, r) {
 const overlap = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
 
 function drawCallouts(i, visible) {
-  // priority: selected, hovered, then the most turbulent; others are skipped unless they fit cleanly
   const order = [];
   if (S.selected >= 0 && visible.includes(S.selected)) order.push(S.selected);
   if (S.hover >= 0 && S.hover !== S.selected && visible.includes(S.hover)) order.push(S.hover);
@@ -268,10 +364,10 @@ function drawCallouts(i, visible) {
   const blocked = overlayRects().map(({ x, y, w, h }) => ({ x: x - 4, y: y - 4, w: w + 8, h: h + 8 }));
   const glyphs = visible.map((k) => ({ k, x: S.sc.aircraft[k].x[i] - 9, y: S.sc.aircraft[k].y[i] - 9, w: 18, h: 18 }));
   const placed = [];
-  const bold = `600 11px ${UI_FONT}`, reg = `500 11px ${UI_FONT}`;
+  const bold = "600 11px 'SF Mono', ui-monospace, Menlo, monospace", reg = "500 11px 'SF Mono', ui-monospace, Menlo, monospace";
   for (const k of order) {
     const a = S.sc.aircraft[k], c = a.cols, x = a.x[i], y = a.y[i];
-    const t1 = a.callsign, t2 = ` · FL${Math.round(c.alt[i] / 100)}`;
+    const t1 = a.callsign, t2 = ` FL${Math.round(c.alt[i] / 100)}`;
     ctx.font = bold; const w1 = ctx.measureText(t1).width;
     ctx.font = reg; const w2 = ctx.measureText(t2).width;
     const w = 26 + w1 + w2, h = 20;
@@ -279,7 +375,7 @@ function drawCallouts(i, visible) {
     let spot = null;
     for (const [dx, dy] of cands) {
       const r = { x: x + dx, y: y + dy, w, h };
-      if (r.x < 4 || r.y < 4 || r.x + w > S.view.w - 4 || r.y + h > S.view.h - 4) continue;
+      if (r.x < 4 || r.y < 4 || r.x + w > S.vp.w - 4 || r.y + h > S.vp.h - 4) continue;
       if (blocked.some((b) => overlap(r, b)) || placed.some((p) => overlap(r, p))) continue;
       if (glyphs.some((g) => g.k !== k && overlap(r, g))) continue;
       spot = r; break;
@@ -290,11 +386,7 @@ function drawCallouts(i, visible) {
     const ax = Math.max(spot.x, Math.min(x, spot.x + w)), ay = Math.max(spot.y, Math.min(y, spot.y + h));
     ctx.strokeStyle = rgba(COL.label, 0.3); ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(ax, ay); ctx.stroke();
-    ctx.save();
-    ctx.shadowColor = COL.dark ? "rgba(0,0,0,0.5)" : "rgba(0,0,0,0.12)"; ctx.shadowBlur = 8; ctx.shadowOffsetY = 2;
     roundRect(spot.x, spot.y, w, h, 10); ctx.fillStyle = COL.surface; ctx.fill();
-    ctx.restore();
-    roundRect(spot.x, spot.y, w, h, 10);
     ctx.strokeStyle = k === S.selected ? COL.accent : COL.hairline; ctx.lineWidth = k === S.selected ? 1.2 : 0.5; ctx.stroke();
     ctx.fillStyle = sevColor(c.sev[i]); ctx.beginPath(); ctx.arc(spot.x + 11, spot.y + h / 2, 3.5, 0, 2 * Math.PI); ctx.fill();
     ctx.textBaseline = "middle";
@@ -305,8 +397,8 @@ function drawCallouts(i, visible) {
 }
 
 function draw() {
-  if (!S.basemap || !S.baseLayer) return;
-  const { dpr } = S.view;
+  if (S.view !== "radar" || !S.basemap || !S.baseLayer) return;
+  const { dpr } = S.vp;
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.drawImage(S.baseLayer, 0, 0);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -320,7 +412,7 @@ function draw() {
   S.sc.aircraft.forEach((a, k) => {
     const c = a.cols, dim = focus >= 0 && k !== focus;
     if (k === S.selected || k === focus) {
-      ctx.strokeStyle = rgba(COL.label, 0.18); ctx.lineWidth = 1.2; ctx.setLineDash([2, 4]); ctx.beginPath();
+      ctx.strokeStyle = rgba(COL.label, 0.2); ctx.lineWidth = 1.2; ctx.setLineDash([2, 4]); ctx.beginPath();
       for (let j = 0; j < c.t.length; j++) j ? ctx.lineTo(a.x[j], a.y[j]) : ctx.moveTo(a.x[j], a.y[j]);
       ctx.stroke(); ctx.setLineDash([]);
     }
@@ -346,14 +438,14 @@ function draw() {
     }
   }
 
-  if (S.selected >= 0) { // PIREP correlation radius around the inspected point
+  if (S.selected >= 0) {
     const a = S.sc.aircraft[S.selected], j = S.pinned ?? i;
     const lat = a.cols.lat[j], lon = a.cols.lon[j];
     const [x, y] = toScreen(lon, lat);
     const rpx = Math.abs(toScreen(offset(lat, lon, S.sc.match.dist_km, 0)[1], lat)[0] - x);
     ctx.beginPath(); ctx.arc(x, y, rpx, 0, 2 * Math.PI);
-    ctx.fillStyle = rgba(COL.accent, 0.06); ctx.fill();
-    ctx.setLineDash([4, 4]); ctx.strokeStyle = rgba(COL.accent, 0.8); ctx.lineWidth = 1.2; ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = rgba(COL.accent, 0.07); ctx.fill();
+    ctx.setLineDash([4, 4]); ctx.strokeStyle = rgba(COL.accent, 0.85); ctx.lineWidth = 1.2; ctx.stroke(); ctx.setLineDash([]);
     if (S.pinned !== null) { ctx.beginPath(); ctx.arc(x, y, 3.5, 0, 2 * Math.PI); ctx.fillStyle = COL.accent; ctx.fill(); }
   }
 
@@ -364,7 +456,7 @@ function draw() {
     visible.push(k);
     const dim = focus >= 0 && k !== focus, sel = k === S.selected;
     ctx.save(); ctx.translate(a.x[i], a.y[i]); ctx.rotate((c.hdg[i] * Math.PI) / 180);
-    if (sel) { ctx.beginPath(); ctx.arc(0, 0, 15, 0, 2 * Math.PI); ctx.fillStyle = rgba(COL.accent, 0.18); ctx.fill(); ctx.scale(1.25, 1.25); }
+    if (sel) { ctx.beginPath(); ctx.arc(0, 0, 15, 0, 2 * Math.PI); ctx.fillStyle = rgba(COL.accent, 0.22); ctx.fill(); ctx.scale(1.25, 1.25); }
     ctx.lineWidth = 2.4; ctx.strokeStyle = dim ? rgba(COL.halo, 0.3) : COL.halo; ctx.stroke(PLANE);
     ctx.fillStyle = rgba(sevColor(c.sev[i]), dim ? 0.3 : 1); ctx.fill(PLANE);
     ctx.restore();
@@ -373,6 +465,7 @@ function draw() {
 
   $("clock").textContent = mmss(S.t);
   $("scrub").value = String(Math.round(S.t));
+  renderFlightList();
   if (S.selected >= 0 && S.pinned === null) updateInspectorLive();
 }
 
@@ -389,7 +482,6 @@ function matches(a, j) {
     .filter((r) => Math.abs(r.dt) <= m.window_s && r.d <= m.dist_km && Math.abs(r.dalt) <= m.alt_ft)
     .sort((x, y) => x.d - y.d);
 }
-
 function renderInspector() {
   const el = $("inspector");
   S.lastJ = -1;
@@ -397,15 +489,13 @@ function renderInspector() {
     el.innerHTML = `<div class="empty">
       <svg viewBox="-10 -10 20 20" width="44" height="44" aria-hidden="true"><path d="${PLANE_D}"/></svg>
       <h3>No Flight Selected</h3>
-      <p>Click an aircraft or a point on its trail, or choose a flight in the playback bar.</p>
-      <p><kbd>Space</kbd> play/pause · <kbd>←</kbd> <kbd>→</kbd> one minute · <kbd>Esc</kbd> deselect</p>
-    </div>`;
+      <p>Pick a flight from the list, click one on the map, or choose one in the playback bar.</p>
+      <p><kbd>Space</kbd> play/pause · <kbd>←</kbd> <kbd>→</kbd> one minute · <kbd>Esc</kbd> deselect</p></div>`;
     return;
   }
   el.innerHTML = '<div id="insLive"></div>';
   updateInspectorLive();
 }
-
 function chartSVG(a, j, width) {
   const c = a.cols, sv = S.sc.severity;
   const j0 = Math.max(0, j - WINDOW_SAMPLES + 1);
@@ -456,7 +546,6 @@ function chartSVG(a, j, width) {
     <rect x="0" y="0" width="${plotW}" height="${Ht}" fill="transparent" data-hit="1"/>
   </svg>`;
 }
-
 function updateInspectorLive() {
   const live = $("insLive");
   if (S.selected < 0 || !live || !S.sc) return;
@@ -468,9 +557,11 @@ function updateInspectorLive() {
   const ms = matches(a, j), m = S.sc.match;
   const sevPill = sev < 0 ? '<span class="sev-pill na">Not Assessed</span>' : `<span class="sev-pill s${sev}">${esc(sv.labels[sev])}</span>`;
   const row = (k, v) => `<div class="row"><span class="k">${k}</span><span class="v">${v}</span></div>`;
+  const ns = c.lat[j] >= 0 ? "N" : "S", ew = c.lon[j] < 0 ? "W" : "E";
   live.innerHTML = `
     <div class="hdr"><div><div class="callsign">${esc(a.callsign)}</div>
-      <div class="subtitle">${a.size === "medium_jet" ? "Medium jet" : "Medium turboprop"} · Synthetic flight</div></div>${sevPill}</div>
+      <div class="subtitle">${a.size === "medium_jet" ? "Medium jet" : "Medium turboprop"} · Synthetic flight ·
+        <span class="num">${fmt(Math.abs(c.lat[j]), 2)}°${ns} ${fmt(Math.abs(c.lon[j]), 2)}°${ew}</span></div></div>${sevPill}</div>
     <div class="meta-line"><span class="num">${mmss(c.t[j])} · ${S.pinned !== null ? "Pinned" : "Live"}</span>
       ${S.pinned !== null ? '<button id="unpin" class="text-btn" type="button">Follow Playhead</button>' : "<span>Placeholder thresholds</span>"}</div>
     <div class="tele">
@@ -550,6 +641,7 @@ function select(k, j = null) {
   const changed = k !== S.selected;
   S.selected = k; S.pinned = j;
   if (changed) renderInspector(); else { S.lastJ = -1; updateInspectorLive(); }
+  renderFlightList.force = true;
   draw();
 }
 canvas.addEventListener("click", (ev) => {
@@ -581,7 +673,7 @@ function setPlaying(on) {
   S.playing = on;
   $("playIcon").setAttribute("d", on ? "M4 2.5h3v11H4zM9 2.5h3v11H9z" : "M4 2.5v11l9-5.5z");
   $("playBtn").setAttribute("aria-label", on ? "Pause" : "Play");
-  if (on) {
+  if (on && S.sc) {
     if (S.t >= S.sc.duration_s - S.sc.stride_s) S.t = 0;
     requestAnimationFrame(tick);
   }
@@ -600,6 +692,7 @@ function syncFL(changed) {
   if (lo > hi) { if (changed === "min") hi = lo; else lo = hi; $("flMin").value = lo; $("flMax").value = hi; }
   S.flMin = lo; S.flMax = hi;
   $("flLabel").textContent = `FL${lo}–FL${hi}`;
+  renderFlightList.force = true;
   draw();
 }
 $("flMin").addEventListener("input", () => syncFL("min"));
@@ -623,30 +716,29 @@ for (const b of $("appearance").querySelectorAll("button")) {
     applyTheme();
   });
 }
+for (const b of $("views").querySelectorAll("button")) b.addEventListener("click", () => setView(b.dataset.view));
+$("launchBtn").addEventListener("click", () => setView("radar"));
 document.addEventListener("keydown", (e) => {
   if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
   const sheetOpen = !$("sheet").classList.contains("hidden");
   if (e.key === "Escape") {
     if (sheetOpen) closeSheet();
-    else if (S.selected >= 0) { S.selected = -1; S.pinned = null; $("callsign").value = ""; S.filterCs = ""; renderInspector(); draw(); }
+    else if (S.view === "radar" && S.selected >= 0) { S.selected = -1; S.pinned = null; $("callsign").value = ""; S.filterCs = ""; renderInspector(); renderFlightList.force = true; draw(); }
     return;
   }
-  if (!S.sc || sheetOpen) return;
+  if (S.view !== "radar" || !S.sc || sheetOpen) return;
   if (e.key === " ") { e.preventDefault(); setPlaying(!S.playing); }
   if (e.key === "ArrowRight") { S.t = Math.min(S.sc.duration_s - S.sc.stride_s, S.t + 60); draw(); }
   if (e.key === "ArrowLeft") { S.t = Math.max(0, S.t - 60); draw(); }
 });
 
-// ---------------------------------------------------------------- architecture sheet
+// ---------------------------------------------------------------- sources sheet (radar)
 function openSheet() {
   const A = S.about, cls = { built: "built", "core built": "core", planned: "planned" };
   $("aboutContent").innerHTML = `
-    <p>${esc(A.tagline)}</p>
-    <div class="pipeline">${A.stages.map((s, k) => `
-      <div class="stage"><h4>${k + 1}. ${esc(s.name)}</h4><ul>${s.items.map((it) => `
-        <li><span class="st ${cls[it.status]}">${esc(it.status)} · ${esc(it.m)}</span>${esc(it.label)}${it.note ? ` <span class="subtitle">(${esc(it.note)})</span>` : ""}</li>`).join("")}
-      </ul></div>`).join("")}</div>
-    <h3>Data Sources &amp; Attribution</h3>
+    ${A.stages.map((s) => `<div class="section-h">${esc(s.name)}</div><div class="group">${s.items.map((it) =>
+      `<div class="row"><span class="k">${esc(it.label)}${it.note ? ` <em>${esc(it.note)}</em>` : ""}</span><span class="st ${cls[it.status]}">${esc(it.status)} · ${esc(it.m)}</span></div>`).join("")}</div>`).join("")}
+    <div class="section-h">Attribution</div>
     ${A.attributions.map((x) => `<p class="attrib"><b>${esc(x.name)}</b>${esc(x.text)}
       <br><a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">${esc(x.url)}</a></p>`).join("")}
     <p class="disclaimer">${esc(A.disclaimer)}</p>
@@ -660,35 +752,44 @@ $("closeSheet").addEventListener("click", closeSheet);
 $("sheet").addEventListener("click", (e) => { if (e.target.id === "sheet") closeSheet(); });
 
 // ---------------------------------------------------------------- boot
-async function boot() {
-  const h = new URLSearchParams(location.hash.slice(1)); // deep links: scenario, t, sel, pin, field, fl, about, theme
-  if (["auto", "light", "dark"].includes(h.get("theme"))) themePref = h.get("theme");
-  applyTheme();
-  [S.basemap, S.index, S.about] = await Promise.all([getJSON("/api/basemap"), getJSON("/api/scenarios"), getJSON("/api/about")]);
+const H = new URLSearchParams(location.hash.slice(1)); // deep links: view, scenario, t, sel, pin, field, fl, about, theme
+
+async function initRadar() {
   const seg = $("scenarios");
   seg.insertAdjacentHTML("beforeend", S.index.map((s) => `<button type="button" role="tab" data-id="${esc(s.id)}" aria-selected="false" title="${esc(s.title)}">${esc(SHORT[s.id] || s.title)}</button>`).join(""));
   for (const b of seg.querySelectorAll("button")) b.addEventListener("click", () => { setPlaying(false); loadScenario(b.dataset.id); });
   for (const b of $("speed").querySelectorAll("button")) b.setAttribute("aria-checked", String(+b.dataset.speed === S.speed));
-  placeThumb($("speed"));
   fitView();
-  const sid = S.index.some((s) => s.id === h.get("scenario")) ? h.get("scenario") : S.index[0].id;
-  await loadScenario(sid);
-  if (h.has("t")) S.t = Math.max(0, Math.min(S.sc.duration_s - S.sc.stride_s, +h.get("t") || 0));
-  if (h.get("field") === "1") { S.showField = true; $("tgField").setAttribute("aria-pressed", "true"); }
-  if (h.has("fl")) {
-    const [lo, hi] = h.get("fl").split("-").map(Number);
+  const sid = S.index.some((s) => s.id === H.get("scenario")) ? H.get("scenario") : DEFAULT_SCENARIO;
+  const k = H.get("sel");
+  await loadScenario(sid, { autoSelect: !k });
+  if (H.has("t")) S.t = Math.max(0, Math.min(S.sc.duration_s - S.sc.stride_s, +H.get("t") || 0));
+  if (H.get("field") === "1") { S.showField = true; $("tgField").setAttribute("aria-pressed", "true"); }
+  if (H.has("fl")) {
+    const [lo, hi] = H.get("fl").split("-").map(Number);
     if (lo && hi) { $("flMin").value = lo; $("flMax").value = hi; syncFL("max"); }
   }
-  const k = S.sc.aircraft.findIndex((a) => a.callsign === h.get("sel"));
-  if (k >= 0) select(k, h.has("pin") ? idxAt(+h.get("pin")) : null);
+  const sk = S.sc.aircraft.findIndex((a) => a.callsign === k);
+  if (sk >= 0) select(sk, H.has("pin") ? idxAt(+H.get("pin")) : null);
+  placeAllThumbs();
+  renderFlightList.force = true;
   draw();
-  if (h.get("about") === "1") openSheet();
+  if (H.get("about") === "1") openSheet();
+}
+
+async function boot() {
+  if (["auto", "light", "dark"].includes(H.get("theme"))) themePref = H.get("theme");
+  applyTheme();
+  [S.basemap, S.index, S.about, S.overview] = await Promise.all([
+    getJSON("/api/basemap"), getJSON("/api/scenarios"), getJSON("/api/about"), getJSON("/api/overview"),
+  ]);
+  renderOverview();
+  await setView(H.get("view") === "radar" ? "radar" : "overview", { push: false });
   new ResizeObserver(() => {
-    fitView(); draw();
-    for (const s of document.querySelectorAll(".segmented")) placeThumb(s);
-    S.lastJ = -1; updateInspectorLive();
+    placeAllThumbs();
+    if (S.view === "radar" && S.radarReady) { fitView(); draw(); S.lastJ = -1; updateInspectorLive(); }
   }).observe(document.body);
 }
 boot().catch((err) => {
-  $("scenarioCard").innerHTML = `<h3>Could not load the demo</h3><p>${esc(err.message)}</p>`;
+  document.body.insertAdjacentHTML("beforeend", `<p class="fine">Could not load the demo: ${esc(err.message)}</p>`);
 });

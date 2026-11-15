@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-view="overview">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -9,32 +9,87 @@
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <div class="window">
+  <header class="toolbar glass">
+    <div class="tb-left">
+      <img class="app-icon" src="/static/icon.svg" alt="" width="22" height="22">
+      <span class="app-title">Horus</span>
+      <span class="pill-badge" title="Simulated aircraft and turbulence; real benchmarks arrive with M2/M3">Synthetic Preview Data · M3 Pending</span>
+    </div>
+    <div class="tb-center">
+      <div id="views" class="segmented" role="tablist" aria-label="View">
+        <span class="seg-thumb" aria-hidden="true"></span>
+        <button type="button" role="tab" data-view="overview" aria-selected="true">Overview</button>
+        <button type="button" role="tab" data-view="radar" aria-selected="false">Live Radar Demo</button>
+      </div>
+    </div>
+    <div class="tb-right">
+      <div id="appearance" class="segmented small only-overview" role="radiogroup" aria-label="Appearance">
+        <span class="seg-thumb" aria-hidden="true"></span>
+        <button type="button" role="radio" data-theme="auto">Auto</button>
+        <button type="button" role="radio" data-theme="light">Light</button>
+        <button type="button" role="radio" data-theme="dark">Dark</button>
+      </div>
+      <button id="aboutBtn" class="tb-button only-radar" type="button">Sources</button>
+    </div>
+  </header>
+
+  <!-- 1. Landing: architecture & benchmarks -->
+  <main id="overview" class="overview" aria-label="Architecture and benchmarks">
+    <section class="hero">
+      <p class="eyebrow">Research prototype · continental US</p>
+      <h1>Horus: Clear-Air Turbulence Radar</h1>
+      <p class="lede">Detects turbulence from the vertical-rate jitter that every airliner already broadcasts over ADS-B, and validates it against pilot reports.</p>
+      <span class="pill-badge big">Synthetic Preview Data · M3 Pending</span>
+    </section>
+
+    <section class="block">
+      <div class="block-head"><h2>Preview metrics</h2><p>Computed live from the bundled synthetic scenarios with the real detector code.</p></div>
+      <div id="kpis" class="kpis"></div>
+    </section>
+
+    <section class="block">
+      <div class="block-head"><h2>Architecture</h2><p>From public broadcasts to a turbulence score, one stage at a time.</p></div>
+      <ol id="pipeline" class="stepper"></ol>
+    </section>
+
+    <section class="block">
+      <div class="block-head"><h2>The maths</h2><p>Every parameter below is read from <span class="num">config.yaml</span>, the same values the detector runs with.</p></div>
+      <div id="maths" class="math-list"></div>
+    </section>
+
+    <section class="block">
+      <div class="block-head"><h2>Benchmark plan</h2><p>PIREP-validated ablation rows (SPEC §8). Filled in after the M1 gate.</p></div>
+      <div class="card table-card"><table id="bench" class="bench"></table></div>
+      <p id="benchNote" class="fine"></p>
+    </section>
+
+    <section class="cta">
+      <h2>See it run.</h2>
+      <p>Four synthetic scenarios, scored second by second by the same code that will run on real traffic.</p>
+      <button id="launchBtn" class="cta-btn" type="button">Launch Radar Console</button>
+    </section>
+
+    <section class="block">
+      <div class="block-head"><h2>Data sources &amp; attribution</h2></div>
+      <div id="attribs" class="card attrib-card"></div>
+    </section>
+
+    <footer class="page-foot">Horus · MIT License · © 2026 Rohit Raj · Research prototype — not for operational use · Runs fully offline</footer>
+  </main>
+
+  <!-- 2. Interactive: ATC-style radar console (always dark) -->
+  <div id="radar" class="window radar" aria-label="Live radar demo">
     <canvas id="map" aria-label="Flat 2D airspace map of the continental US"></canvas>
 
-    <header class="toolbar glass">
-      <div class="tb-left">
-        <img class="app-icon" src="/static/icon.svg" alt="" width="22" height="22">
-        <span class="app-title">Horus</span>
-        <span class="pill-badge" title="Simulated aircraft and turbulence; severity thresholds are uncalibrated until milestone M3">Synthetic Preview · M3 Pending</span>
-      </div>
-      <div class="tb-center">
-        <div id="scenarios" class="segmented" role="tablist" aria-label="Scenario">
-          <span class="seg-thumb" aria-hidden="true"></span>
-        </div>
-      </div>
-      <div class="tb-right">
-        <div id="appearance" class="segmented small" role="radiogroup" aria-label="Appearance">
-          <span class="seg-thumb" aria-hidden="true"></span>
-          <button type="button" role="radio" data-theme="auto">Auto</button>
-          <button type="button" role="radio" data-theme="light">Light</button>
-          <button type="button" role="radio" data-theme="dark">Dark</button>
-        </div>
-        <button id="aboutBtn" class="tb-button" type="button">Architecture</button>
-      </div>
-    </header>
+    <div id="scenarios" class="segmented scen glass" role="tablist" aria-label="Scenario">
+      <span class="seg-thumb" aria-hidden="true"></span>
+    </div>
 
-    <section id="scenarioCard" class="float-card glass" aria-live="polite"></section>
+    <aside id="flightPane" class="pane left glass" aria-label="Flights">
+      <section id="scenarioCard" class="pane-card"></section>
+      <div class="pane-h"><span>Flights</span><span class="num dim">σ<sub>corr</sub> ft/min</span></div>
+      <ul id="flightList" class="flight-list" role="listbox" aria-label="Flights by current turbulence"></ul>
+    </aside>
 
     <section class="capsule glass" aria-label="Playback and filters">
       <div class="cap-row">
@@ -69,15 +124,14 @@
       </div>
     </section>
 
-    <aside id="inspector" class="inspector glass" aria-label="Flight inspector"></aside>
-
+    <aside id="inspector" class="inspector pane right glass" aria-label="Flight inspector"></aside>
     <div class="map-legal">Synthetic data · Map: Natural Earth</div>
   </div>
 
   <div id="sheet" class="sheet-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
     <div class="sheet">
       <div class="sheet-head">
-        <h2 id="sheetTitle">Architecture</h2>
+        <h2 id="sheetTitle">Sources &amp; status</h2>
         <button id="closeSheet" class="text-btn" type="button">Done</button>
       </div>
       <div id="aboutContent" class="sheet-body"></div>

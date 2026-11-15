@@ -10,6 +10,7 @@ Routes
   /api/scenario/<id>     one bundled synthetic scenario
   /api/basemap           CONUS state outline (Natural Earth, public domain)
   /api/about             pipeline stages, status and attributions
+  /api/overview          landing page: computed synthetic KPIs, pipeline, maths, benchmark plan
 
 A Content-Security-Policy restricts the page to this origin, so the browser itself
 blocks any attempt to load tiles, fonts or scripts from the internet.
@@ -26,6 +27,7 @@ from pathlib import Path
 from typing import Any
 
 from demo.about import ABOUT
+from demo.overview import overview
 
 HERE = Path(__file__).parent
 STATIC = HERE / "static"
@@ -96,6 +98,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._file(DATA / "conus_states.json", "application/json")
         if path == "/api/about":
             return self._json(ABOUT)
+        if path == "/api/overview":
+            return self._json(overview())
         return self._404()
 
 
