@@ -15,6 +15,7 @@ import numpy as np
 import pandas as pd
 
 from turbcast.config import resolve
+from turbcast.schema import RECORD_COLUMNS
 
 SOURCES = {
     "opensky": "data/raw/live/source=opensky",
@@ -30,6 +31,11 @@ def source_glob(source: str, root: str | Path | None = None) -> str:
     return f"{base}/**/*.parquet"
 
 
+# Canonical columns by name: partition columns differ per source (live and Trino
+# use date=/hour=, the adsb.lol archive only date=), so never `* exclude (...)`.
+_COLS = ", ".join(RECORD_COLUMNS)
+
+
 def _scan(glob: str) -> str:
     return f"read_parquet('{glob}', hive_partitioning=true, union_by_name=true)"
 
@@ -39,7 +45,7 @@ def load_track(
 ) -> pd.DataFrame:
     """All rows for one aircraft in [t0, t1), sorted, one row per time."""
     q = (
-        f"select * exclude (date, hour) from {_scan(source_glob(source, root))} "
+        f"select {_COLS} from {_scan(source_glob(source, root))} "
         f"where icao24 = ? and time >= ? and time < ? order by time"
     )
     df = duckdb.execute(q, [icao24, int(t0), int(t1)]).df()
@@ -54,7 +60,7 @@ def load_day(
     min_alt_ft: float | None = None,
 ) -> pd.DataFrame:
     """One UTC day, column-pruned (keeps memory low on 8 GB)."""
-    cols = ", ".join(columns) if columns else "* exclude (date, hour)"
+    cols = ", ".join(columns) if columns else _COLS
     t0 = int(datetime(day.year, day.month, day.day, tzinfo=UTC).timestamp())
     where = f"time >= {t0} and time < {t0 + 86400}"
     if min_alt_ft is not None:

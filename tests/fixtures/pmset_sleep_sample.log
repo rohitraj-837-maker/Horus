@@ -1,0 +1,40 @@
+2026-11-15 06:46:14 +0300 Sleep               	Entering DarkWake state due to 'Clamshell Sleep':TCPKeepAlive=active Using AC (Charge:80%)           
+2026-11-15 06:46:19 +0300 Sleep               	Entering Sleep state due to 'Clamshell Sleep':TCPKeepAlive=active Using Batt (Charge:80%) 600 secs  
+2026-11-15 06:46:21 +0300 Wake Requests       	[process=dasd request=SleepService deltaSecs=1074 wakeAt=2026-11-15 12:04:14 info="com.apple.dasd:501:com.apple.GenerativeFunctions.PeriodicTasks.SystemA
+2026-11-15 06:56:19 +0300 DarkWake            	DarkWake from Deep Idle [CDNP] : due to NUB.SPMI0Sw3IRQ nub-spmi.0x02 rtc/Maintenance Using BATT (Charge:80%) 7 secs    
+2026-11-15 06:56:26 +0300 Sleep               	Entering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using Batt (Charge:80%) 1045 secs 
+2026-11-15 06:56:27 +0300 Wake Requests       	[*process=dasd request=SleepService deltaSecs=1043 wakeAt=2026-11-15 12:13:51 info="com.apple.dasd:501:com.apple.GenerativeFunctions.PeriodicTasks.System
+2026-11-15 07:13:51 +0300 DarkWake            	DarkWake from Deep Idle [CDNP] : due to NUB.SPMI0Sw3IRQ nub-spmi.0x02 rtc/SleepService Using BATT (Charge:80%) 2 secs    
+2026-11-15 07:13:53 +0300 Sleep               	Entering Sleep state due to 'Sleep Service Back to Sleep':TCPKeepAlive=active Using Batt (Charge:80%) 56 secs   
+2026-11-15 07:13:56 +0300 Wake Requests       	[*process=dasd request=SleepService deltaSecs=945 wakeAt=2026-11-15 12:29:41 info="com.apple.dasd:501:com.apple.GenerativeFunctions.PeriodicTasks.SystemA
+2026-11-15 07:14:49 +0300 DarkWake            	DarkWake from Deep Idle [CDNP] : due to smc.sysState.Wake(0x70070000) wifibt SMC.OutboxNotEmpty/ Using BATT (Charge:80%) 12 secs   
+2026-11-15 07:15:01 +0300 Sleep               	Entering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using Batt (Charge:80%) 1032 secs 
+2026-11-15 07:15:03 +0300 Wake Requests       	[*process=dasd request=SleepService deltaSecs=1030 wakeAt=2026-11-15 12:32:13 info="com.apple.dasd:501:com.apple.GenerativeFunctions.PeriodicTasks.System
+2026-11-15 07:32:13 +0300 DarkWake            	DarkWake from Deep Idle [CDNP] : due to NUB.SPMI0Sw3IRQ nub-spmi.0x02 rtc/SleepService Using BATT (Charge:80%) 2 secs    
+2026-11-15 07:32:15 +0300 Sleep               	Entering Sleep state due to 'Sleep Service Back to Sleep':TCPKeepAlive=active Using Batt (Charge:80%) 844 secs  
+2026-11-15 07:32:18 +0300 Wake Requests       	[process=dasd request=SleepService deltaSecs=995 wakeAt=2026-11-15 12:48:53 info="com.apple.dasd:501:com.apple.GenerativeFunctions.PeriodicTasks.SystemAp
+2026-11-15 07:46:19 +0300 DarkWake            	DarkWake from Deep Idle [CDNP] : due to NUB.SPMI0Sw3IRQ nub-spmi.0x02 rtc/Maintenance Using BATT (Charge:80%) 6 secs    
+2026-11-15 07:46:25 +0300 Sleep               	Entering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using Batt (Charge:80%) 911 secs  
+2026-11-15 07:46:27 +0300 Wake Requests       	[*process=dasd request=SleepService deltaSecs=909 wakeAt=2026-11-15 13:01:36 info="com.apple.dasd:501:com.apple.GenerativeFunctions.PeriodicTasks.SystemA
+2026-11-15 08:01:36 +0300 DarkWake            	DarkWake from Deep Idle [CDNP] : due to NUB.SPMI0Sw3IRQ nub-spmi.0x02 rtc/SleepService Using BATT (Charge:80%) 2 secs    
+2026-11-15 08:01:38 +0300 Sleep               	Entering Sleep state due to 'Sleep Service Back to Sleep':TCPKeepAlive=active Using Batt (Charge:80%) 1054 secs 
+2026-11-15 08:01:41 +0300 Wake Requests       	[*process=dasd request=SleepService deltaSecs=1051 wakeAt=2026-11-15 13:19:12 info="com.apple.dasd:501:com.apple.GenerativeFunctions.PeriodicTasks.System
+2026-11-15 08:19:12 +0300 DarkWake            	DarkWake from Deep Idle [CDNP] : due to NUB.SPMI0Sw3IRQ nub-spmi.0x02 rtc/SleepService Using BATT (Charge:80%) 2 secs    
+2026-11-15 08:19:14 +0300 Sleep               	Entering Sleep state due to 'Sleep Service Back to Sleep':TCPKeepAlive=active Using Batt (Charge:80%) 904 secs  
+2026-11-15 08:19:17 +0300 Wake Requests       	[*process=dasd request=SleepService deltaSecs=955 wakeAt=2026-11-15 13:35:12 info="com.apple.dasd:501:com.apple.GenerativeFunctions.PeriodicTasks.SystemA
+2026-11-15 08:34:18 +0300 DarkWake            	DarkWake from Deep Idle [CDNP] : due to smc.sysState.Wake(0x70070000) wifibt SMC.OutboxNotEmpty/ Using BATT (Charge:80%) 21 secs   
+2026-11-15 08:34:39 +0300 Sleep               	Entering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using Batt (Charge:80%) 756 secs  
+2026-11-15 08:34:40 +0300 Wake Requests       	[process=dasd request=SleepService deltaSecs=900 wakeAt=2026-11-15 13:49:41 info="com.apple.dasd:501:com.apple.GenerativeFunctions.PeriodicTasks.SystemAp
+2026-11-15 08:47:15 +0300 DarkWake            	DarkWake from Deep Idle [CDNP] : due to NUB.SPMI0Sw3IRQ nub-spmi.0x02 rtc/Maintenance Using BATT (Charge:80%) 5 secs    
+2026-11-15 08:47:20 +0300 Sleep               	Entering Sleep state due to 'Maintenance Sleep':TCPKeepAlive=active Using Batt (Charge:80%) 907 secs  
+2026-11-15 08:47:22 +0300 Wake Requests       	[*process=dasd request=SleepService deltaSecs=905 wakeAt=2026-11-15 14:02:27 info="com.apple.dasd:501:com.apple.GenerativeFunctions.PeriodicTasks.SystemA
+2026-11-15 09:02:27 +0300 DarkWake            	DarkWake from Deep Idle [CDNP] : due to NUB.SPMI0Sw3IRQ nub-spmi.0x02 rtc/SleepService Using BATT (Charge:80%) 2 secs    
+2026-11-15 09:02:29 +0300 Sleep               	Entering Sleep state due to 'Sleep Service Back to Sleep':TCPKeepAlive=active Using Batt (Charge:80%) 987 secs  
+2026-11-15 09:02:32 +0300 Wake Requests       	[*process=dasd request=SleepService deltaSecs=983 wakeAt=2026-11-15 14:18:55 info="com.apple.dasd:501:com.apple.GenerativeFunctions.PeriodicTasks.SystemA
+2026-11-15 09:18:56 +0300 DarkWake            	DarkWake from Deep Idle [CDNP] : due to NUB.SPMI0Sw3IRQ nub-spmi.0x02 rtc/SleepService Using BATT (Charge:80%) 2 secs    
+2026-11-15 09:18:58 +0300 Sleep               	Entering Sleep state due to 'Sleep Service Back to Sleep':TCPKeepAlive=active Using Batt (Charge:80%) 1030 secs 
+2026-11-15 09:19:01 +0300 Wake Requests       	[*process=dasd request=SleepService deltaSecs=1026 wakeAt=2026-11-15 14:36:07 info="com.apple.dasd:501:com.apple.GenerativeFunctions.PeriodicTasks.System
+2026-11-15 09:36:08 +0300 DarkWake            	DarkWake from Deep Idle [CDNP] : due to NUB.SPMI0Sw3IRQ nub-spmi.0x02 rtc/SleepService Using BATT (Charge:80%) 2 secs    
+2026-11-15 09:36:10 +0300 Sleep               	Entering Sleep state due to 'Sleep Service Back to Sleep':TCPKeepAlive=active Using Batt (Charge:80%) 686 secs  
+2026-11-15 09:36:12 +0300 Wake Requests       	[process=dasd request=SleepService deltaSecs=912 wakeAt=2026-11-15 14:51:25 info="com.apple.dasd:501:com.apple.GenerativeFunctions.PeriodicTasks.SystemAp
+2026-11-15 09:47:36 +0300 Wake                	Wake from Deep Idle [CDNVA] : due to smc.sysState.Wake(0x70070000) lid SMC.OutboxNotEmpty/HID Activity Using BATT (Charge:80%)           

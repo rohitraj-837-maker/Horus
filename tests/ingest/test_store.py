@@ -47,6 +47,19 @@ def test_load_day_and_iter_tracks(archive):
     assert store.load_day(date(2000, 1, 1), root=root).empty
 
 
+def test_day_partitioned_archive(archive, tmp_path):
+    """adsb.lol history is partitioned by date= only (no hour=); loaders must work."""
+    _, a, _ = archive
+    day = pd.Timestamp(int(a["time"].min()), unit="s", tz="UTC").date()
+    root = tmp_path / "daily"
+    (root / f"date={day:%Y-%m-%d}").mkdir(parents=True)
+    a.to_parquet(root / f"date={day:%Y-%m-%d}" / "part-0.parquet", index=False)
+    icao = a["icao24"].iloc[0]
+    tr = store.load_track(icao, 0, 2**40, root=root)
+    assert len(tr) == (a.icao24 == icao).sum()
+    assert list(store.load_day(day, root=root).columns) == list(a.columns)
+
+
 def test_resample_no_interpolation():
     tr = pd.DataFrame(
         {

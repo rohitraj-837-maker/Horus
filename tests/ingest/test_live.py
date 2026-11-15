@@ -4,6 +4,8 @@ httpx.MockTransport, so no API credits are consumed."""
 import asyncio
 import dataclasses
 import json
+from datetime import UTC, datetime
+from pathlib import Path
 
 import httpx
 import numpy as np
@@ -320,3 +322,47 @@ def test_audit_accepts_planned_backoff():
     iv = [90.0, 600.0] + [90.0] * (len(t) - 2)
     res = audit.audit(_polls(t, iv), hours=24, end=t[-1])
     assert res.passed, res.reasons
+
+
+# ------------------------------------------------- host sleep (real pmset excerpt)
+
+# Real recorder gaps on 2026-11-15 (lid closed on battery, 03:46-06:47 UTC)
+FIXTURES = Path(__file__).parents[1] / "fixtures"
+GAP_POLLS = [1794714353.0, 1794720865.0, 1794725306.0]
+
+
+def _pmset_sample() -> str:
+    return (FIXTURES / "pmset_sleep_sample.log").read_text()
+
+
+def test_parse_pmset_sleeps_real_log():
+    s = audit.parse_pmset_sleeps(_pmset_sample())
+    # starts at "Entering Sleep state" (03:46:19 UTC), not at "Entering DarkWake state"
+    assert s[0, 0] == datetime(2026, 11, 15, 3, 46, 19, tzinfo=UTC).timestamp()
+    # last interval ends at the lid-open Wake (06:47:36 UTC); "Wake Requests" lines ignored
+    assert s[-1, 1] == datetime(2026, 11, 15, 6, 47, 36, tzinfo=UTC).timestamp()
+    assert (s[:, 1] > s[:, 0]).all() and (s[1:, 0] >= s[:-1, 1]).all()
+
+
+def _with_gap_polls():
+    before = list(np.arange(GAP_POLLS[0] - 3600, GAP_POLLS[0], 90.0))
+    after = list(np.arange(GAP_POLLS[2] + 90, GAP_POLLS[2] + 3600, 90.0))
+    t = before + GAP_POLLS + after
+    return _polls(t, [90.0] * len(t)), t[-1]
+
+
+def test_audit_excuses_gaps_only_when_host_asleep():
+    polls, end = _with_gap_polls()
+    plain = audit.audit(polls, hours=6, end=end)
+    assert plain.bad_gaps == 2
+    res = audit.audit(polls, hours=6, end=end, sleeps=audit.parse_pmset_sleeps(_pmset_sample()))
+    assert res.bad_gaps == 0 and res.excused_gaps == 2
+    assert 2.5 * 3600 < res.slept_s < GAP_POLLS[2] - GAP_POLLS[0]
+
+
+def test_audit_does_not_excuse_gap_when_host_awake():
+    polls, end = _with_gap_polls()
+    # host asleep for only half of the first gap -> recorder must have stalled
+    half = np.array([[GAP_POLLS[0], (GAP_POLLS[0] + GAP_POLLS[1]) / 2]])
+    res = audit.audit(polls, hours=6, end=end, sleeps=half)
+    assert res.bad_gaps == 2 and res.excused_gaps == 0
