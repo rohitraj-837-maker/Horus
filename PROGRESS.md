@@ -39,6 +39,10 @@ One entry per milestone gate. A milestone is **complete** only when its `make ga
 
 - **2026-11-15: Demo front end restarted from a blank page (Rohit).** Research first (docs/design-brief.md): aviationweather.gov GFA/PIREP, Aireon, SkyPath read and rendered; Maserati Trident Stars, withwise.com, microdose.studio for structure; Flightradar24/FlightAware/Turbli refused automated access (403) and were not contacted further. New front end: night-sky opening scene; problem; five steps with labs; proof; four skies; dated comparison table (PIREPs, Aireon, SkyPath, Horus; published facts only); roadmap with folds. Radar follows AWC conventions (layer strip, T+ timeline with peak marker, FL range, caret PIREPs, legend; smooth air neutral grey; Moderate #FF9900, Severe AWC #CC0000 brightened to #EC2A2A). Serif font removed.
 
+- **2026-11-15: M2 input = held 1 s series from the adsb.lol archive.** readsb stores a vertical-rate point only when it moves ≥ 200 ft/min from the last stored value, plus a ~20 s heartbeat (source read; on 2025-12-02, 99.5% of heartbeat pairs differ by < 200 ft/min). Each stored value is held until the next point (max gap 25 s). ADS-B rows only; MLAT is excluded (8 ft/min step, no dead band). Trino full-rate data, once available, reruns the same bench.
+- **2026-11-15: M2 evaluation design.** PIREP windows and no-PIREP windows have the same shape (±10 min, 40 km, ±2,000 ft), and both need ≥ 5 aircraft in the window. No-PIREP windows are centred on random aircraft-minutes with no turbulence PIREP within ±2 h / 150 km (1,000 candidates per test day, fixed seed). A window's score is the max over aircraft-minutes inside it; a detector with no value there scores 0, so it is charged with the miss. tau per row = lowest score giving ≤ 1 alarm event per 1,000 clear flight-hours on **train days only**. An event = a run of consecutive alarmed minutes on one aircraft (minute resolution, replacing the 30 s merge for the bench). Test-day metrics: PR-AUC, ROC-AUC, recall at tau, test FA rate, precision at recall 0.5.
+- **2026-11-15: Bug fixed in `core/segment.py`.** "Level" was assigned up to half a window beyond the observed data, so the 30 s trim was spent on empty grid points and climbs/descents next to data edges and coverage gaps were not trimmed. Found because B2 coverage changed with chunk size. Points must now lie inside observed data. Flicker is no longer detected across held pieces, and B1 round-off is snapped to 0. Scores are now identical under different chunk sizes; demo scenarios regenerated.
+
 ## M1 — Ingestion ✅ gate passed (2026-11-15 22:30 UTC)
 
 `make gate-m1 DAY=2026-11-14` (2026-11-15 01:5x AEDT): ruff ✔, mypy ✔, **pytest 110 passed** (1 Trino test deselected until access), then:
@@ -65,11 +69,13 @@ Key findings (details in `reports/data_notes.md`):
 - Also built after the first gate run: `ingest/adsblol_history.py` (streams adsb.lol daily tar releases, CONUS ≥ FL180 to Parquet with bounded memory), `scripts/fetch_adsblol_history.py`. The IEM PIREP ingest is now resumable with retries; an earlier run had silently stopped partway when IEM dropped a connection.
 - Study period fixed: 2025-12-02 → 2026-01-15 (most MOD+ PIREPs); train Dec 2–31, test Jan 1–15. History download started 2026-11-15 ~02:13 AEDT (`data/raw/adsblol_hist/_log.csv`).
 
-## M2 — Segmentation, residual, B0–B2 ⏳ core started under the gate-order exception
+## M2 — Segmentation, residual, B0–B2 ⏳ eval built; scoring the study window
 
 Done (synthetic tests only; no benchmark rows):
 - `core/geo.py` (haversine, ISA pressure ↔ altitude, FL bins, H3), `core/rolling.py` (NaN-aware centred windows), `core/segment.py` (level flight, trims, sparse-data aware), `core/residual.py` (median trend, flicker-weighted variance, Sheppard, B0/B1 acceleration RMS), `tests/synth.py`.
 - `make check`: ruff ✔, mypy strict on core ✔ (5 files), **pytest 162 passed**.
 - Verified by tests: injected σ ∈ {40, 64, 100, 150} ft/min recovered within 3% after quantisation (Sheppard helps every case); smooth air with 2% flicker stays below every turbulent window; step-climbs never enter segments and never trigger; sparse 20 s data needs wider windows.
 
-Next (unblocked by the M1 gate): `eval/match.py`, `eval/negatives.py`, `eval/detector_bench.py`, leakage test, B0–B2 rows.
+Built after the M1 gate (commit 3090233): `core/hold.py`, `eval/scores.py` (per-minute B0/B1/B2), `eval/match.py`, `eval/negatives.py`, `eval/metrics.py`, `eval/detector_bench.py`, `eval/splits.py` + `tests/test_leakage.py`, `scripts/score_days.py`, `scripts/gate_m2.py`; `make scores`, `make bench-detector`, `make gate-m2`. pytest 241 passed; mypy strict on core + eval.
+
+Next: score 44 days (`make scores`), run `make bench-detector`, then `make gate-m2`.

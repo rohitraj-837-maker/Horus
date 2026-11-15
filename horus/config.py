@@ -64,6 +64,8 @@ class Normalise:
     n_min_segments: int
     smooth_exclusion: SmoothExclusion
     method: str
+    scale_quantile: float
+    min_level_s: int
 
 
 @dataclass(frozen=True)
@@ -88,12 +90,17 @@ class Grid:
     l_min: float
     l_max: float
     theta_display: float
+    detect_fa_per_1000h: float
+    half_life_max_dt_s: int
+    half_life_bin_s: int
+    tau_smooth_frac: float
 
 
 @dataclass(frozen=True)
 class Winds:
     levels_hpa: list[int]
     refresh_h: int
+    lattice_step_deg: float
 
 
 @dataclass(frozen=True)
@@ -123,6 +130,7 @@ class Match:
 @dataclass(frozen=True)
 class Eval:
     rates_s: list[int]
+    rate_windows: dict[str, list[int]]
     nowcast_horizon_s: int
     nowcast_step_s: int
     ece_bins: int
@@ -253,8 +261,17 @@ def _check(cfg: Config) -> None:
         raise ConfigError("grid: theta_display must be in (0, 1)")
     if cfg.live.source not in {"opensky", "adsblol"}:
         raise ConfigError("live.source must be opensky or adsblol")
-    if cfg.normalise.method not in {"robust_z", "percentile"}:
-        raise ConfigError("normalise.method must be robust_z or percentile")
+    for r in cfg.eval.rates_s:
+        w = cfg.eval.rate_windows.get(str(r))
+        if w is None or len(w) != 2 or w[1] / r + 1 < cfg.residual.min_samples_stat:
+            raise ConfigError(f"eval.rate_windows[{r}]: need [w_trend, w_stat] with enough samples")
+    if str(1) in cfg.eval.rate_windows and cfg.eval.rate_windows["1"] != [
+        cfg.residual.w_trend_s,
+        cfg.residual.w_stat_s,
+    ]:
+        raise ConfigError("eval.rate_windows['1'] must equal residual.w_trend_s/w_stat_s")
+    if cfg.normalise.method not in {"robust_z", "percentile", "quantile_scale"}:
+        raise ConfigError("normalise.method must be robust_z, percentile or quantile_scale")
     sp = cfg.splits
     try:
         for d in (sp.train_start, sp.train_end, sp.test_start, sp.test_end):

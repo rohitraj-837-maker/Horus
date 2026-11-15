@@ -35,23 +35,23 @@ def _day_has_tracks(day: date, cfg: config.Config) -> bool:
     return base is None or (base / f"date={day}").exists()
 
 
-def run_one(day_s: str) -> dict[str, object]:
-    cfg = config.load()
-    day = date.fromisoformat(day_s)
+def run_one(day_s: str, step_s: int = 1) -> dict[str, object]:
     t0 = time.time()
     row: dict[str, object] = {"date": day_s}
-    if not _day_has_tracks(day, cfg):
-        return {**row, "status": "no_data", "seconds": 0.0}
-    try:
-        df, stats = scores.score_day(day, cfg)
-        out = scores.scores_path(day, cfg)
+    try:  # any failure (config, data, code) is recorded; the run continues
+        cfg = config.load()
+        day = date.fromisoformat(day_s)
+        if not _day_has_tracks(day, cfg):
+            return {**row, "status": "no_data", "seconds": 0.0}
+        df, stats = scores.score_day(day, cfg, step_s=step_s)
+        out = scores.scores_path(day, cfg, step_s)
         out.parent.mkdir(parents=True, exist_ok=True)
         tmp = out.with_suffix(".tmp")
         df.to_parquet(tmp, index=False)
         tmp.replace(out)
         row.update(stats)
         row["status"] = "ok"
-    except Exception as e:  # recorded, the run continues with other days
+    except Exception as e:
         row.update(status="error", error=f"{type(e).__name__}: {e}")
     row["seconds"] = round(time.time() - t0, 1)
     return row
@@ -63,15 +63,16 @@ def main() -> int:
     ap.add_argument("--end", required=True)
     ap.add_argument("--workers", type=int, default=1)
     ap.add_argument("--force", action="store_true", help="recompute existing days")
+    ap.add_argument("--rate", type=int, default=1, help="data rate in seconds (eval.rates_s)")
     a = ap.parse_args()
 
     cfg = config.load()
     d0, d1 = date.fromisoformat(a.start), date.fromisoformat(a.end)
     days = [str(d0 + timedelta(days=i)) for i in range((d1 - d0).days + 1)]
-    todo = [d for d in days if a.force or not scores.scores_path(d, cfg).exists()]
+    todo = [d for d in days if a.force or not scores.scores_path(d, cfg, a.rate).exists()]
     print(f"{len(days)} days, {len(todo)} to score, {a.workers} worker(s)", flush=True)
 
-    log = config.resolve(cfg.bench.scores_dir) / "_log.csv"
+    log = scores.scores_dir(cfg, a.rate) / "_log.csv"
     log.parent.mkdir(parents=True, exist_ok=True)
     new_file = not log.exists()
     failed = 0
@@ -80,7 +81,7 @@ def main() -> int:
         if new_file:
             w.writeheader()
         with ProcessPoolExecutor(max_workers=a.workers) as ex:
-            futs = {ex.submit(run_one, d): d for d in todo}
+            futs = {ex.submit(run_one, d, a.rate): d for d in todo}
             for f in as_completed(futs):
                 row = f.result()
                 w.writerow({k: row.get(k, "") for k in LOG_FIELDS})

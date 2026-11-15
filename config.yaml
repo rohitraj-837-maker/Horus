@@ -31,7 +31,10 @@ normalise:                   # SPEC §5.3
     time_s: 7200
     dist_km: 150.0
     alt_ft: 4000.0
-  method: robust_z           # robust_z | percentile
+  method: quantile_scale     # robust_z | percentile | quantile_scale (robust z centred at 0;
+                             # held adsb.lol smooth sigma is mostly exactly 0, see core/normalise.py)
+  scale_quantile: 0.99       # quantile_scale: T = sigma / q(smooth sigma)
+  min_level_s: 30            # a smooth minute needs >= this many level-flight seconds
 
 detect:                      # SPEC §5.4
   tau_detect: null           # tuned on train split
@@ -55,10 +58,15 @@ grid:                        # SPEC §5.5
   l_min: -6.0
   l_max: 6.0
   theta_display: 0.5
+  detect_fa_per_1000h: 10.0  # grid evidence/target threshold: B3 tau at this clear-air FA rate (train)
+  half_life_max_dt_s: 7200   # pass pairs up to 2 h apart for the half-life fit
+  half_life_bin_s: 300
+  tau_smooth_frac: 0.5       # N3: a pass with T < frac * tau is a confident smooth pass
 
 winds:
   levels_hpa: [400, 300, 250, 200]   # 400 hPa is a logged deviation from SPEC (covers FL200-FL260)
   refresh_h: 6
+  lattice_step_deg: 2.0      # Open-Meteo GFS lattice over the region
 
 match:                       # SPEC §6.1
   window_s: 600
@@ -89,6 +97,10 @@ bench:                       # SPEC §6.2 detector ablation (B0-B2 at M2)
 
 eval:
   rates_s: [1, 5, 10]
+  rate_windows:              # [W_trend_s, W_stat_s] per data rate (s). 1 s = SPEC §5.2;
+    "1": [31, 15]            # sparser rates widen so a stat window keeps >= 6 samples
+    "5": [61, 30]
+    "10": [121, 60]
   nowcast_horizon_s: 900
   nowcast_step_s: 300
   ece_bins: 10

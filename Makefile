@@ -1,4 +1,4 @@
-.PHONY: setup test lint types check gate-m0 gate-m1 gate-m2 scores bench-detector record recorder-status trino-smoke demo demo-data bundle gate-demo
+.PHONY: setup test lint types check gate-m0 gate-m1 gate-m2 gate-m3 gate-m4 gate-m5 scores bench-detector bench-rates winds bench-nowcast bench record recorder-status trino-smoke demo demo-data bundle gate-demo
 
 setup:
 	uv sync
@@ -32,6 +32,34 @@ bench-detector:
 
 gate-m2: check
 	uv run python scripts/gate_m2.py
+
+# M3: rate rows (5 s / 10 s scores are cheap: scored on a coarser grid) + window sweep
+bench-rates:
+	uv run python scripts/score_days.py --start 2025-12-02 --end 2026-01-15 --workers 2 --rate 5
+	uv run python scripts/score_days.py --start 2025-12-02 --end 2026-01-15 --workers 2 --rate 10
+	uv run python -m horus.eval.detector_bench --rate 1 --windows sweep
+	uv run python -m horus.eval.detector_bench --rate 5
+	uv run python -m horus.eval.detector_bench --rate 10
+
+gate-m3: check
+	uv run python scripts/gate_m3.py
+
+# M4/M5: GFS winds, half-life fit, nowcast replays, grid performance
+winds:
+	uv run python -m horus.ingest.winds --start 2025-12-02 --end 2026-01-15
+
+bench-nowcast:
+	uv run python -m horus.eval.nowcast_bench fit
+	uv run python -m horus.eval.nowcast_bench run --rows CLIM,N0,N1,N2,N3 --plots
+
+bench:
+	uv run python -m horus.eval.perf_bench
+
+gate-m4: check
+	uv run python scripts/gate_nowcast.py m4
+
+gate-m5: check bench
+	uv run python scripts/gate_nowcast.py m5
 
 record:
 	nohup caffeinate -i uv run python scripts/record_live.py > data/raw/live/nohup-opensky.out 2>&1 & echo $$! > data/raw/live/recorder.pid
