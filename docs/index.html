@@ -30,7 +30,14 @@
   --fc: #b35ce8;              /* forecast */
   --rep: #e0507f;             /* pilot reports (rose: amber/rose/purple pass every CVD check, all pairs) */
   --wind: #2a9fd6;            /* wind / time */
-  --muted-mark: #48484a;      /* bars below threshold, baselines */
+  --muted-mark: #48484a;
+  /* text tints of the meanings (>= 7:1 on black; words still carry the meaning) */
+  --turb-t: #ffb44d;
+  --fc-t: #d3a2f8;
+  --rep-t: #ff95b8;
+  --wind-t: #82cff2;
+  --blue-t: #74b8ff;
+  --good-t: #6fdc9e;      /* bars below threshold, baselines */
   --term: #0a0c0f;
   --radius: 28px;
   --radius-sm: 18px;
@@ -95,6 +102,10 @@ h1 { margin: 0; font-size: clamp(64px, 13vw, 168px); line-height: 0.95; font-wei
 }
 .lede { margin: 26px auto 0; max-width: 720px; font-size: clamp(17px, 1.6vw, 21px); line-height: 1.5; color: var(--ink-2); }
 .lede strong { color: var(--ink); font-weight: 500; }
+/* utility colours win over the generic "bold text is white" rules */
+.t-turb { color: var(--turb-t) !important; } .t-fc { color: var(--fc-t) !important; } .t-rep { color: var(--rep-t) !important; }
+.t-wind { color: var(--wind-t) !important; } .t-blue { color: var(--blue-t) !important; } .t-good { color: var(--good-t) !important; }
+strong.t-turb, strong.t-fc, strong.t-rep, strong.t-wind, strong.t-blue, b.t-turb, b.t-fc, b.t-rep, b.t-wind, b.t-blue { font-weight: 600; }
 .cta { margin-top: 34px; display: flex; justify-content: center; align-items: center; gap: 28px; flex-wrap: wrap; }
 
 /* ---------- live map ---------- */
@@ -202,7 +213,7 @@ svg.chart .ptitle { fill: var(--ink-2); font-weight: 600; font-size: 11.5px; }
   counter-increment: s; content: counter(s); position: absolute; left: 0; top: 16vh; width: 32px; height: 32px; border-radius: 10px;
   display: grid; place-items: center; font-size: 14px; font-weight: 700; color: #000; background: var(--c, var(--wind));
 }
-.step h5 { margin: 0 0 8px; font-size: 22px; font-weight: 650; letter-spacing: -0.02em; }
+.step h5 { margin: 0 0 8px; font-size: 22px; font-weight: 650; letter-spacing: -0.02em; color: color-mix(in srgb, var(--c) 55%, #ffffff); }
 .step p { margin: 0; font-size: 16px; color: var(--ink-2); line-height: 1.55; max-width: 44ch; }
 
 /* ---------- bento ---------- */
@@ -222,6 +233,8 @@ svg.chart .ptitle { fill: var(--ink-2); font-weight: 600; font-size: 11.5px; }
 .card .figure small { font-size: 0.42em; letter-spacing: -0.02em; font-weight: 600; color: var(--ink-2); margin-left: 4px; }
 .card p.body { margin: 14px 0 0; color: var(--ink-2); font-size: 15.5px; line-height: 1.5; max-width: 48ch; }
 .card p.body strong { color: var(--ink); font-weight: 500; }
+.card .label { color: color-mix(in srgb, var(--fig, #a1a1a6) 70%, #ffffff); }
+.card .figure { color: color-mix(in srgb, var(--fig, #ffffff) 55%, #ffffff); }
 .chip { display: inline-flex; align-items: center; gap: 10px; margin-top: 20px; padding: 10px 14px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line); font-family: var(--mono); font-size: 14px; }
 .chip .prompt { color: var(--accent); }
 .hexes { position: absolute; right: -18px; bottom: -22px; width: 190px; z-index: -1; }
@@ -272,7 +285,7 @@ svg.chart .ptitle { fill: var(--ink-2); font-weight: 600; font-size: 11.5px; }
 .rpanel.on { display: grid; animation: panel-in 0.55s var(--ease); }
 @keyframes panel-in { from { opacity: 0; transform: translateY(14px); } }
 .rbig { padding: 30px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); display: flex; flex-direction: column; justify-content: center; }
-.rbig .num { font-size: clamp(56px, 6vw, 84px); font-weight: 700; letter-spacing: -0.05em; line-height: 1; font-variant-numeric: tabular-nums; }
+.rbig .num { color: color-mix(in srgb, var(--c) 60%, #ffffff); font-size: clamp(56px, 6vw, 84px); font-weight: 700; letter-spacing: -0.05em; line-height: 1; font-variant-numeric: tabular-nums; }
 .rbig .num small { font-size: 0.4em; color: var(--ink-2); font-weight: 600; letter-spacing: -0.02em; margin-left: 4px; }
 .rbig .what { margin: 14px 0 0; font-size: 17px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
 .rbig .what::before { content: ""; width: 10px; height: 10px; border-radius: 3px; background: var(--c); }
@@ -299,6 +312,7 @@ svg.chart .ptitle { fill: var(--ink-2); font-weight: 600; font-size: 11.5px; }
 .case-meta b { color: var(--ink); font-weight: 600; }
 .case-note { margin: 14px 0 0; font-size: 15px; color: var(--ink-2); max-width: 80ch; }
 .case-note b { color: var(--ink); font-weight: 600; }
+.case-note b.hit { color: var(--good-t); } .case-note b.miss { color: var(--rep-t); } .case-note b.late { color: var(--turb-t); }
 .case-ctrl { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .case-legend { margin: 6px 0 0; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12.5px; color: var(--ink-2); }
 .case-legend span { display: inline-flex; align-items: center; gap: 6px; }
@@ -352,7 +366,7 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
 .bar-s { transition: height 0.6s var(--ease), y 0.6s var(--ease), opacity 0.4s; }
 .stage::after {  /* scrim: keeps captions readable over the sky */
   content: ""; position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(180deg, rgba(3,14,42,0.88) 0%, rgba(3,14,42,0.62) 28%, rgba(3,14,42,0) 50%);
+  background: linear-gradient(180deg, rgba(1,3,10,0.85) 0%, rgba(1,3,10,0.5) 28%, rgba(1,3,10,0) 50%);
 }
 .cap {
   position: absolute; z-index: 2; left: 50%; top: 10vh; width: min(820px, calc(100vw - 40px)); text-align: center;
@@ -372,6 +386,8 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
 .cap.intro .tagline-big { margin: 0; max-width: 900px; font-size: clamp(26px, 3.6vw, 46px); line-height: 1.08; font-weight: 650; letter-spacing: -0.035em; text-wrap: balance; }
 .beacon { animation: blink 1.4s linear infinite; }
 .beacon.b2 { animation-delay: 0.7s; }
+.strobe { animation: strobe 1.5s linear infinite; }
+@keyframes strobe { 0%, 4% { opacity: 1; } 5%, 9% { opacity: 0; } 10%, 13% { opacity: 1; } 14%, 100% { opacity: 0; } }
 @keyframes blink { 0%, 7% { opacity: 1; } 8%, 100% { opacity: 0.1; } }
 .scroll-hint { position: absolute; z-index: 2; left: 50%; bottom: 4.5vh; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-2); transition: opacity 0.4s; }
 .scroll-hint svg { width: 18px; height: 18px; animation: bob 1.6s ease-in-out infinite; }
@@ -393,7 +409,7 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
 .facts > span { display: inline-flex; align-items: baseline; gap: 6px; padding: 2px 16px; font-size: 13.5px; color: var(--ink-2); border-left: 1px solid rgba(255, 255, 255, 0.18); }
 .facts > span:first-child { border-left: 0; }
 .facts b { font-variant-numeric: tabular-nums; }
-.facts b { color: #fff; font-weight: 600; }
+.facts b { color: color-mix(in srgb, var(--c, #fff) 60%, #ffffff); font-weight: 650; }
 .cap.on .facts > span { animation: chip-in 0.5s var(--ease) both; animation-delay: 0.3s; }
 .cap.on .facts > span:nth-child(2) { animation-delay: 0.4s; }
 .cap.on .facts > span:nth-child(3) { animation-delay: 0.5s; }
@@ -403,7 +419,7 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
 .breathe { transform-box: fill-box; transform-origin: center; animation: breathe 2.6s ease-in-out infinite; }
 @keyframes breathe { 50% { transform: scale(1.07); } }
 .illus .short { display: none; }
-#s-stars { display: none; }  /* daytime: no stars */
+#s-stars .tw { animation: twinkle 4.2s ease-in-out infinite; }
 .illus { color: #fff; background: rgba(3, 14, 42, 0.72); padding: 4px 10px; border-radius: 980px; }
 .scroll-hint { color: #fff; text-shadow: 0 1px 10px rgba(3, 14, 42, 0.7); }
 .cap.intro .tagline-big.grad { color: #e6eefb; }
@@ -425,7 +441,7 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
 .still .facts > span { animation: none !important; }
 .still .rpanel.on, .still .limit[open] p { animation: none !important; }
 @media (prefers-reduced-motion: reduce) {
-  .waves path, .wind-arrow, .ring, .scroll-hint svg, .beacon, .tw, .breathe, .cap.on .facts > span { animation: none; }
+  .waves path, .wind-arrow, .ring, .scroll-hint svg, .beacon, .strobe, .tw, #s-stars .tw, .breathe, .cap.on .facts > span { animation: none; }
 }
 @media (max-width: 720px) {
   .cap { top: 9vh; }
@@ -504,49 +520,63 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
       <svg class="scene" id="scene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
         <defs>
           <linearGradient id="g-sky" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="900">
-            <stop offset="0" stop-color="#08296a"/><stop offset="0.34" stop-color="#124c9f"/><stop offset="0.58" stop-color="#3b84cc"/><stop offset="0.7" stop-color="#93c3ea"/><stop offset="0.78" stop-color="#dce9f6"/><stop offset="1" stop-color="#c2d1e2"/>
+            <stop offset="0" stop-color="#01030a"/><stop offset="0.4" stop-color="#050d24"/><stop offset="0.66" stop-color="#0b1a3d"/><stop offset="0.78" stop-color="#14264d"/><stop offset="1" stop-color="#0a1430"/>
           </linearGradient>
-          <radialGradient id="g-cloud"><stop offset="0" stop-color="#ffffff" stop-opacity="0.6"/><stop offset="0.6" stop-color="#f4f8fc" stop-opacity="0.25"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></radialGradient>
+          <radialGradient id="g-cloud"><stop offset="0" stop-color="#a9bde3" stop-opacity="0.22"/><stop offset="0.6" stop-color="#8ea6d4" stop-opacity="0.08"/><stop offset="1" stop-color="#8ea6d4" stop-opacity="0"/></radialGradient>
+          <radialGradient id="g-moon"><stop offset="0" stop-color="#fdf8e8" stop-opacity="0.32"/><stop offset="1" stop-color="#fdf8e8" stop-opacity="0"/></radialGradient>
+          <mask id="m-moon"><circle cx="0" cy="0" r="26" fill="#fff"/><circle cx="11" cy="-7" r="23" fill="#000"/></mask>
+          <radialGradient id="g-glow-red"><stop offset="0" stop-color="#ff3b30" stop-opacity="0.85"/><stop offset="1" stop-color="#ff3b30" stop-opacity="0"/></radialGradient>
+          <radialGradient id="g-glow-white"><stop offset="0" stop-color="#ffffff" stop-opacity="0.9"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></radialGradient>
+          <linearGradient id="g-fin-light" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#f2f6ff" stop-opacity="0.75"/><stop offset="0.7" stop-color="#f2f6ff" stop-opacity="0.08"/><stop offset="1" stop-color="#f2f6ff" stop-opacity="0"/></linearGradient>
           <radialGradient id="g-rough"><stop offset="0" stop-color="#d07a00" stop-opacity="0.42"/><stop offset="0.5" stop-color="#b35ce8" stop-opacity="0.16"/><stop offset="1" stop-color="#b35ce8" stop-opacity="0"/></radialGradient>
           <radialGradient id="g-lit"><stop offset="0" stop-color="#b35ce8" stop-opacity="0.55"/><stop offset="1" stop-color="#b35ce8" stop-opacity="0"/></radialGradient>
-          <linearGradient id="g-body" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7f8fa"/><stop offset="0.55" stop-color="#e3e6eb"/><stop offset="1" stop-color="#b7bdc7"/></linearGradient>
+          <linearGradient id="g-body" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9e1ef"/><stop offset="0.5" stop-color="#9aa7c0"/><stop offset="1" stop-color="#46516b"/></linearGradient>
           <linearGradient id="g-tail" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2a9fd6"/><stop offset="1" stop-color="#b35ce8"/></linearGradient>
-          <linearGradient id="g-trail" x1="0" x2="1"><stop offset="0" stop-color="#ffffff" stop-opacity="0"/><stop offset="1" stop-color="#ffffff" stop-opacity="0.75"/></linearGradient>
+          <linearGradient id="g-trail" x1="0" x2="1"><stop offset="0" stop-color="#cfdcff" stop-opacity="0"/><stop offset="1" stop-color="#cfdcff" stop-opacity="0.45"/></linearGradient>
           <clipPath id="clip-trace"><rect id="clip-trace-rect" x="200" y="600" width="0" height="300"/></clipPath>
           <!-- a generic twin-jet in side view, nose right (our own drawing, no livery) -->
-          <symbol id="sym-plane" viewBox="0 0 200 56">
-            <!-- Boeing 737-800, side view, nose right; generic paint, no livery or registration -->
-            <path d="M29 30.6 L9 4.2 L19.5 4.2 L46 25.8 L60 25.4 L44 23.6 Z" fill="#3a4357"/>
-            <path d="M14.6 9.6 L27.6 29.2" stroke="#2a3142" stroke-width="0.5"/>
-            <ellipse cx="11.6" cy="31.6" rx="1.1" ry="0.8" fill="#4a505b"/>
-            <path d="M31 31.4 L7.5 35.4 L12 36.6 L39 32.8 Z" fill="#c4c9d1"/>
-            <path d="M11 35.1 L33 32.2" stroke="#a3a9b3" stroke-width="0.4"/>
+          <symbol id="sym-plane" viewBox="-12 -12 224 80" overflow="visible">
+            <!-- Boeing 737-800 at night, side view, nose right: moonlit paint, lit cabin, logo-lit fin,
+                 navigation light, beacons and strobe. Generic, no livery or registration. -->
+            <path d="M29 30.6 L9 4.2 L19.5 4.2 L46 25.8 L60 25.4 L44 23.6 Z" fill="#26304a"/>
+            <path d="M29 30.6 L9 4.2 L19.5 4.2 L46 25.8 L60 25.4 L44 23.6 Z" fill="url(#g-fin-light)"/>
+            <path d="M14.6 9.6 L27.6 29.2" stroke="#1a2236" stroke-width="0.5"/>
+            <ellipse cx="11.6" cy="31.6" rx="1.1" ry="0.8" fill="#2a3040"/>
+            <path d="M31 31.4 L7.5 35.4 L12 36.6 L39 32.8 Z" fill="#7d8aa6"/>
+            <path d="M11 35.1 L33 32.2" stroke="#5d6982" stroke-width="0.4"/>
             <path d="M12 31.2 L31 25.6 L168 25.1 C181 25.1 190.5 27.8 195.6 31.5 C196.6 32.3 196.4 33.4 195 34 C189 37.2 180 38.8 168 39 L54 39.2 C42 39.2 28 36.6 12 31.9 Z" fill="url(#g-body)"/>
-            <path d="M31.5 26 L168 25.6 C178 25.6 186 27 192.2 29.6" fill="none" stroke="#ffffff" stroke-width="0.9" opacity="0.85"/>
-            <path d="M54 39.2 L168 39 C176 38.9 183 38.2 188 36.9 L60 37.3 Z" fill="#a9b0bb" opacity="0.55"/>
-            <path d="M84 38.6 C95 41.6 118 41.8 130 38.4 Z" fill="#cfd4db"/>
-            <path d="M93 35 L60.5 49.2 L66.5 50.6 L120 36.4 Z" fill="#c1c6ce"/>
-            <path d="M93 35 L120 36.4" stroke="#e9ecf0" stroke-width="0.6"/>
-            <path d="M60.5 49.2 L57.6 42.6 L60 42.4 L64.6 49.8 Z" fill="#aab1bc"/>
-            <circle cx="61.4" cy="49.6" r="0.7" fill="#ff453a"/>
-            <path d="M74 44.6 l-6 2.8 l1.6 0.5 l6.2 -2.6 z M84 40.6 l-6 2.8 l1.6 0.5 l6.2 -2.6 z" fill="#b5bbc4"/>
-            <path d="M96 37.4 L113 37.2 L111 39.2 L98 39.4 Z" fill="#c7ccd3"/>
-            <path d="M85 38.2 H110 C113.4 38.2 115 40 115 43 C115 45.9 113.6 47.4 110.6 47.4 H87.4 C85.2 47.4 84.2 46.6 83.8 45.2 L83.4 41.4 C83.3 39.4 84 38.2 85 38.2 Z" fill="#b3b9c3"/>
-            <path d="M100 38.3 V47.3" stroke="#9aa1ac" stroke-width="0.35"/>
-            <ellipse cx="114" cy="42.8" rx="1.5" ry="4.2" fill="#1b2029"/>
-            <ellipse cx="114.3" cy="42.8" rx="0.7" ry="2.6" fill="#3a414d"/>
-            <path d="M83.4 39.8 L78.6 41.2 L78.6 44.2 L83.6 45.4 Z" fill="#6e7684"/>
-            <line x1="52" y1="29.6" x2="176" y2="29.6" stroke="#2a303b" stroke-width="1.7" stroke-dasharray="1.7 3.9" stroke-linecap="round"/>
-            <rect x="45.5" y="27.2" width="4" height="9" rx="1" fill="none" stroke="#8a919d" stroke-width="0.5"/>
-            <rect x="170" y="27" width="4.2" height="9.4" rx="1" fill="none" stroke="#8a919d" stroke-width="0.5"/>
-            <rect x="97.6" y="27.6" width="2.6" height="4.6" rx="0.6" fill="none" stroke="#8a919d" stroke-width="0.4"/>
-            <rect x="103" y="27.6" width="2.6" height="4.6" rx="0.6" fill="none" stroke="#8a919d" stroke-width="0.4"/>
-            <path d="M178.6 28.7 L182.9 28.3 L182.6 30.7 L178.4 30.9 Z M183.5 28.3 L187.9 28.9 L187.5 31.1 L183.1 30.7 Z M188.5 29.1 L191.7 30.5 L190.6 32 L188.1 31.3 Z" fill="#1b2029" stroke="#59606d" stroke-width="0.3"/>
-            <path d="M70 25.5 l1.2 -2.4 h0.7 l-0.6 2.4 z M140 25.3 l1 -1.9 h0.6 l-0.5 1.9 z" fill="#9aa1ac"/>
-            <path d="M118 39.1 L132 38.9" stroke="#9aa1ac" stroke-width="0.4"/>
-            <circle class="beacon" cx="108" cy="24.9" r="1.3" fill="#ff453a"/>
-            <circle class="beacon b2" cx="104" cy="39.4" r="1.2" fill="#ff453a"/>
-            <circle class="beacon" cx="9.6" cy="4.6" r="1.2" fill="#ffffff"/>
+            <path d="M31.5 26 L168 25.6 C178 25.6 186 27 192.2 29.6" fill="none" stroke="#eef3ff" stroke-width="0.8" opacity="0.7"/>
+            <path d="M84 38.6 C95 41.6 118 41.8 130 38.4 Z" fill="#5e6a85"/>
+            <path d="M93 35 L60.5 49.2 L66.5 50.6 L120 36.4 Z" fill="#7f8ca8"/>
+            <path d="M93 35 L120 36.4" stroke="#c8d2e6" stroke-width="0.6"/>
+            <path d="M60.5 49.2 L57.6 42.6 L60 42.4 L64.6 49.8 Z" fill="#6b7792"/>
+            <path d="M74 44.6 l-6 2.8 l1.6 0.5 l6.2 -2.6 z M84 40.6 l-6 2.8 l1.6 0.5 l6.2 -2.6 z" fill="#6f7b96"/>
+            <path d="M96 37.4 L113 37.2 L111 39.2 L98 39.4 Z" fill="#7d8aa6"/>
+            <path d="M85 38.2 H110 C113.4 38.2 115 40 115 43 C115 45.9 113.6 47.4 110.6 47.4 H87.4 C85.2 47.4 84.2 46.6 83.8 45.2 L83.4 41.4 C83.3 39.4 84 38.2 85 38.2 Z" fill="#6c7891"/>
+            <path d="M86 38.9 H110 C112.6 38.9 113.8 40.2 114 42" fill="none" stroke="#b9c4da" stroke-width="0.5" opacity="0.8"/>
+            <path d="M100 38.3 V47.3" stroke="#56617a" stroke-width="0.35"/>
+            <ellipse cx="114" cy="42.8" rx="1.5" ry="4.2" fill="#0b0e15"/>
+            <ellipse cx="114.3" cy="42.8" rx="0.7" ry="2.6" fill="#232a38"/>
+            <path d="M83.4 39.8 L78.6 41.2 L78.6 44.2 L83.6 45.4 Z" fill="#3c4558"/>
+            <!-- lit cabin: a soft warm band behind the window line -->
+            <line x1="52" y1="29.6" x2="176" y2="29.6" stroke="#ffcf7a" stroke-width="3.4" stroke-dasharray="1.7 3.9" stroke-linecap="round" opacity="0.28"/>
+            <line x1="52" y1="29.6" x2="176" y2="29.6" stroke="#ffe3a6" stroke-width="1.6" stroke-dasharray="1.7 3.9" stroke-linecap="round"/>
+            <rect x="45.5" y="27.2" width="4" height="9" rx="1" fill="none" stroke="#5b667f" stroke-width="0.5"/>
+            <rect x="170" y="27" width="4.2" height="9.4" rx="1" fill="none" stroke="#5b667f" stroke-width="0.5"/>
+            <rect x="97.6" y="27.6" width="2.6" height="4.6" rx="0.6" fill="none" stroke="#5b667f" stroke-width="0.4"/>
+            <rect x="103" y="27.6" width="2.6" height="4.6" rx="0.6" fill="none" stroke="#5b667f" stroke-width="0.4"/>
+            <path d="M178.6 28.7 L182.9 28.3 L182.6 30.7 L178.4 30.9 Z M183.5 28.3 L187.9 28.9 L187.5 31.1 L183.1 30.7 Z M188.5 29.1 L191.7 30.5 L190.6 32 L188.1 31.3 Z" fill="#1b2a44" stroke="#4d5a74" stroke-width="0.3"/>
+            <path d="M179 29.6 L190 30.4" stroke="#7fb4ff" stroke-width="0.5" opacity="0.6"/>
+            <path d="M70 25.5 l1.2 -2.4 h0.7 l-0.6 2.4 z M140 25.3 l1 -1.9 h0.6 l-0.5 1.9 z" fill="#5b667f"/>
+            <!-- logo lights shining up the fin from the tailplane -->
+            <circle cx="24" cy="31.4" r="0.8" fill="#ffffff" opacity="0.9"/>
+            <!-- steady red navigation light on the (left) wingtip -->
+            <circle cx="61.4" cy="49.6" r="5" fill="url(#g-glow-red)"/>
+            <circle cx="61.4" cy="49.6" r="0.9" fill="#ff6b61"/>
+            <!-- red beacons (top, belly) and white tail strobe -->
+            <g class="beacon"><circle cx="108" cy="24.9" r="5.5" fill="url(#g-glow-red)"/><circle cx="108" cy="24.9" r="1.2" fill="#ff8077"/></g>
+            <g class="beacon b2"><circle cx="104" cy="39.4" r="5" fill="url(#g-glow-red)"/><circle cx="104" cy="39.4" r="1.1" fill="#ff8077"/></g>
+            <g class="strobe"><circle cx="9.6" cy="4.6" r="7" fill="url(#g-glow-white)"/><circle cx="9.6" cy="4.6" r="1.1" fill="#ffffff"/></g>
           </symbol>
         </defs>
         <rect x="-2400" y="-1200" width="6400" height="3300" fill="url(#g-sky)"/>
@@ -558,8 +588,8 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
         <g id="s-rough" opacity="0"></g>
         <g id="s-clouds-near"></g>
         <rect id="s-trail" x="0" y="0" width="520" height="3.4" rx="1.7" fill="url(#g-trail)"/>
-        <use id="s-plane" href="#sym-plane" width="200" height="56"/>
-        <use id="s-plane2" href="#sym-plane" width="200" height="56" opacity="0"/>
+        <use id="s-plane" href="#sym-plane" width="224" height="80"/>
+        <use id="s-plane2" href="#sym-plane" width="224" height="80" opacity="0"/>
         <g id="s-chip" opacity="0"></g>
         <g id="s-fc" opacity="0"></g>
         <g id="s-next" opacity="0"></g>
@@ -572,30 +602,30 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
           <p class="eyebrow">Turbulence detection<i>·</i>15-minute nowcasting<i>·</i>validated against pilot reports</p>
           <h1>Horus.</h1>
         </div>
-        <p class="tagline-big grad">Turbulence, sensed by the aircraft already flying.</p>
+        <p class="tagline-big grad"><span class="t-turb">Turbulence</span>, sensed by the <span class="t-wind">aircraft already flying</span>.</p>
       </div>
       <div class="cap" data-ch="1"><p class="k" data-n="01" style="--c:var(--wind)">Broadcast</p>
-        <h2>Every airliner reports its vertical rate, about once a second.</h2>
+        <h2>Every airliner reports its <span class="t-wind">vertical rate</span>, about once a second.</h2>
         <p>The line below is real: <b data-fill="sig-who">a Boeing 737-800</b>, 1 January 2026. Watch it as the plane flies.</p>
         <div class="facts"><span style="--c:var(--wind)"><b data-fill="ac-peak">2,386</b> aircraft above FL200 at once</span><span style="--c:var(--wind)">rounded to <b>64 ft/min</b></span><span style="--c:var(--wind)">public data, <b>no account</b></span></div></div>
-      <div class="cap" data-ch="2"><p class="k" data-n="02" style="--c:var(--turb-hi)">Rough air</p>
-        <h2>At <span data-fill="sig-alt">36,000 ft</span>, the air turns rough.</h2>
+      <div class="cap" data-ch="2"><p class="k" data-n="02" style="--c:var(--turb)">Rough air</p>
+        <h2>At <span data-fill="sig-alt">36,000 ft</span>, the air <span class="t-turb">turns rough</span>.</h2>
         <p>No sensor on board, no weather radar. Just the jitter in numbers it already broadcasts.</p>
-        <div class="facts"><span style="--c:var(--turb-hi)">swings of <b data-fill="rough-swing">±1,472 ft/min</b></span><span style="--c:var(--turb-hi)"><b>0</b> sensors added</span><span style="--c:var(--turb-hi)">same code as the <b>live loop</b></span></div></div>
+        <div class="facts"><span style="--c:var(--turb)">swings of <b data-fill="rough-swing">±1,472 ft/min</b></span><span style="--c:var(--turb)"><b>0</b> sensors added</span><span style="--c:var(--turb)">same code as the <b>live loop</b></span></div></div>
       <div class="cap" data-ch="3"><p class="k" data-n="03" style="--c:var(--turb)">Detect</p>
-        <h2>Horus hears it in the numbers.</h2>
+        <h2>Horus <span class="t-turb">hears it</span> in the numbers.</h2>
         <p>Level flight only, trend removed, rounding corrected, divided by what this type shows in smooth air. One minute crossed the line: <b data-fill="sig-peak">2.3×</b> the threshold.</p>
         <div class="facts"><span style="--c:var(--turb)"><b data-fill="sig-peak">2.3×</b> the threshold</span><span style="--c:var(--turb)">threshold fitted on <b>December</b> only</span><span style="--c:var(--turb)">scored on <b>January</b></span></div></div>
       <div class="cap" data-ch="4"><p class="k" data-n="04" style="--c:var(--fc)">Forecast</p>
-        <h2>It lights up the sky.</h2>
+        <h2>It <span class="t-fc">lights up</span> the sky.</h2>
         <p>The ~45 km cell gets higher odds of turbulence. They fade with a fitted half-life of about <b><span data-metric="t_half_mid">50.3</span> min</b> and drift with the GFS wind, here <b data-fill="wind">104 kt from 308°</b>.</p>
         <div class="facts"><span style="--c:var(--fc)"><b>~45 km</b> × 2,000 ft cells</span><span style="--c:var(--fc)"><b data-metric="grid_cells">8,388</b> cells × <b data-metric="fl_bins">13</b> levels</span><span style="--c:var(--wind)">cell <b data-fill="cell">842a94b</b></span></div></div>
       <div class="cap" data-ch="5"><p class="k" data-n="05" style="--c:#c98cf0">Next aircraft</p>
-        <h2>The forecast covers whoever flies in next.</h2>
+        <h2>The <span class="t-fc">forecast</span> covers whoever flies in next.</h2>
         <p id="next-line">For the next 15 minutes, an aircraft entering a freshly lit cell is up to <b data-fill="max-x">43×</b> more likely than normal to meet turbulence.</p>
         <div class="facts"><span style="--c:var(--fc)"><b data-fill="max-x">43×</b> the normal chance</span><span style="--c:var(--fc)"><b>15 min</b> ahead</span><span style="--c:var(--fc)">forecast ROC-AUC <b data-metric="n2_roc">0.676</b> (chance 0.5)</span></div></div>
       <div class="cap" data-ch="6"><p class="k" data-n="06" style="--c:var(--rep)">Check</p>
-        <h2>Then pilots grade it.</h2>
+        <h2>Then <span class="t-rep">pilots grade it</span>.</h2>
         <p data-fill="case-line">Pilot reports never go in. They only score Horus.</p>
         <div class="facts"><span style="--c:var(--rep)">detector PR-AUC <b data-metric="b3_pr_auc">0.566</b> vs <b data-metric="pr_baseline">0.290</b> random</span><span style="--c:var(--rep)">strict setting catches <b data-metric="recall_10fa">5.7%</b></span></div>
         <a class="pill big" href="#live">Now, an hour of real US traffic ↓</a></div>
@@ -604,7 +634,7 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
       <nav class="chapters" aria-label="Story chapters">
         <button type="button" data-to="0" style="--c:#fff"><span>Horus</span><i></i></button>
         <button type="button" data-to="1" style="--c:var(--wind)"><span>Broadcast</span><i></i></button>
-        <button type="button" data-to="2" style="--c:var(--turb-hi)"><span>Rough air</span><i></i></button>
+        <button type="button" data-to="2" style="--c:var(--turb)"><span>Rough air</span><i></i></button>
         <button type="button" data-to="3" style="--c:var(--turb)"><span>Detect</span><i></i></button>
         <button type="button" data-to="4" style="--c:var(--fc)"><span>Forecast</span><i></i></button>
         <button type="button" data-to="5" style="--c:#c98cf0"><span>Next aircraft</span><i></i></button>
@@ -621,12 +651,12 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
   <section class="hero" id="live">
     <div class="wrap live-head">
       <p class="eyebrow reveal">The real thing</p>
-      <h2 class="reveal" style="--d:60ms">An hour of real US traffic.</h2>
+      <h2 class="reveal" style="--d:60ms">An hour of <span class="t-wind">real US traffic</span>.</h2>
       <p class="lede reveal" style="--d:120ms">
         Every airliner broadcasts its vertical rate about once a second. Horus reads it from
-        <strong>public ADS-B data</strong> (the adsb.lol archive and OpenSky), scales it by what
-        <strong>each aircraft type</strong> normally shows in smooth air, forecasts the next
-        15 minutes on a 3D grid, and checks itself against <strong>pilot reports</strong> it never sees.
+        <strong class="t-wind">public ADS-B data</strong> (the adsb.lol archive and OpenSky), scales it by what
+        <strong class="t-turb">each aircraft type</strong> normally shows in smooth air, <strong class="t-fc">forecasts</strong> the next
+        15 minutes on a 3D grid, and checks itself against <strong class="t-rep">pilot reports</strong> it never sees.
       </p>
       <div class="cta reveal" style="--d:180ms">
         <a class="pill big" href="#how">How it works</a>
@@ -680,7 +710,7 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
   <section class="section" id="how">
     <div class="wrap">
       <p class="kicker k-wind reveal">How it works</p>
-      <h3 class="reveal" style="--d:60ms">From a jittery number to a forecast.</h3>
+      <h3 class="reveal" style="--d:60ms">From a <span class="t-turb">jittery number</span> to a <span class="t-fc">forecast</span>.</h3>
       <p class="sub reveal" style="--d:120ms">
         The chart is real: two Boeing jets of the same type at a similar level, the same half hour.
         One flew through rough air. Switch between them.
@@ -716,23 +746,23 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
   <section class="section" id="architecture">
     <div class="wrap">
       <p class="kicker k-blue reveal">The architecture</p>
-      <h3 class="reveal" style="--d:60ms">A sensor network made of airliners.</h3>
+      <h3 class="reveal" style="--d:60ms">A sensor network made of <span class="t-wind">airliners</span>.</h3>
       <p class="sub reveal" style="--d:120ms">One pure core runs both the offline benchmark and the live loop. Everything else feeds it or measures it.</p>
 
       <div class="bento">
         <article class="card w4 reveal" style="--glow:rgba(42,159,214,0.16)">
           <div class="icon" style="--ic:rgba(42,159,214,0.18)"><svg viewBox="0 0 24 24" fill="none" stroke="#5bbcec" stroke-width="2" stroke-linecap="round"><path d="M4 7c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3z"/><path d="M4 7v10c0 1.7 3.6 3 8 3s8-1.3 8-3V7"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg></div>
-          <p class="label">Data ingestion</p>
-          <p class="figure">3.5<small>GB</small></p>
-          <p class="body">streamed per archive day and <strong>never written to disk</strong>. Only continental-US traffic at FL180 and above is kept (about 220 MB a day), as typed, unit-checked Parquet.</p>
+          <p class="label" style="--fig:var(--wind)">Data ingestion</p>
+          <p class="figure" style="--fig:var(--wind)">3.5<small>GB</small></p>
+          <p class="body">streamed per archive day and <strong class="t-wind">never written to disk</strong>. Only continental-US traffic at FL180 and above is kept (about 220 MB a day), as typed, unit-checked Parquet.</p>
           <span class="chip"><span class="prompt">$</span> make up</span>
           <p class="body" style="margin-top:12px">One command installs the locked environment and fetches only what is missing: the archive day, pilot reports, aircraft types and GFS winds.</p>
         </article>
 
         <article class="card hex-card reveal" style="--d:80ms;--glow:rgba(179,92,232,0.16)">
           <div class="icon" style="--ic:rgba(179,92,232,0.2)"><svg viewBox="0 0 24 24" fill="none" stroke="#c98cf0" stroke-width="2"><path d="M12 2.5l8.2 4.75v9.5L12 21.5l-8.2-4.75v-9.5z"/></svg></div>
-          <p class="label">Spatial mapping</p>
-          <p class="figure">~45<small>km</small></p>
+          <p class="label" style="--fig:var(--fc)">Spatial mapping</p>
+          <p class="figure" style="--fig:var(--fc)">~45<small>km</small></p>
           <p class="body">hexagonal forecast cells, 2,000 ft deep: <span data-metric="grid_cells">8,388</span> cells × <span data-metric="fl_bins">13</span> flight levels over the continental US.</p>
           <svg class="hexes" viewBox="0 0 190 170" aria-hidden="true">
             <path d="M47 10l26 15v30l-26 15-26-15V25z"/><path d="M99 10l26 15v30l-26 15-26-15V25z"/><path d="M151 10l26 15v30l-26 15-26-15V25z"/>
@@ -743,36 +773,36 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
 
         <article class="card reveal" style="--glow:rgba(208,122,0,0.14)">
           <div class="icon" style="--ic:rgba(208,122,0,0.2)"><svg viewBox="0 0 24 24" fill="none" stroke="#ffad3b" stroke-width="2" stroke-linecap="round"><path d="M2 12h3l2-5 3 10 3-12 3 9 2-2h4"/></svg></div>
-          <p class="label">Detection</p>
-          <p class="figure">σ<small>/ type</small></p>
-          <p class="body">Level flight only. Trend removed, ADS-B's 64 ft/min rounding corrected, divided by the <strong>aircraft type's</strong> smooth-air scale.</p>
+          <p class="label" style="--fig:var(--turb)">Detection</p>
+          <p class="figure" style="--fig:var(--turb)">σ<small>/ type</small></p>
+          <p class="body">Level flight only. Trend removed, ADS-B's 64 ft/min rounding corrected, divided by the <strong class="t-turb">aircraft type's</strong> smooth-air scale.</p>
         </article>
 
         <article class="card reveal" style="--d:80ms;--glow:rgba(42,159,214,0.14)">
           <div class="icon" style="--ic:rgba(42,159,214,0.18)"><svg viewBox="0 0 24 24" fill="none" stroke="#5bbcec" stroke-width="2" stroke-linecap="round"><path d="M3 8h11a3 3 0 1 0-3-3"/><path d="M3 12h15a3 3 0 1 1-3 3"/><path d="M3 16h7"/></svg></div>
-          <p class="label">Forecast</p>
+          <p class="label" style="--fig:var(--wind)">Forecast</p>
           <!-- auto-generated metric (scripts/readme_numbers.py): cruise-band half-life -->
-          <p class="figure"><span data-metric="t_half_mid">50.3</span><small>min</small></p>
+          <p class="figure" style="--fig:var(--wind)"><span data-metric="t_half_mid">50.3</span><small>min</small></p>
           <p class="body">half-life of a detection at cruise, fitted from data (<span data-metric="t_half_low">11.6</span> min lower down). The odds drift with GFS upper winds.</p>
         </article>
 
         <article class="card reveal" style="--d:160ms;--glow:rgba(41,151,255,0.14)">
           <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#2997ff" stroke-width="2" stroke-linecap="round"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg></div>
-          <p class="label">Efficiency</p>
+          <p class="label" style="--fig:var(--accent)">Efficiency</p>
           <!-- auto-generated metric (scripts/readme_numbers.py): grid update p95 -->
-          <p class="figure"><span data-metric="grid_p95_ms">32.3</span><small>ms</small></p>
-          <p class="body">to update the whole grid for <strong>10,000 aircraft</strong> (p95) on an 8 GB M1. Python and NumPy, a <code>uv</code> lockfile, no Docker.</p>
+          <p class="figure" style="--fig:var(--accent)"><span data-metric="grid_p95_ms">32.3</span><small>ms</small></p>
+          <p class="body">to update the whole grid for <strong class="t-blue">10,000 aircraft</strong> (p95) on an 8 GB M1. Python and NumPy, a <code>uv</code> lockfile, no Docker.</p>
         </article>
 
         <article class="card w3 reveal" style="--glow:rgba(179,92,232,0.12)">
-          <p class="label">Offline equals live</p>
-          <p class="figure" style="font-size:clamp(34px,4vw,50px)">Bit-identical.</p>
+          <p class="label" style="--fig:var(--fc)">Offline equals live</p>
+          <p class="figure" style="font-size:clamp(34px,4vw,50px);--fig:var(--fc)">Bit-identical.</p>
           <p class="body">A test replays a recorded half hour of real traffic through both the live loop and the offline pipeline, and requires the same grid, to the last bit.</p>
         </article>
 
         <article class="card w3 reveal" style="--d:80ms;--glow:rgba(255,69,58,0.10)">
-          <p class="label">Engineering rigour</p>
-          <p class="figure" style="font-size:clamp(34px,4vw,50px)">Nothing leaks.</p>
+          <p class="label" style="--fig:var(--rep)">Engineering rigour</p>
+          <p class="figure" style="font-size:clamp(34px,4vw,50px);--fig:var(--rep)">Nothing leaks.</p>
           <p class="body">Fitted on December, scored on January. A leakage test fails if a test date reaches any fitted artefact, and every modelling choice has a benchmark row.</p>
           <div class="tags"><span class="tagline">time split</span><span class="tagline">leakage test</span><span class="tagline">recorded real fixtures</span><span class="tagline">CI</span></div>
         </article>
@@ -784,7 +814,7 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
   <section class="section" id="results">
     <div class="wrap">
       <p class="kicker k-fc reveal">Metrics</p>
-      <h3 class="reveal" style="--d:60ms">Measured, not claimed.</h3>
+      <h3 class="reveal" style="--d:60ms"><span class="t-fc">Measured</span>, not claimed.</h3>
       <p class="sub reveal" style="--d:120ms">
         Trained on <span data-metric="train_range">2025-12-02 → 2025-12-30</span>, tested on
         <span data-metric="test_range">2026-01-01 → 2026-01-15</span>. Every number on this page is
@@ -906,7 +936,7 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
   <section class="section" id="cases">
     <div class="wrap">
       <p class="kicker k-rep reveal">Case studies</p>
-      <h3 class="reveal" style="--d:60ms">Three real reports, minute by minute.</h3>
+      <h3 class="reveal" style="--d:60ms">Three <span class="t-rep">real reports</span>, minute by minute.</h3>
       <p class="sub reveal" style="--d:120ms">
         The clearest detection on three test days, chosen by score, not by hand. One of them is a miss,
         and it stays in.
@@ -948,7 +978,7 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
   <section class="section" id="run">
     <div class="wrap">
       <p class="kicker k-turb reveal">Run it</p>
-      <h3 class="reveal" style="--d:60ms">Three commands.</h3>
+      <h3 class="reveal" style="--d:60ms">Three <span class="t-blue">commands</span>.</h3>
       <p class="sub reveal" style="--d:120ms">macOS or Linux with <a class="link-arrow" style="font-size:inherit" href="https://docs.astral.sh/uv/">uv</a>. Public data only, no account or API key. The first <code>make up</code> streams about 3.5 GB.</p>
       <div class="run reveal" style="--d:180ms">
         <div class="run-head"><span>Terminal</span><button class="copy" type="button" data-copy="make up&#10;make watch&#10;make cases">Copy</button></div>
@@ -1527,10 +1557,10 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
         `<span><b>${mt.size}</b> inside the match window</span>` +
         `<span>forecast at the report: <b>${at[1] ? at[1] + " cell" + (at[1] > 1 ? "s" : "") + " lit" : "normal"}</b></span>`;
       $("#case-note").innerHTML = before.size
-        ? `<b>A hit.</b> ${before.size} aircraft inside the match window had already detected it by the time the pilot called it in.`
+        ? `<b class="hit">A hit.</b> ${before.size} aircraft inside the match window had already detected it by the time the pilot called it in.`
         : mt.size
-          ? `<b>Late.</b> An aircraft inside the match window detected it, but only after the report.`
-          : `<b>A miss.</b> Aircraft nearby detected turbulence, but none inside the 40 km, ±2,000 ft window. It stays in because the selection was by score, not by outcome.`;
+          ? `<b class="late">Late.</b> An aircraft inside the match window detected it, but only after the report.`
+          : `<b class="miss">A miss.</b> Aircraft nearby detected turbulence, but none inside the 40 km, ±2,000 ft window. It stays in because the selection was by score, not by outcome.`;
     }
     show(0);
   })(window.HORUS_CASES);
@@ -1577,9 +1607,14 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
     let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
     const stars = $("#s-stars");
     for (let i = 0; i < 200; i++) {
-      const st = el("circle", { cx: -700 + rnd() * 3000, cy: -300 + rnd() * 900, r: 0.5 + rnd() * 1.1, fill: "#fff", opacity: 0.15 + rnd() * 0.55 }, stars);
-      rnd();
+      const st = el("circle", { cx: -700 + rnd() * 3000, cy: -300 + rnd() * 900, r: 0.5 + rnd() * 1.2, fill: rnd() < 0.15 ? "#ffe8c4" : "#ffffff", opacity: 0.2 + rnd() * 0.6 }, stars);
+      if (rnd() < 0.3) { st.setAttribute("class", "tw"); st.style.animationDelay = (-rnd() * 4.2).toFixed(2) + "s"; }
     }
+    // a crescent moon, far away (it barely moves)
+    const moonG = el("g", { id: "s-moon" }, stars.parentNode);
+    stars.parentNode.insertBefore(moonG, stars.nextSibling);
+    el("circle", { cx: 1290, cy: 150, r: 110, fill: "url(#g-moon)" }, moonG);
+    el("circle", { cx: 0, cy: 0, r: 26, fill: "#f6f0dc", mask: "url(#m-moon)", transform: "translate(1290,150) rotate(-18)" }, moonG);
     const far = $("#s-clouds-far"), near = $("#s-clouds-near");
     for (let i = 0; i < 9; i++) el("ellipse", { cx: rnd() * 2000, cy: 160 + rnd() * 460, rx: 200 + rnd() * 220, ry: 34 + rnd() * 40, fill: "url(#g-cloud)" }, far);
     for (let i = 0; i < 6; i++) el("ellipse", { cx: rnd() * 2600, cy: 520 + rnd() * 200, rx: 320 + rnd() * 300, ry: 50 + rnd() * 50, fill: "url(#g-cloud)", opacity: 0.9 }, near);
@@ -1598,14 +1633,14 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
     for (let j = -3; j <= 3; j++) for (let k = -9; k <= 9; k++) {
       const cx = ZX + k * 100 + (j % 2 ? 50 : 0), cy = ZY + j * 87;
       if (cx < -60 || cx > 1660) continue;
-      el("polygon", { points: hexPts(cx, cy, 57), fill: "none", stroke: "rgba(255,255,255,0.18)", "stroke-width": 1 }, hexes);
+      el("polygon", { points: hexPts(cx, cy, 57), fill: "none", stroke: "rgba(160,190,255,0.14)", "stroke-width": 1 }, hexes);
     }
     const lit = $("#s-lit");
     const litHex = el("polygon", { points: hexPts(ZX, ZY, 57), fill: "rgba(179,92,232,0.62)", stroke: "#f3e6ff", "stroke-width": 1.6 }, lit);
     const wind = $("#s-wind");
     for (let i = 0; i < 10; i++) {
       const g = el("g", { transform: `translate(${(ZX - 420 + rnd() * 760).toFixed(0)},${(ZY - 170 + rnd() * 340).toFixed(0)})` }, wind);
-      el("path", { d: "M0,-5 L9,0 L0,5", fill: "none", stroke: "rgba(255,255,255,0.8)", "stroke-width": 1.6, "stroke-linecap": "round", "stroke-linejoin": "round", class: "wind-arrow", style: `animation-delay:${(-rnd() * 2.6).toFixed(2)}s` }, g);
+      el("path", { d: "M0,-5 L9,0 L0,5", fill: "none", stroke: "rgba(130,207,242,0.75)", "stroke-width": 1.6, "stroke-linecap": "round", "stroke-linejoin": "round", class: "wind-arrow", style: `animation-delay:${(-rnd() * 2.6).toFixed(2)}s` }, g);
     }
     // labels are the lines Horus actually printed (make watch), in terminal type,
     // tied to what they describe by a hairline
@@ -1682,7 +1717,7 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
 
     // trace panel (real data)
     const panel = $("#s-panel");
-    el("rect", { x: 120, y: 612, width: 1360, height: 264, rx: 24, fill: "rgba(6,14,32,0.8)", stroke: "rgba(255,255,255,0.12)" }, panel);
+    el("rect", { x: 120, y: 612, width: 1360, height: 264, rx: 24, fill: "rgba(5,9,20,0.84)", stroke: "rgba(255,255,255,0.12)" }, panel);
     set(el("text", { x: 152, y: 648, fill: "#a1a1a6", "font-size": 14, "font-weight": 600 }, panel), {}).textContent = "Vertical rate as broadcast (ft/min)";
     const readout = el("text", { x: 1448, y: 648, "text-anchor": "end", fill: "#a1a1a6", "font-size": 13, "font-family": MONO }, panel);
     readout.textContent = `${tur.id} · ${tur.type} · FL${tur.fl}`;
@@ -1775,7 +1810,7 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
       const idle = reduce ? 0 : Math.sin(now / 950) * 3;
       const y = ZY + bob + shake + (s === null ? idle : 0);
       const rot = -(v / vmax) * 5 + shake * 0.6;
-      set(plane, { x: (x - 100).toFixed(1), y: (y - 28).toFixed(1), transform: `rotate(${rot.toFixed(2)} ${x.toFixed(1)} ${y.toFixed(1)})` });
+      set(plane, { x: (x - 112).toFixed(1), y: (y - 40).toFixed(1), transform: `rotate(${rot.toFixed(2)} ${x.toFixed(1)} ${y.toFixed(1)})` });
       set(trail, { x: (x - 78 - 520).toFixed(1), y: (y + 1).toFixed(1) });
       clipRect.setAttribute("width", Math.max(0, s === null ? (p < 0.12 ? 0 : XW) : x - X0).toFixed(1));
       if (s !== null) {
@@ -1787,6 +1822,7 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
         if (on !== b.on) { b.on = on; const hgt = on ? Math.max(2, 856 - by(b.v)) : 0; set(b.r, { height: hgt, y: 856 - hgt }); }
       }
       const sway = reduce ? 0 : 1;
+      moonG.setAttribute("transform", `translate(${(-p * 90).toFixed(1)},0)`);
       $("#s-clouds-far").setAttribute("transform", `translate(${(-p * 300 + sway * Math.sin(now / 7000) * 30).toFixed(1)},0)`);
       near.setAttribute("transform", `translate(${(-p * 800 + sway * Math.sin(now / 5200) * 60).toFixed(1)},0)`);
       rough.setAttribute("opacity", (seg(p, 0.18, 0.28) * (1 - seg(p, 0.6, 0.66))).toFixed(3));
@@ -1802,7 +1838,7 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
       wind.setAttribute("opacity", (seg(p, 0.62, 0.66) * (1 - seg(p, 0.93, 0.98))).toFixed(3));
       const x2 = lerp(-160, ZX + 100, ease(seg(p, 0.72, 0.85)));
       const y2 = ZY + 4 + (reduce ? 0 : Math.sin(now / 800) * 3);
-      set(plane2, { opacity: p >= 0.72 ? 1 : 0, x: (x2 - 100).toFixed(1), y: (y2 - 28).toFixed(1) });
+      set(plane2, { opacity: p >= 0.72 ? 1 : 0, x: (x2 - 112).toFixed(1), y: (y2 - 40).toFixed(1) });
       fc.setAttribute("opacity", seg(p, 0.79, 0.82).toFixed(3));
       const drop = seg(p, 0.87, 0.9);
       pirep.setAttribute("opacity", drop.toFixed(3));
