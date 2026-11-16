@@ -328,7 +328,7 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
   transition: opacity 0.3s ease, transform 0.45s var(--ease);
 }
 .cap.on { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; transition-delay: 0.2s; }
-.cap .k { margin: 0 0 14px; font-size: 15px; font-weight: 600; color: var(--c, var(--ink-2)); display: flex; justify-content: center; align-items: center; gap: 10px; }
+.cap .k { margin: 0 auto 14px; max-width: none; font-size: 15px; font-weight: 600; color: var(--c, var(--ink-2)); display: flex; justify-content: center; align-items: center; gap: 10px; }
 .cap .k::before { content: attr(data-n); display: grid; place-items: center; width: 24px; height: 24px; border-radius: 8px; background: var(--c); color: #000; font-size: 13px; font-weight: 700; }
 .cap h2 { margin: 0; font-size: clamp(30px, 4vw, 54px); line-height: 1.06; font-weight: 700; letter-spacing: -0.035em; text-wrap: balance; }
 .cap p { margin: 16px auto 0; max-width: 680px; font-size: clamp(16px, 1.3vw, 19px); line-height: 1.55; color: #d1d1d6; text-wrap: pretty; }
@@ -344,21 +344,51 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
 .scroll-hint { position: absolute; z-index: 2; left: 50%; bottom: 4.5vh; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-2); transition: opacity 0.4s; }
 .scroll-hint svg { width: 18px; height: 18px; animation: bob 1.6s ease-in-out infinite; }
 @keyframes bob { 50% { transform: translateY(6px); } }
-.story-dots { position: absolute; z-index: 2; right: 22px; top: 50%; transform: translateY(-50%); display: grid; gap: 12px; }
-.story-dots i { width: 7px; height: 7px; border-radius: 50%; background: rgba(255, 255, 255, 0.22); transition: background 0.3s, transform 0.3s; }
-.story-dots i.on { background: var(--ink); transform: scale(1.35); }
+/* chapter list: where you are, and a click to jump */
+.chapters { position: absolute; z-index: 3; right: 18px; top: 50%; transform: translateY(-50%); display: grid; gap: 2px; }
+.chapters button { display: flex; align-items: center; justify-content: flex-end; gap: 10px; border: 0; background: none; color: var(--ink-3); font-size: 12.5px; font-weight: 600; padding: 6px 2px; cursor: pointer; }
+.chapters button span { opacity: 0; transform: translateX(6px); transition: opacity 0.25s, transform 0.25s, color 0.25s; white-space: nowrap; }
+.chapters button i { flex: none; width: 8px; height: 8px; border-radius: 50%; background: rgba(255, 255, 255, 0.25); transition: background 0.3s, transform 0.3s, box-shadow 0.3s; }
+.chapters:hover button span, .chapters button.on span { opacity: 1; transform: none; }
+.chapters button:hover { color: var(--ink-2); }
+.chapters button.on { color: var(--ink); }
+.chapters button.on i { background: var(--c, #fff); transform: scale(1.45); box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.08); }
+.story-progress { position: absolute; z-index: 3; left: 0; top: 56px; height: 3px; width: 100%; transform-origin: 0 50%; transform: scaleX(0); background: linear-gradient(90deg, var(--wind), var(--fc) 55%, var(--turb-hi)); }
+.skip { position: absolute; z-index: 3; left: 20px; bottom: 16px; display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 15px; border-radius: 980px; font-size: 13px; font-weight: 600; color: var(--ink); background: rgba(28, 28, 32, 0.62); border: 1px solid var(--line-2); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); transition: opacity 0.3s, background 0.2s; }
+.skip:hover { background: rgba(52, 52, 58, 0.75); }
+/* fact chips under each caption: the numbers behind the sentence */
+.facts { margin: 18px auto 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; max-width: 780px; }
+.facts > span { display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; border-radius: 980px; font-size: 13.5px; color: #d1d1d6; background: rgba(28, 28, 32, 0.72); border: 1px solid rgba(255, 255, 255, 0.12); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.facts > span::before { content: ""; flex: none; width: 7px; height: 7px; border-radius: 50%; margin-right: 2px; background: var(--c, var(--accent)); }
+.facts b { color: #fff; font-weight: 600; }
+.cap.on .facts > span { animation: chip-in 0.5s var(--ease) both; animation-delay: 0.3s; }
+.cap.on .facts > span:nth-child(2) { animation-delay: 0.4s; }
+.cap.on .facts > span:nth-child(3) { animation-delay: 0.5s; }
+@keyframes chip-in { from { opacity: 0; transform: translateY(8px) scale(0.96); } }
+.tw { animation: twinkle 3.6s ease-in-out infinite; }
+@keyframes twinkle { 50% { opacity: 0.06; } }
+.breathe { transform-box: fill-box; transform-origin: center; animation: breathe 2.6s ease-in-out infinite; }
+@keyframes breathe { 50% { transform: scale(1.07); } }
+.illus .short { display: none; }
 .illus { position: absolute; z-index: 2; right: 22px; bottom: 16px; font-size: 12px; color: var(--ink-3); }
 .cap .pill { margin-top: 22px; }
 .live-head h2 { margin: 0; font-size: clamp(40px, 6vw, 72px); line-height: 1.02; font-weight: 700; letter-spacing: -0.045em; }
 .still *, .still *::before { transition: none !important; }
+.still .facts > span { animation: none !important; }
 @media (prefers-reduced-motion: reduce) {
-  .waves path, .wind-arrow, .ring, .scroll-hint svg, .beacon { animation: none; }
+  .waves path, .wind-arrow, .ring, .scroll-hint svg, .beacon, .tw, .breathe, .cap.on .facts > span { animation: none; }
 }
 @media (max-width: 720px) {
   .cap { top: 9vh; }
   .cap.intro { padding: 9vh 20px 18vh; }
-  .story-dots { right: 10px; }
-  .illus { left: 22px; right: auto; }
+  .chapters { right: 6px; }
+  .chapters button span, .chapters:hover button span { display: none; }
+  .illus .long { display: none; }
+  .illus .short { display: inline; }
+  .facts > span { font-size: 12.5px; padding: 6px 11px; }
+  .facts > span:nth-child(3) { display: none; }  /* phones: two facts keep the caption short */
+  .cap .pill { display: none; }  /* phones: the skip button does the same job */
+  .scroll-hint { bottom: 68px; }
 }
 
 /* ---------- responsive ---------- */
@@ -474,27 +504,43 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
       </div>
       <div class="cap" data-ch="1"><p class="k" data-n="1" style="--c:var(--wind)">Broadcast</p>
         <h2>Every airliner reports its vertical rate, about once a second.</h2>
-        <p>The line below is real: <b data-fill="sig-who">a Boeing 737-800</b>, 1 January 2026. Watch it as the plane flies.</p></div>
+        <p>The line below is real: <b data-fill="sig-who">a Boeing 737-800</b>, 1 January 2026. Watch it as the plane flies.</p>
+        <div class="facts"><span style="--c:var(--wind)"><b data-fill="ac-peak">2,386</b> aircraft above FL200 at once</span><span style="--c:var(--wind)">rounded to <b>64 ft/min</b></span><span style="--c:var(--wind)">public data, <b>no account</b></span></div></div>
       <div class="cap" data-ch="2"><p class="k" data-n="2" style="--c:var(--turb-hi)">Rough air</p>
         <h2>At <span data-fill="sig-alt">36,000 ft</span>, the air turns rough.</h2>
-        <p>No sensor on board, no weather radar. Just the jitter in numbers it already broadcasts.</p></div>
+        <p>No sensor on board, no weather radar. Just the jitter in numbers it already broadcasts.</p>
+        <div class="facts"><span style="--c:var(--turb-hi)">swings of <b data-fill="rough-swing">±1,472 ft/min</b></span><span style="--c:var(--turb-hi)"><b>0</b> sensors added</span><span style="--c:var(--turb-hi)">same code as the <b>live loop</b></span></div></div>
       <div class="cap" data-ch="3"><p class="k" data-n="3" style="--c:var(--turb)">Detect</p>
         <h2>Horus hears it in the numbers.</h2>
-        <p>Level flight only, trend removed, rounding corrected, divided by what this type shows in smooth air. One minute crossed the line: <b data-fill="sig-peak">2.3×</b> the threshold.</p></div>
+        <p>Level flight only, trend removed, rounding corrected, divided by what this type shows in smooth air. One minute crossed the line: <b data-fill="sig-peak">2.3×</b> the threshold.</p>
+        <div class="facts"><span style="--c:var(--turb)"><b data-fill="sig-peak">2.3×</b> the threshold</span><span style="--c:var(--turb)">threshold fitted on <b>December</b> only</span><span style="--c:var(--turb)">scored on <b>January</b></span></div></div>
       <div class="cap" data-ch="4"><p class="k" data-n="4" style="--c:var(--fc)">Forecast</p>
         <h2>It lights up the sky.</h2>
-        <p>The ~45 km cell gets higher odds of turbulence. They fade with a fitted half-life of about <b><span data-metric="t_half_mid">50.3</span> min</b> and drift with GFS upper winds.</p></div>
+        <p>The ~45 km cell gets higher odds of turbulence. They fade with a fitted half-life of about <b><span data-metric="t_half_mid">50.3</span> min</b> and drift with GFS upper winds.</p>
+        <div class="facts"><span style="--c:var(--fc)"><b>~45 km</b> × 2,000 ft cells</span><span style="--c:var(--fc)"><b data-metric="grid_cells">8,388</b> cells × <b data-metric="fl_bins">13</b> levels</span><span style="--c:var(--wind)">drifts with <b>GFS</b> winds</span></div></div>
       <div class="cap" data-ch="5"><p class="k" data-n="5" style="--c:#c98cf0">Next aircraft</p>
         <h2>The forecast covers whoever flies in next.</h2>
-        <p>For the next 15 minutes, an aircraft entering a freshly lit cell is up to <b data-fill="max-x">43×</b> more likely than normal to meet turbulence.</p></div>
+        <p>For the next 15 minutes, an aircraft entering a freshly lit cell is up to <b data-fill="max-x">43×</b> more likely than normal to meet turbulence.</p>
+        <div class="facts"><span style="--c:var(--fc)"><b data-fill="max-x">43×</b> the normal chance</span><span style="--c:var(--fc)"><b>15 min</b> ahead</span><span style="--c:var(--fc)">forecast ROC-AUC <b data-metric="n2_roc">0.676</b> (chance 0.5)</span></div></div>
       <div class="cap" data-ch="6"><p class="k" data-n="6" style="--c:var(--rep)">Check</p>
         <h2>Then pilots grade it.</h2>
         <p data-fill="case-line">Pilot reports never go in. They only score Horus.</p>
+        <div class="facts"><span style="--c:var(--rep)">detector PR-AUC <b data-metric="b3_pr_auc">0.566</b> vs <b data-metric="pr_baseline">0.290</b> random</span><span style="--c:var(--rep)">strict setting catches <b data-metric="recall_10fa">5.7%</b></span></div>
         <a class="pill big" href="#live">Now, an hour of real US traffic ↓</a></div>
 
       <div class="scroll-hint" id="scroll-hint"><span>Scroll to fly</span><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 6l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <div class="story-dots" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-      <div class="illus">Illustration · the trace, the numbers and the case are real data</div>
+      <nav class="chapters" aria-label="Story chapters">
+        <button type="button" data-to="0" style="--c:#fff"><span>Horus</span><i></i></button>
+        <button type="button" data-to="1" style="--c:var(--wind)"><span>Broadcast</span><i></i></button>
+        <button type="button" data-to="2" style="--c:var(--turb-hi)"><span>Rough air</span><i></i></button>
+        <button type="button" data-to="3" style="--c:var(--turb)"><span>Detect</span><i></i></button>
+        <button type="button" data-to="4" style="--c:var(--fc)"><span>Forecast</span><i></i></button>
+        <button type="button" data-to="5" style="--c:#c98cf0"><span>Next aircraft</span><i></i></button>
+        <button type="button" data-to="6" style="--c:var(--rep)"><span>Check</span><i></i></button>
+      </nav>
+      <div class="story-progress" id="story-progress"></div>
+      <a class="skip" id="skip" href="#live">Skip to the live map <span aria-hidden="true">↓</span></a>
+      <div class="illus"><span class="long">Illustration · the trace, the numbers and the case are real data</span><span class="short">Illustration · real data</span></div>
     </div>
   </section>
 
@@ -1278,10 +1324,15 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
     const lerp = (a, b, k) => a + (b - a) * k;
     const seg = (p, a, b) => clamp((p - a) / (b - a));
     const tur = S.turbulent, span = S.span;
-    const X0 = 200, XW = 1200, tx = (s) => X0 + (s / span) * XW;
+    const XW = 1200;
     const vmax = Math.max(400, ...tur.vr.map((q) => Math.abs(q[1])));
     const peak = tur.idx.reduce((a, b) => (b[1] > a[1] ? b : a));
-    const sPk = peak[0], ZX = tx(sPk + 30), ZY = 470;
+    const sPk = peak[0];
+    // place the trace so its rough minute sits exactly at the scene's centre line (x = 800):
+    // rough air, detection, forecast cell and trace panel then share one centre
+    const X0 = Math.round(clamp(800 - ((sPk + 30) / span) * XW, 160, 240));
+    const tx = (s) => X0 + (s / span) * XW;
+    const ZX = tx(sPk + 30), ZY = 470;
     const imax = Math.max(1.5, Math.ceil(peak[1] * 2) / 2);
     const TYPES = { B738: "Boeing 737-800", B739: "Boeing 737-900", B38M: "Boeing 737 MAX 8", A320: "Airbus A320", A321: "Airbus A321", A21N: "Airbus A321neo", B763: "Boeing 767-300" };
     const vrAt = (s) => { let lo = 0, hi = tur.vr.length - 1, v = tur.vr[0][1]; while (lo <= hi) { const m = (lo + hi) >> 1; if (tur.vr[m][0] <= s) { v = tur.vr[m][1]; lo = m + 1; } else hi = m - 1; } return v; };
@@ -1305,7 +1356,10 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
     // ---- build the static scene ----
     let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
     const stars = $("#s-stars");
-    for (let i = 0; i < 200; i++) el("circle", { cx: -700 + rnd() * 3000, cy: -300 + rnd() * 900, r: 0.5 + rnd() * 1.1, fill: "#fff", opacity: 0.15 + rnd() * 0.55 }, stars);
+    for (let i = 0; i < 200; i++) {
+      const st = el("circle", { cx: -700 + rnd() * 3000, cy: -300 + rnd() * 900, r: 0.5 + rnd() * 1.1, fill: "#fff", opacity: 0.15 + rnd() * 0.55 }, stars);
+      if (rnd() < 0.35) { st.setAttribute("class", "tw"); st.style.animationDelay = (-rnd() * 3.6).toFixed(2) + "s"; }
+    }
     const far = $("#s-clouds-far"), near = $("#s-clouds-near");
     for (let i = 0; i < 9; i++) el("ellipse", { cx: rnd() * 2000, cy: 160 + rnd() * 460, rx: 200 + rnd() * 220, ry: 34 + rnd() * 40, fill: "url(#g-cloud)" }, far);
     for (let i = 0; i < 6; i++) el("ellipse", { cx: rnd() * 2600, cy: 520 + rnd() * 200, rx: 320 + rnd() * 300, ry: 50 + rnd() * 50, fill: "url(#g-cloud)", opacity: 0.9 }, near);
@@ -1325,8 +1379,8 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
       el("polygon", { points: hexPts(cx, cy, 57), fill: "none", stroke: "rgba(200,215,240,0.16)", "stroke-width": 1.2 }, hexes);
     }
     const lit = $("#s-lit");
-    el("circle", { cx: ZX, cy: ZY, r: 150, fill: "url(#g-lit)" }, lit);
-    const litHex = el("polygon", { points: hexPts(ZX, ZY, 57), fill: "rgba(179,92,232,0.55)", stroke: "#c98cf0", "stroke-width": 2 }, lit);
+    el("circle", { cx: ZX, cy: ZY, r: 150, fill: "url(#g-lit)", class: "breathe" }, lit);
+    const litHex = el("polygon", { points: hexPts(ZX, ZY, 57), fill: "rgba(179,92,232,0.55)", stroke: "#c98cf0", "stroke-width": 2, class: "breathe" }, lit);
     const wind = $("#s-wind");
     for (let i = 0; i < 14; i++) {
       const g = el("g", { transform: `translate(${(ZX - 420 + rnd() * 760).toFixed(0)},${(ZY - 170 + rnd() * 340).toFixed(0)})` }, wind);
@@ -1346,9 +1400,9 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
     const fc = $("#s-fc");
     const fcG = el("g", {}, fc);
     label(fcG, "FORECAST", "#b35ce8", `next 15 min: ${Math.round(maxX)}× normal`, 330);
-    const pirep = $("#s-pirep");
-    el("circle", { cx: ZX + 100, cy: ZY - 30, r: 12, fill: "none", stroke: "#ff453a", "stroke-width": 2.5, class: "ring" }, pirep);
-    el("path", { d: `M${ZX + 100},${ZY - 46} l14,24 h-28 z`, fill: "#ff453a", stroke: "#000", "stroke-width": 2 }, pirep);
+    const pirep = $("#s-pirep"), pirepMark = el("g", {}, pirep);
+    el("circle", { cx: ZX + 100, cy: ZY - 30, r: 12, fill: "none", stroke: "#ff453a", "stroke-width": 2.5, class: "ring" }, pirepMark);
+    el("path", { d: `M${ZX + 100},${ZY - 46} l14,24 h-28 z`, fill: "#ff453a", stroke: "#000", "stroke-width": 2 }, pirepMark);
     const pirepG = el("g", {}, pirep);
     label(pirepG, "PILOT REPORT", "#ff453a", best ? `${{ MOD: "moderate", SEV: "severe" }[best.c.level] || ""} · Horus felt it first` : "graded against Horus", 360);
 
@@ -1375,27 +1429,38 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
 
     // ---- render from scroll position ----
     const plane = $("#s-plane"), plane2 = $("#s-plane2"), trail = $("#s-trail");
-    const caps = $$(".cap", sec), dots = $$(".story-dots i", sec), hint = $("#scroll-hint");
+    const caps = $$(".cap", sec), dots = $$(".chapters button", sec), hint = $("#scroll-hint");
+    const bar = $("#story-progress"), skip = $("#skip");
+    // jump to a chapter: scroll to a point where that chapter is fully set up
+    const AT = [0, 0.18, 0.37, 0.53, 0.68, 0.83, 0.96];
+    dots.forEach((b) => b.addEventListener("click", () => scrollTo({ top: sec.offsetTop + AT[+b.dataset.to] * (sec.offsetHeight - innerHeight), behavior: reduce ? "auto" : "smooth" })));
     const CH = [0, 0.12, 0.3, 0.45, 0.6, 0.72, 0.86];
     let chShown = -1, bob = 0, visible = true;
-    // labels sit under the cell, clear of the captions at the top
-    fcG.setAttribute("transform", `translate(${ZX + 100},${ZY + 108})`);
-    pirepG.setAttribute("transform", `translate(${ZX + 100},${ZY + 160})`);
+    // more facts from the data
+    if (T) fill("ac-peak", Math.max(...T.perFrame).toLocaleString("en-US"));
+    const roughPts = tur.vr.filter((q) => q[0] >= sPk - 30 && q[0] <= sPk + 90).map((q) => Math.abs(q[1]));
+    fill("rough-swing", "±" + Math.round(Math.max(...roughPts)).toLocaleString("en-US") + " ft/min");
     const ease = (k) => (k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2);
     function frameBox() {  // the part of the 1600x900 scene that fits this screen at zoom 1
       const ar = svg.clientWidth / svg.clientHeight;
       return ar > 16 / 9 ? [1600, 1600 / ar] : [900 * ar, 900];
     }
-    function camera(fx, fy, z) {
+    function camera(fx, cy, z, clampY) {
       const [bw, bh] = frameBox(), vw = bw / z, vh = bh / z;
-      let vx = fx - vw / 2, vy = fy - vh / 2;
-      if (z < 1.01) { vx = clamp(vx, 0, Math.max(0, 1600 - vw)); vy = clamp(vy, 0, Math.max(0, 900 - vh)); }
+      let vx = fx - vw / 2, vy = cy - vh / 2;
+      if (z < 1.01) { vx = clamp(vx, 0, Math.max(0, 1600 - vw)); if (clampY) vy = clamp(vy, 0, Math.max(0, 900 - vh)); }
       svg.setAttribute("viewBox", `${vx.toFixed(1)} ${vy.toFixed(1)} ${vw.toFixed(2)} ${vh.toFixed(2)}`);
     }
     function render(p, now) {
       let ch = 0; while (ch + 1 < CH.length && p >= CH[ch + 1]) ch++;
       if (ch !== chShown) { chShown = ch; caps.forEach((c) => c.classList.toggle("on", +c.dataset.ch === ch)); dots.forEach((n, i) => n.classList.toggle("on", i === ch)); }
       hint.style.opacity = p < 0.02 ? 1 : 0;
+      bar.style.transform = "scaleX(" + p.toFixed(4) + ")";
+      // the skip button would cover the trace panel, so it steps aside while the panel shows
+      // (the nav's "Live map" link and the chapter list still lead on)
+      const panelShown = p > 0.08 && p < 0.62;
+      skip.style.opacity = p > 0.97 || panelShown ? 0 : 1;
+      skip.style.pointerEvents = p > 0.97 || panelShown ? "none" : "auto";
       // plane 1: time along the real trace
       let x, s = null;
       if (p < 0.12) x = X0;
@@ -1417,30 +1482,59 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
         const on = s === null ? p >= 0.6 : b.s + 60 <= s;
         if (on !== b.on) { b.on = on; const hgt = on ? Math.max(2, 856 - by(b.v)) : 0; set(b.r, { height: hgt, y: 856 - hgt }); }
       }
-      $("#s-clouds-far").setAttribute("transform", `translate(${(-p * 300).toFixed(1)},0)`);
-      near.setAttribute("transform", `translate(${(-p * 800).toFixed(1)},0)`);
+      const sway = reduce ? 0 : 1;
+      $("#s-clouds-far").setAttribute("transform", `translate(${(-p * 300 + sway * Math.sin(now / 7000) * 30).toFixed(1)},0)`);
+      near.setAttribute("transform", `translate(${(-p * 800 + sway * Math.sin(now / 5200) * 60).toFixed(1)},0)`);
       rough.setAttribute("opacity", (seg(p, 0.18, 0.28) * (1 - seg(p, 0.6, 0.66))).toFixed(3));
-      chip.setAttribute("opacity", (seg(p, 0.44, 0.47) * (1 - seg(p, 0.62, 0.66))).toFixed(3));
+      const pop = seg(p, 0.44, 0.47);
+      chip.setAttribute("opacity", (pop * (1 - seg(p, 0.62, 0.66))).toFixed(3));
+      chipG.setAttribute("transform", `translate(${ZX},${ZY + 84}) scale(${(0.8 + 0.2 * ease(pop)).toFixed(3)})`);
       panel.setAttribute("opacity", (seg(p, 0.08, 0.13) * (1 - seg(p, 0.62, 0.68))).toFixed(3));
       hexes.setAttribute("opacity", (0.9 * seg(p, 0.58, 0.64)).toFixed(3));
       lit.setAttribute("opacity", seg(p, 0.6, 0.63).toFixed(3));
-      lit.setAttribute("transform", `translate(${(100 * seg(p, 0.63, 0.84)).toFixed(1)},0)`);
+      const drift = 100 * seg(p, 0.63, 0.84);
+      lit.setAttribute("transform", `translate(${drift.toFixed(1)},0)`);
       litHex.setAttribute("fill-opacity", (1 - 0.4 * seg(p, 0.63, 0.98)).toFixed(3));
       wind.setAttribute("opacity", (seg(p, 0.62, 0.66) * (1 - seg(p, 0.93, 0.98))).toFixed(3));
-      const x2 = lerp(-160, ZX + 70, seg(p, 0.72, 0.85));
+      const x2 = lerp(-160, ZX + 100, ease(seg(p, 0.72, 0.85)));
       const y2 = ZY + 4 + (reduce ? 0 : Math.sin(now / 800) * 3);
       set(plane2, { opacity: p >= 0.72 ? 1 : 0, x: (x2 - 100).toFixed(1), y: (y2 - 28).toFixed(1) });
       fc.setAttribute("opacity", seg(p, 0.79, 0.82).toFixed(3));
-      pirep.setAttribute("opacity", seg(p, 0.87, 0.9).toFixed(3));
-      // camera: close on the plane, ease out to the whole sky, then hold it centred
-      // (narrow screens cannot show the whole sky, so they keep following the action)
+      const drop = seg(p, 0.87, 0.9);
+      pirep.setAttribute("opacity", drop.toFixed(3));
+      pirepMark.setAttribute("transform", `translate(0,${(-90 * (1 - drop) ** 2).toFixed(1)})`);
+      // labels sit under the (drifting) cell, clear of the captions at the top
+      fcG.setAttribute("transform", `translate(${(ZX + drift).toFixed(1)},${ZY + 108})`);
+      pirepG.setAttribute("transform", `translate(${(ZX + drift).toFixed(1)},${ZY + 160})`);
+      // camera: close on the plane -> ease out to the whole sky -> push in on the detection
+      // -> follow the forecast cell as it drifts. Narrow screens follow the action all along.
       const [bw, bh] = frameBox(), narrow = bw < 1100;
-      const k = ease(seg(p, 0.02, 0.12)), z = lerp(clamp(bw / 250, 1.6, 4.2), 1, k);
-      const wide = narrow ? (p < 0.45 ? x : p < 0.6 ? ZX : ZX + 100) : 800;
-      // while zooming out, pan no faster than keeps the plane 15% inside the left edge
-      const fx = p < 0.12 ? Math.min(lerp(x, wide, k), x + 0.35 * (bw / z)) : wide;
-      const fy = lerp(ZY, bh >= 900 ? 450 : 900 - bh / 2, k);
-      camera(fx, fy, z);
+      const k = ease(seg(p, 0.02, 0.12)), z0 = clamp(bw / 250, 1.6, 4.2);
+      const cyFull = bh >= 900 ? 450 : 900 - bh / 2;
+      let fx, cy, z;
+      if (narrow) {
+        // tall screens: pull back to 0.79x so the action sits at ~62% height and the trace
+        // panel at the bottom, leaving the top for the caption
+        const zr = 0.79, vhr = bh / zr, cyRest = ZY - 0.12 * vhr;
+        z = p < 0.12 ? lerp(z0, zr, k) : zr;
+        fx = p < 0.6 ? lerp(x, ZX, ease(seg(p, 0.44, 0.48))) : ZX + drift;
+        cy = p < 0.12 ? lerp(ZY, cyRest, k) : cyRest;
+      } else if (p < 0.12) {
+        z = lerp(z0, 1, k);
+        fx = Math.min(lerp(x, 800, k), x + 0.35 * (bw / z));  // keep the plane in frame while panning
+        cy = lerp(ZY, cyFull, k);
+      } else if (p < 0.6) {
+        const e = ease(seg(p, 0.44, 0.5));
+        z = 1 + 0.12 * e;
+        fx = lerp(800, ZX, e);  // ZX is 800 unless the rough minute sits near an end
+        cy = lerp(cyFull, 900 - bh / z / 2, e);  // push in, keep the trace panel in view
+      } else {
+        const e = ease(seg(p, 0.6, 0.7));
+        z = lerp(1.12, 1.32, e);
+        fx = ZX + drift;
+        cy = lerp(900 - bh / 1.12 / 2, ZY - 0.05 * (bh / z), e);  // cell a little below centre
+      }
+      camera(fx, cy, z, !narrow);
     }
     const progress = () => { const b = sec.getBoundingClientRect(); return clamp(-b.top / (b.height - innerHeight)); };
     // deep link / screenshot hook: ?p=0.5 opens the story halfway through
