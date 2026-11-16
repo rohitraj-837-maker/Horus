@@ -18,9 +18,12 @@ def reliability(y: np.ndarray, p: np.ndarray, title: str, path: Path, bins: int 
     (rare events: equal-width bins would put almost everything in the first bin).
     Log-log axes; the dashed diagonal is perfect calibration."""
     y, p = np.asarray(y, dtype=float), np.asarray(p, dtype=float)
-    edges = np.unique(np.quantile(p, np.linspace(0, 1, bins + 1)))
-    if len(edges) < 2:  # constant forecast (e.g. climatology): one bin
-        edges = np.array([edges[0], np.nextafter(edges[0], np.inf)])
+    # Most grid cells sit exactly at the prior: give the prior its own bin, then
+    # equal-count bins over the forecasts above it (else the bins collapse).
+    lo_p = float(p.min())
+    above = p[p > lo_p]
+    q = np.quantile(above, np.linspace(0, 1, bins)) if len(above) else np.array([])
+    edges = np.unique(np.r_[lo_p, np.nextafter(lo_p, np.inf), q, np.nextafter(p.max(), np.inf)])
     b = np.clip(np.searchsorted(edges, p, side="right") - 1, 0, len(edges) - 2)
     n = np.bincount(b, minlength=len(edges) - 1)
     ok = n > 0
