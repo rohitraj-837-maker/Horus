@@ -470,7 +470,7 @@ def main() -> int:
             plots_mod.reliability(
                 df["y"].to_numpy(),
                 df["p"].to_numpy(),
-                f"{r}: aircraft target, {split} {test[0]} to {test[-1]}",
+                f"{r}: aircraft target, test {test[0]} to {test[-1]}",
                 config.resolve(f"reports/figures/reliability_{r}.png"),
             )
         return 0

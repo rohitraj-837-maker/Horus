@@ -69,6 +69,24 @@ Key findings (details in `reports/data_notes.md`):
 - Also built after the first gate run: `ingest/adsblol_history.py` (streams adsb.lol daily tar releases, CONUS ≥ FL180 to Parquet with bounded memory), `scripts/fetch_adsblol_history.py`. The IEM PIREP ingest is now resumable with retries; an earlier run had silently stopped partway when IEM dropped a connection.
 - Study period fixed: 2025-12-02 → 2026-01-15 (most MOD+ PIREPs); train Dec 2–31, test Jan 1–15. History download started 2026-11-15 ~02:13 AEDT (`data/raw/adsblol_hist/_log.csv`).
 
+## M5 — Advection N2, negative evidence N3, performance ✅ gate passed (2026-11-16 ~03:00 UTC)
+
+`make gate-m5`: check ✔, `make bench` ✔, N0–N3 rows ✔, reliability plots ✔, 7 artefacts leakage-free ✔.
+
+| Row | Aircraft PR-AUC (base 0.0009) | Aircraft ROC-AUC | ECE | PIREP ROC-AUC |
+|---|---|---|---|---|
+| CLIM | 0.0009 | 0.500 | 0.0002 | 0.500 |
+| N0 | 0.0015 | 0.511 | 0.0002 | 0.502 |
+| N1 | 0.0027 | 0.529 | 0.0002 | 0.515 |
+| **N2 + GFS advection** | **0.0051** | **0.676** | 0.0002 | **0.548** |
+| N3 + negative evidence | 0.0025 | 0.472 | 0.0005 | 0.535 |
+
+- **Advection is the big win:** N2 more than doubles N1's PR-AUC (5.7× base) and lifts ROC-AUC from 0.53 to 0.68 on held-out days, matching the in-sample train check (0.68).
+- **Negative evidence (N3) hurts** (ROC 0.47). Two smooth passes erase an alert, but turbulence is patchy and most passes through a turbulent cell miss it. N2 stays the best model; N3's rule needs rethinking (e.g. require several smooth passes, or weight by distance).
+- **Clamp fix (decision log):** the first test reliability plot showed config `l_min` = −6 sitting above the fitted prior (−7) and stacked detections running to p 0.998 with ~0 observed. Clamps now follow the train fit (floor l0 − (l_hit − l0), cap l_hit). Checked on the last 5 train days before re-running test. It was found on test, so it is logged here.
+- **Advection scheme:** barycentric upwind interpolation in the hex triangle around the departure point (convex: no new maxima; zero wind = identity; a blob at 50 m/s moves 180 km ± 15% in an hour). Inverse-distance and limited-gradient versions failed the transport test.
+- **Performance** (`reports/perf.md`): a full grid update for 10,000 aircraft (H3 lookup, evidence, advection, read) takes **31 ms p95** on the M1 (budget 2 s); 8,388 cells × 13 FL bins.
+
 ## M4 — Grid N0–N1, fitted half-life, GFS winds ✅ gate passed (2026-11-16 ~02:05 UTC)
 
 `make gate-m4`: check ✔, N0/N1 rows ✔, t½ per band ✔, GFS winds ✔, 7 artefacts leakage-free ✔.
@@ -82,7 +100,9 @@ Key findings (details in `reports/data_notes.md`):
 |---|---|---|---|
 | CLIM | 0.0009 | 0.500 | 0.500 |
 | N0 persistence | 0.0015 | 0.511 | 0.502 |
-| N1 decay + evidence | **0.0026** | **0.520** | 0.491 |
+| N1 decay + evidence | **0.0027** | **0.529** | 0.515 |
+
+  (Re-run in M5 after the clamp fix below; the first M4 run had N1 0.0026 / 0.520 / 0.491.)
 
   N1 gives ~3× the base rate in PR-AUC on the aircraft target but almost no ranking skill. The PIREP target shows none. This follows from the weak per-aircraft detector (M2/M3): the grid can only spread evidence it receives. PIREP-target calibration numbers are not meaningful for CLIM (PIREP windows are conditioned on a report existing, base 0.34).
 
