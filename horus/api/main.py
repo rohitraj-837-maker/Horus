@@ -13,7 +13,7 @@ Endpoints
     WS   /ws/live                    one message per snapshot: aircraft + changed cells
 The feed replays an archive day through the live loop at `speed`x real time (the
 free live sources give ~90 s per aircraft, too sparse for the detector; see
-reports/data_notes.md). The terminal front end (horus.tui) runs the same hub in-process.
+reports/data_notes.md). The text stream (horus.watch) runs the same hub in-process.
 """
 
 from __future__ import annotations
@@ -149,6 +149,12 @@ class Hub:
         with self.lock:
             self.loop.ingest(rows)
             return self.loop.step(now)
+
+    def step(self, now: int) -> dict[str, Any]:
+        """Synchronous advance to `now` (the text stream drives the hub this way)."""
+        assert self.feed is not None
+        self.now = now
+        return self._advance(self.feed.next(now), now)
 
     async def run(self) -> None:
         if self.feed is None:

@@ -198,6 +198,19 @@ class Live:
 
 
 @dataclass(frozen=True)
+class Watch:
+    speed: float
+    forecast_x: float
+    rearm_x: float
+    calm_after_s: int
+    status_every_s: int
+    pirep_near_km: float
+    pirep_lookback_s: int
+    case_pace_s: float
+    case_radius_km: float
+
+
+@dataclass(frozen=True)
 class Config:
     region: Region
     units: Units
@@ -213,6 +226,7 @@ class Config:
     eval: Eval
     splits: Splits
     live: Live
+    watch: Watch
 
 
 class ConfigError(ValueError):

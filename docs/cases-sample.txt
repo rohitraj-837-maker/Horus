@@ -1,0 +1,65 @@
+CASE 1 of 3  ·  Tue 13 Jan 2026, 15:05Z  ·  moderate turbulence reported at FL220-270 over IL
+Picked as the clearest detection on its test day, not at random.
+30 min either side of the report, one line per change.
+
+-30 min  ·             38 aircraft within 150 km · 0 in turbulence · 0 forecast cells lit
+-20 min  ·             50 aircraft within 150 km · 1 in turbulence · 0 forecast cells lit
+-20 min  TURBULENCE    ac0d21  FL330   1.4× threshold  128 km from the report
+-14 min  TURBULENCE    aa70b1  FL350   1.0× threshold  141 km from the report
+-10 min  ·             36 aircraft within 150 km · 0 in turbulence · 0 forecast cells lit
+ -7 min  TURBULENCE    abcd7a  FL210   4.7× threshold  42 km from the report
+  0 min  ·             32 aircraft within 150 km · 0 in turbulence · 0 forecast cells lit
+  0 min  PILOT REPORT  moderate at FL220-270   Horus so far: 0 aircraft felt it within 40 km, forecast at that spot: normal
++10 min  ·             28 aircraft within 150 km · 0 in turbulence · 0 forecast cells lit
++20 min  ·             21 aircraft within 150 km · 0 in turbulence · 0 forecast cells lit
++30 min  ·             28 aircraft within 150 km · 0 in turbulence · 0 forecast cells lit
+
+  3 aircraft hit turbulence within 150 km; 0 of them within 40 km and 2,000 ft of the report.
+
+CASE 2 of 3  ·  Sun 11 Jan 2026, 16:11Z  ·  moderate turbulence reported at FL290 over TN
+Picked as the clearest detection on its test day, not at random.
+30 min either side of the report, one line per change.
+
+-30 min  ·             38 aircraft within 150 km · 0 in turbulence · 0 forecast cells lit
+-24 min  TURBULENCE    ab5b8c  FL360   1.0× threshold  70 km from the report
+-21 min  TURBULENCE    a6ed61  FL360   1.1× threshold  71 km from the report
+-20 min  ·             36 aircraft within 150 km · 0 in turbulence · 0 forecast cells lit
+-19 min  TURBULENCE    a12f2a  FL340   1.0× threshold  70 km from the report
+-10 min  ·             33 aircraft within 150 km · 0 in turbulence · 0 forecast cells lit
+ -7 min  TURBULENCE    a46d4a  FL240   1.6× threshold  77 km from the report
+ -5 min  TURBULENCE    ac8583  FL360   1.0× threshold  45 km from the report
+  0 min  ·             35 aircraft within 150 km · 1 in turbulence · 0 forecast cells lit
+  0 min  TURBULENCE    a245b7  FL290   1.6× threshold  12 km from the report
+  0 min  PILOT REPORT  moderate at FL290   Horus so far: 1 aircraft felt it within 40 km, forecast at that spot: normal
+ +1 min  TURBULENCE    ad84db  FL370   1.2× threshold  23 km from the report
+ +4 min  TURBULENCE    c00e25  FL300   1.1× threshold  110 km from the report
+ +4 min  FORECAST      cell 21 km from the report at 36× normal; it drifts with the wind
++10 min  ·             37 aircraft within 150 km · 0 in turbulence · 2 forecast cells lit
++15 min  TURBULENCE    aaa590  FL390   1.0× threshold  20 km from the report
++20 min  ·             42 aircraft within 150 km · 0 in turbulence · 2 forecast cells lit
++22 min  TURBULENCE    a4f1e5  FL260   1.1× threshold  131 km from the report
++23 min  forecast      faded back to normal
++27 min  TURBULENCE    a44963  FL370   1.5× threshold  85 km from the report
++30 min  ·             46 aircraft within 150 km · 0 in turbulence · 0 forecast cells lit
+
+  11 aircraft hit turbulence within 150 km; 1 of them within 40 km and 2,000 ft of the report.
+
+CASE 3 of 3  ·  Sat 10 Jan 2026, 14:38Z  ·  moderate turbulence reported at FL370 over GA
+Picked as the clearest detection on its test day, not at random.
+30 min either side of the report, one line per change.
+
+-30 min  ·             39 aircraft within 150 km · 1 in turbulence · 0 forecast cells lit
+-30 min  TURBULENCE    ab35d2  FL400   1.1× threshold  31 km from the report
+-20 min  ·             44 aircraft within 150 km · 0 in turbulence · 0 forecast cells lit
+-10 min  ·             39 aircraft within 150 km · 0 in turbulence · 0 forecast cells lit
+ -1 min  TURBULENCE    a98051  FL370   2.9× threshold  5 km from the report
+  0 min  ·             40 aircraft within 150 km · 0 in turbulence · 0 forecast cells lit
+  0 min  PILOT REPORT  moderate at FL370   Horus so far: 1 aircraft felt it within 40 km, forecast at that spot: normal
+ +2 min  FORECAST      cell 22 km from the report at 36× normal; it drifts with the wind
++10 min  ·             30 aircraft within 150 km · 0 in turbulence · 1 forecast cell lit
++13 min  forecast      faded back to normal
++20 min  ·             49 aircraft within 150 km · 0 in turbulence · 0 forecast cells lit
++30 min  ·             44 aircraft within 150 km · 0 in turbulence · 0 forecast cells lit
+
+  2 aircraft hit turbulence within 150 km; 1 of them within 40 km and 2,000 ft of the report.
+

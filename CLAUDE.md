@@ -32,7 +32,7 @@ horus/ingest/  network + file I/O → canonical Parquet
 horus/core/    pure algorithms: geo, segment, residual, normalise, detect, grid
 horus/eval/    PIREP matching, negatives, benchmarks, plots
 horus/api/     FastAPI + live loop
-horus/tui/        terminal dashboard (Textual, M6; replaced the web map 2026-11-16)
+horus/watch.py    text stream: one line per event (M6; replaced the web map and TUI 2026-11-16)
 demo/             offline demo: stdlib server + static UI + synthetic scenarios (not a milestone)
 scripts/          CLI entry points (recorder, fetchers, fits)
 reports/          benchmark tables + figures (committed)
@@ -48,7 +48,8 @@ uv run ruff check .           # lint
 uv run mypy horus/core     # types (core only)
 make gate-m1 … gate-m7        # milestone acceptance gates
 make bench                    # performance benchmark
-make tui                      # terminal dashboard (live loop in-process)
+make watch                    # live text stream (live loop in-process); ARGS="--fl 340"
+make cases                    # the 3 curated case studies, told minute by minute
 make serve                    # JSON + WebSocket API on 127.0.0.1:8000
 make demo / make bundle       # offline demo; dist/horus-push-bundle.tar.gz
 make gate-demo                # demo + bundle gate (needs a clean git tree)

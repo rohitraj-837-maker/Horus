@@ -124,3 +124,14 @@ live:
   opensky_bbox_credit_cost: 4          # measured 2026-11-15: CONUS bbox (>400 sq deg) = 4 credits
   adsblol_radius_nm: 250
   adsblol_request_spacing_s: 1.5
+
+watch:                         # text stream (horus/watch.py): what counts as a line worth printing
+  speed: 30                    # archive replay speed (x real time)
+  forecast_x: 5.0              # a FORECAST line when a cell reaches this many times the prior
+  rearm_x: 2.0                 # ... and may print again only after dropping below this
+  calm_after_s: 180            # an aircraft is "calm" after this long without a detection
+  status_every_s: 300          # status line every 5 simulated minutes
+  pirep_near_km: 40            # PIREP check: detections within the SPEC match radius ...
+  pirep_lookback_s: 600        # ... in the previous 10 min (live: only the past is known)
+  case_pace_s: 0.4             # seconds per replay minute in case stories
+  case_radius_km: 150          # case stories follow aircraft and cells this close to the report

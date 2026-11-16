@@ -1,7 +1,7 @@
 """M6 acceptance gate (SPEC §10 week 6): live loop == offline (pytest), live view
 updating with p95 end-to-end latency < 10 s (reports/perf.md), 3 curated replays.
-The live view is the terminal dashboard (horus/tui; Rohit's decision 2026-11-16,
-replacing the web map); its behaviour is covered by tests/tui."""
+The live view is a plain text stream (horus/watch.py; Rohit's decision 2026-11-16,
+replacing the web map and then the Textual dashboard); covered by tests/test_watch.py."""
 
 from __future__ import annotations
 
@@ -26,10 +26,15 @@ def main() -> int:
     reps = sorted(config.resolve("data/replays").glob("*.json"))
     good = [p for p in reps if len(json.loads(p.read_text())["frames"]) >= 30]
     check("curated replays", len(good) >= 3, f"{len(good)} replays with >= 30 frames")
-    tui = [config.resolve(f"horus/tui/{f}") for f in ("app.py", "mapview.py", "__main__.py")]
-    check("terminal front end", all(f.exists() for f in tui), "horus/tui (tested in tests/tui)")
-    shots = [config.resolve(f"docs/img/horus-tui-{m}.svg") for m in ("live", "case")]
-    check("TUI screenshots", all(s.exists() for s in shots), "docs/img/horus-tui-{live,case}.svg")
+    watch = config.resolve("horus/watch.py")
+    check("text stream", watch.exists(), "horus/watch.py (tested in tests/test_watch.py)")
+    for name, must in (
+        ("watch-sample.txt", ("TURBULENCE", "FORECAST", "PILOT REPORT", "Summary")),
+        ("cases-sample.txt", ("CASE 1 of", "PILOT REPORT")),
+    ):
+        p = config.resolve(f"docs/{name}")
+        text = p.read_text() if p.exists() else ""
+        check(f"sample {name}", all(m in text for m in must), f"docs/{name} (make watch-sample)")
     print("M6 GATE:", "PASS" if ok else "FAIL")
     return 0 if ok else 1
 

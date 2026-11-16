@@ -62,6 +62,7 @@ class LiveLoop:
     pending: Evidence = field(default_factory=Evidence)
     tick: int = 0
     latest: pd.DataFrame = field(default_factory=pd.DataFrame)  # last minute row per aircraft
+    fresh: pd.DataFrame = field(default_factory=pd.DataFrame)  # minutes settled by the last step
 
     def __post_init__(self) -> None:
         g = self.cfg.grid
@@ -108,6 +109,7 @@ class LiveLoop:
         """Advance to `now`: score buffers, queue newly settled minutes, then run
         every 60 s tick up to the settled horizon. Returns a summary for clients."""
         out = self._score(now)
+        self.fresh = pd.DataFrame()
         if not out.empty:
             self.latest = out.sort_values("minute").groupby("icao24").tail(1)
             settled = out[out["minute"] + TICK_S <= now - self.settle_s]
@@ -116,6 +118,7 @@ class LiveLoop:
             key = list(zip(settled["icao24"], settled["minute"], strict=True))
             new = [k not in self.emitted for k in key]
             fresh = settled[new]
+            self.fresh = fresh
             self.emitted.update(k for k, n in zip(key, new, strict=True) if n)
             if len(fresh):
                 self.pending.rows.append(fresh)

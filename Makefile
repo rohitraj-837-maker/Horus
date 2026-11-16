@@ -1,4 +1,4 @@
-.PHONY: setup test lint types check gate-m0 gate-m1 gate-m2 gate-m3 gate-m4 gate-m5 gate-m6 serve replays latency tui scores bench-detector bench-rates winds bench-nowcast bench record recorder-status trino-smoke demo demo-data bundle gate-demo
+.PHONY: setup test lint types check gate-m0 gate-m1 gate-m2 gate-m3 gate-m4 gate-m5 gate-m6 serve replays latency watch cases watch-sample scores bench-detector bench-rates winds bench-nowcast bench record recorder-status trino-smoke demo demo-data bundle gate-demo
 
 setup:
 	uv sync
@@ -61,9 +61,17 @@ gate-m4: check
 gate-m5: check bench
 	uv run python scripts/gate_nowcast.py m5
 
-# M6: terminal dashboard (in-process), JSON/WS API, curated replays, live latency
-tui:
-	uv run python -m horus.tui
+# M6: text stream (in-process live loop), JSON/WS API, curated replays, live latency
+#   make watch ARGS="--fl 340"   options: --fl --speed --fast --minutes --loop --day
+watch:
+	uv run python -m horus.watch $(ARGS)
+
+cases:
+	uv run python -m horus.watch --cases
+
+watch-sample:
+	uv run python -m horus.watch --fast --minutes 60 --no-color > docs/watch-sample.txt
+	uv run python -m horus.watch --cases --fast --no-color > docs/cases-sample.txt
 
 serve:
 	uv run uvicorn horus.api.main:app --host 127.0.0.1 --port 8000

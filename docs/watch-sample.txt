@@ -1,0 +1,59 @@
+Loading a day of flights (about 30 s)...
+HORUS  turbulence from aircraft vertical speed
+Replaying 2026-01-01 15:00Z-17:59Z from the archive, as fast as this machine runs.
+Real flights, run through the same code a live feed uses. Ctrl-C stops.
+Research prototype. Not for flight decisions.
+
+  TURBULENCE    an aircraft's own climb/descent data turned bumpy (strength vs the threshold)
+  calm          a bump that lasted 2 min or more has ended
+  FORECAST      a ~26 km patch where the next aircraft is likely to hit turbulence (15 min)
+  PILOT REPORT  a real pilot report (FL200+): never fed in, only used to check Horus
+Lines run about 5 min behind the flights: each minute of data settles before it counts.
+
+ 15:04Z  PILOT REPORT  moderate at FL370 over NY (B737).  Horus: 1 aircraft passed within 40 km just before, none felt it; forecast normal
+ 15:05Z  ·             2,033 aircraft above FL200 · 0 in turbulence · 0 forecast cells above 5× normal
+ 15:09Z  TURBULENCE    a12f07  B39M  FL370   1.1× threshold  offshore
+ 15:09Z  FORECAST      FL360-380  offshore: 3.0% chance in the next 15 min (43× normal)
+ 15:10Z  ·             2,069 aircraft above FL200 · 1 in turbulence · 1 forecast cell above 5× normal
+ 15:15Z  ·             2,101 aircraft above FL200 · 0 in turbulence · 1 forecast cell above 5× normal
+ 15:20Z  ·             2,163 aircraft above FL200 · 0 in turbulence · 1 forecast cell above 5× normal
+ 15:23Z  PILOT REPORT  moderate at FL310 offshore (B77W).  Horus: no aircraft passed within 40 km just before; forecast normal
+ 15:25Z  TURBULENCE    a1d99b  A21N  FL340   1.3× threshold  over NM
+ 15:25Z  FORECAST      FL340-360  over NM: 3.0% chance in the next 15 min (43× normal)
+ 15:25Z  ·             2,195 aircraft above FL200 · 1 in turbulence · 1 forecast cell above 5× normal
+ 15:26Z  TURBULENCE    a95975  ?     FL470   3.2× threshold  over WI
+ 15:27Z  PILOT REPORT  moderate at FL430 over NM (GLF6).  Horus: 1 aircraft passed within 40 km just before, none felt it; forecast normal
+ 15:30Z  TURBULENCE    a416be  B738  FL360   2.3× threshold  over OH
+ 15:30Z  FORECAST      FL360-380  over OH: 3.0% chance in the next 15 min (43× normal)
+ 15:30Z  ·             2,232 aircraft above FL200 · 1 in turbulence · 2 forecast cells above 5× normal
+ 15:34Z  TURBULENCE    a788d3  A21N  FL320   1.2× threshold  over NM
+ 15:34Z  FORECAST      FL320-340  over NM: 3.0% chance in the next 15 min (43× normal)
+ 15:34Z  PILOT REPORT  moderate at FL000-250 over CA (E75L).  Horus: 3 aircraft passed within 40 km just before, none felt it; forecast normal
+ 15:34Z  PILOT REPORT  moderate at FL360 offshore (B738).  Horus: no aircraft passed within 40 km just before; forecast normal
+ 15:35Z  PILOT REPORT  moderate at FL270-300 over VA (B738).  Horus: 4 aircraft passed within 40 km just before, none felt it; forecast normal
+ 15:35Z  ·             2,245 aircraft above FL200 · 1 in turbulence · 3 forecast cells above 5× normal
+ 15:38Z  calm          a788d3  bumpy for 2 min (15:33Z-15:35Z), peak 1.3×
+ 15:40Z  TURBULENCE    abfdaf  B38M  FL370   1.6× threshold  over TX
+ 15:40Z  FORECAST      FL360-380  over TX: 3.0% chance in the next 15 min (43× normal)
+ 15:40Z  PILOT REPORT  moderate at FL370 offshore (B738).  Horus: 2 aircraft passed within 40 km just before, none felt it; forecast normal
+ 15:40Z  PILOT REPORT  moderate at FL230 over CA (GL7T).  Horus: 3 aircraft passed within 40 km just before, none felt it; forecast normal
+ 15:40Z  ·             2,271 aircraft above FL200 · 1 in turbulence · 3 forecast cells above 5× normal
+ 15:45Z  PILOT REPORT  moderate at FL370 offshore (B738).  Horus: 3 aircraft passed within 40 km just before, none felt it; forecast normal
+ 15:45Z  ·             2,304 aircraft above FL200 · 0 in turbulence · 2 forecast cells above 5× normal
+ 15:46Z  TURBULENCE    a1d99b  A21N  FL340   1.0× threshold  over NM
+ 15:46Z  FORECAST      FL340-360  over NM: 3.0% chance in the next 15 min (43× normal)
+ 15:49Z  PILOT REPORT  moderate at FL430 over NM (GLF6).  Horus: 2 aircraft passed within 40 km just before, none felt it; forecast normal
+ 15:49Z  PILOT REPORT  moderate at FL430 over NM (LJ45).  Horus: 2 aircraft passed within 40 km just before, none felt it; forecast normal
+ 15:50Z  ·             2,325 aircraft above FL200 · 0 in turbulence · 3 forecast cells above 5× normal
+ 15:51Z  PILOT REPORT  moderate at FL380 over WY (B738).  Horus: 1 aircraft passed within 40 km just before, none felt it; forecast normal
+ 15:52Z  PILOT REPORT  moderate at FL280 over AL (BCS3).  Horus: no aircraft passed within 40 km just before; forecast normal
+ 15:54Z  TURBULENCE    a17ecd  B763  FL340   1.0× threshold  over MO
+ 15:54Z  FORECAST      FL340-360  over MO: 3.0% chance in the next 15 min (43× normal)
+ 15:54Z  PILOT REPORT  moderate at FL270 over VA (B737).  Horus: 2 aircraft passed within 40 km just before, none felt it; forecast normal
+ 15:55Z  TURBULENCE    a72dcb  GLF5  FL430   1.1× threshold  offshore
+ 15:55Z  FORECAST      FL420-440  offshore: 3.0% chance in the next 15 min (43× normal)
+ 15:55Z  ·             2,332 aircraft above FL200 · 2 in turbulence · 4 forecast cells above 5× normal
+
+Summary 15:00Z-15:56Z
+  9 turbulence detections (runs of bumpy minutes)
+  14 pilot reports of moderate or worse at FL200+: 11 had aircraft passing within 40 km and 2,000 ft in the 10 min before, and 0 of those had a detection

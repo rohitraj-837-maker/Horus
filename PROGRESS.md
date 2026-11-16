@@ -51,6 +51,16 @@ One entry per milestone gate. A milestone is **complete** only when its `make ga
   - Removed: `web/`, `web-glass/` and their routes (`/`, `/glass`, `/api/lattice`, `/api/basemap`).
   - Kept: the JSON/WS API (`make serve`) and `/api/winds`.
   - The M6 gate now checks `horus/tui` (tested in `tests/tui`) and `docs/img/horus-tui-{live,case}.svg`. SPEC deviation: the SPEC's MapLibre web UI.
+- **2026-11-16: Plain text stream replaces the terminal dashboard (Rohit).** The braille dashboard redrew the map in Python every 0.5 s and felt laggy; Rohit chose text only. `horus/watch.py` (`make watch`, `make cases`) prints one line per event and nothing is redrawn:
+  - `TURBULENCE`: a run of detected minutes starts on an aircraft (strength vs the grid tau, state). `calm`: a run of 2+ minutes ends. `FORECAST`: a cell reaches 5× the prior (neighbours of a lit cell stay quiet, so a drifting patch prints once). `PILOT REPORT`: a real MOD+ report at FL200+, with how many aircraft passed within 40 km / 2,000 ft in the 10 min before, how many of them detected, and the forecast at that spot. Status line every 5 min; summary at the end.
+  - Clock = the grid tick: only settled minutes (the ones the grid and the evaluation use) become TURBULENCE lines, so the stream runs ~5 min behind the flights and every forecast follows a detection. `LiveLoop.fresh` exposes the settled rows of each step.
+  - Cases: the 3 curated replays told minute by minute, limited to 150 km around the report.
+  - Thresholds in `config.yaml: watch`. Samples: `docs/watch-sample.txt`, `docs/cases-sample.txt` (`make watch-sample`).
+  - Removed: `horus/tui/`, `tests/tui/`, `scripts/tui_shot.py`, TUI screenshots, the `textual` dependency. The M6 gate now checks `horus/watch.py`, `tests/test_watch.py` and the two samples. Re-passed: 274 tests.
+  - What the stream shows honestly: on 2026-01-01 15:00–15:56Z, 14 MOD+ PIREPs at FL200+; 11 had aircraft nearby in the 10 min before, none with a detection, in line with recall ≈ 0.06 at 10 FA/1000 h (reports/detector_ablation.md).
+- **2026-11-17: Bulk data deleted (Rohit: "delete the 22 GB if not needed anymore").** The disk was 97% full (7.7 GB free), below the 20 GB floor of the Trino fetcher. Deleted: adsb.lol archive days other than 2026-01-01 (11.7 GB), `data/derived/` (all scores and bench outputs, 9.6 GB), `data/raw/live` (recorder), `data/raw/metadata` (aircraft DB sources). Kept (255 MB): `date=2026-01-01` (the `make watch` day), `data/parquet` (PIREPs, aircraft types), `data/winds`, `data/replays`. `models/` and `reports/` are untouched (small, committed).
+  - Still works: `make watch`, `make cases`, `make serve`, `make test`, `make bench`, `make gate-m6`. Checked before deleting by moving the data aside first.
+  - No longer re-runnable without re-downloading (`scripts/fetch_adsblol_history.py`, hours) and re-scoring (`make scores`, overnight): `gate-m1`…`gate-m5` and the benchmarks behind them. Their results stay in `reports/`, this log and tags m1–m5.
 
 ## M1 — Ingestion ✅ gate passed (2026-11-15 22:30 UTC)
 
