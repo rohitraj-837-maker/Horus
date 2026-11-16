@@ -1,4 +1,4 @@
-.PHONY: setup test lint types check gate-m0 gate-m1 gate-m2 gate-m3 gate-m4 gate-m5 gate-m6 serve replays latency watch cases watch-sample up readme gif gate-m7 scores bench-detector bench-rates winds bench-nowcast bench record recorder-status trino-smoke bundle gate-bundle
+.PHONY: setup test lint types check gate-m0 gate-m1 gate-m2 gate-m3 gate-m4 gate-m5 gate-m6 serve replays latency watch cases watch-sample up readme gif site-data gate-m7 scores bench-detector bench-rates winds bench-nowcast bench record recorder-status trino-smoke bundle gate-bundle
 
 setup:
 	uv sync
@@ -97,6 +97,10 @@ readme:
 
 gif:
 	uv run python scripts/make_demo_gif.py
+
+# Project site (docs/index.html): real data for the scroll story, live map, charts, cases
+site-data:
+	uv run python scripts/make_site_data.py
 
 gate-m7: check bench readme
 	uv run python scripts/gate_m7.py

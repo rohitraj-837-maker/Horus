@@ -172,8 +172,15 @@ def metrics() -> dict[str, str]:
     grid_body = section("perf.md", "grid-update")
     live_body = section("perf.md", "live-latency")
     b3r = pick(rec, Rate="1 s", Row="B3")
+    t1 = table(det1, "Row")
     return {
-        "b3_pr_auc": pick(table(det1, "Row"), Row="B3")["PR-AUC"],
+        "b0_pr_auc": pick(t1, Row="B0")["PR-AUC"],
+        "b1_pr_auc": pick(t1, Row="B1")["PR-AUC"],
+        "b2_pr_auc": pick(t1, Row="B2")["PR-AUC"],
+        "b3_pr_auc": pick(t1, Row="B3")["PR-AUC"],
+        "n0_roc": pick(now, Row="N0", Target="aircraft")["ROC-AUC"],
+        "n1_roc": pick(now, Row="N1", Target="aircraft")["ROC-AUC"],
+        "t_half_high": hl["FL370–460"],
         "pr_baseline": grab(r"prevalence (\d\.\d+)", det1),
         "n_pos": f"{int(grab(r'Test windows: (\d+) positive', det1)):,}",
         "n_neg": f"{int(grab(r'(\d+) negative', det1)):,}",
