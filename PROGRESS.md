@@ -69,7 +69,7 @@ Key findings (details in `reports/data_notes.md`):
 - Also built after the first gate run: `ingest/adsblol_history.py` (streams adsb.lol daily tar releases, CONUS ≥ FL180 to Parquet with bounded memory), `scripts/fetch_adsblol_history.py`. The IEM PIREP ingest is now resumable with retries; an earlier run had silently stopped partway when IEM dropped a connection.
 - Study period fixed: 2025-12-02 → 2026-01-15 (most MOD+ PIREPs); train Dec 2–31, test Jan 1–15. History download started 2026-11-15 ~02:13 AEDT (`data/raw/adsblol_hist/_log.csv`).
 
-## M5 — Advection N2, negative evidence N3, performance ✅ gate passed (2026-11-16 ~03:00 UTC)
+## M5 — Advection N2, negative evidence N3, performance ✅ gate passed (2026-11-16 02:14 UTC)
 
 `make gate-m5`: check ✔, `make bench` ✔, N0–N3 rows ✔, reliability plots ✔, 7 artefacts leakage-free ✔.
 
