@@ -318,36 +318,45 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
 .ring { transform-box: fill-box; transform-origin: center; animation: ring 1.8s ease-out infinite; }
 @keyframes ring { from { transform: scale(0.4); opacity: 0.9; } to { transform: scale(3.2); opacity: 0; } }
 .bar-s { transition: height 0.6s var(--ease), y 0.6s var(--ease), opacity 0.4s; }
-.cap {
-  position: absolute; left: max(6vw, 22px); top: 15vh; width: min(540px, calc(100vw - 44px));
-  opacity: 0; transform: translateY(18px); transition: opacity 0.55s var(--ease), transform 0.55s var(--ease); pointer-events: none;
+.stage::after {  /* scrim: keeps captions readable over the sky */
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.45) 26%, rgba(0,0,0,0) 44%);
 }
-.cap.on { opacity: 1; transform: none; pointer-events: auto; }
-.cap .k { margin: 0 0 12px; font-size: 15px; font-weight: 600; color: var(--c, var(--ink-2)); display: flex; align-items: center; gap: 10px; }
+.cap {
+  position: absolute; z-index: 2; left: 50%; top: 10vh; width: min(820px, calc(100vw - 40px)); text-align: center;
+  opacity: 0; transform: translate(-50%, 14px); pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.45s var(--ease);
+}
+.cap.on { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; transition-delay: 0.2s; }
+.cap .k { margin: 0 0 14px; font-size: 15px; font-weight: 600; color: var(--c, var(--ink-2)); display: flex; justify-content: center; align-items: center; gap: 10px; }
 .cap .k::before { content: attr(data-n); display: grid; place-items: center; width: 24px; height: 24px; border-radius: 8px; background: var(--c); color: #000; font-size: 13px; font-weight: 700; }
-.cap h2 { margin: 0; font-size: clamp(32px, 4.4vw, 58px); line-height: 1.04; font-weight: 700; letter-spacing: -0.04em; }
-.cap p { margin: 16px 0 0; font-size: clamp(16px, 1.35vw, 19px); line-height: 1.5; color: var(--ink-2); }
-.cap p b { color: var(--ink); font-weight: 600; }
-.cap.intro { left: 0; right: 0; width: auto; top: 11vh; text-align: center; padding: 0 20px; }
-.cap.intro .eyebrow { margin-bottom: 14px; }
-.cap.intro h1 { font-size: clamp(72px, 14vw, 180px); }
-.cap.intro .tagline-big { margin: 14px auto 0; max-width: 900px; font-size: clamp(26px, 3.8vw, 48px); line-height: 1.08; font-weight: 650; letter-spacing: -0.035em; }
-.scroll-hint { position: absolute; left: 50%; bottom: 4.5vh; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-2); transition: opacity 0.4s; }
+.cap h2 { margin: 0; font-size: clamp(30px, 4vw, 54px); line-height: 1.06; font-weight: 700; letter-spacing: -0.035em; text-wrap: balance; }
+.cap p { margin: 16px auto 0; max-width: 680px; font-size: clamp(16px, 1.3vw, 19px); line-height: 1.55; color: #d1d1d6; text-wrap: pretty; }
+.cap p b { color: #fff; font-weight: 600; }
+.cap.intro { inset: 0; top: 0; left: 0; width: auto; transform: none; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 10vh 24px 17vh; }
+.cap.intro.on { transform: none; }
+.cap.intro .eyebrow { margin: 0 0 12px; }
+.cap.intro h1 { font-size: clamp(72px, 13vw, 168px); }
+.cap.intro .tagline-big { margin: 0; max-width: 900px; font-size: clamp(26px, 3.6vw, 46px); line-height: 1.08; font-weight: 650; letter-spacing: -0.035em; text-wrap: balance; }
+.beacon { animation: blink 1.4s linear infinite; }
+.beacon.b2 { animation-delay: 0.7s; }
+@keyframes blink { 0%, 7% { opacity: 1; } 8%, 100% { opacity: 0.1; } }
+.scroll-hint { position: absolute; z-index: 2; left: 50%; bottom: 4.5vh; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-2); transition: opacity 0.4s; }
 .scroll-hint svg { width: 18px; height: 18px; animation: bob 1.6s ease-in-out infinite; }
 @keyframes bob { 50% { transform: translateY(6px); } }
-.story-dots { position: absolute; right: 22px; top: 50%; transform: translateY(-50%); display: grid; gap: 12px; }
+.story-dots { position: absolute; z-index: 2; right: 22px; top: 50%; transform: translateY(-50%); display: grid; gap: 12px; }
 .story-dots i { width: 7px; height: 7px; border-radius: 50%; background: rgba(255, 255, 255, 0.22); transition: background 0.3s, transform 0.3s; }
 .story-dots i.on { background: var(--ink); transform: scale(1.35); }
-.illus { position: absolute; right: 22px; bottom: 16px; font-size: 12px; color: var(--ink-3); }
+.illus { position: absolute; z-index: 2; right: 22px; bottom: 16px; font-size: 12px; color: var(--ink-3); }
 .cap .pill { margin-top: 22px; }
 .live-head h2 { margin: 0; font-size: clamp(40px, 6vw, 72px); line-height: 1.02; font-weight: 700; letter-spacing: -0.045em; }
 .still *, .still *::before { transition: none !important; }
 @media (prefers-reduced-motion: reduce) {
-  .waves path, .wind-arrow, .ring, .scroll-hint svg { animation: none; }
+  .waves path, .wind-arrow, .ring, .scroll-hint svg, .beacon { animation: none; }
 }
 @media (max-width: 720px) {
-  .cap { top: 10vh; }
-  .cap.intro { top: 9vh; }
+  .cap { top: 9vh; }
+  .cap.intro { padding: 9vh 20px 18vh; }
   .story-dots { right: 10px; }
   .illus { left: 22px; right: auto; }
 }
@@ -411,7 +420,7 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
     <div class="stage">
       <svg class="scene" id="scene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
         <defs>
-          <linearGradient id="g-sky" x1="0" y1="0" x2="0" y2="1">
+          <linearGradient id="g-sky" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="900">
             <stop offset="0" stop-color="#02040a"/><stop offset="0.55" stop-color="#0a1528"/><stop offset="1" stop-color="#010103"/>
           </linearGradient>
           <radialGradient id="g-cloud"><stop offset="0" stop-color="#cfe0ff" stop-opacity="0.11"/><stop offset="1" stop-color="#cfe0ff" stop-opacity="0"/></radialGradient>
@@ -430,9 +439,16 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
             <rect x="80" y="38" width="30" height="10" rx="5" fill="#8e98a8"/>
             <line x1="56" y1="29" x2="172" y2="29" stroke="#2b3240" stroke-width="2.2" stroke-dasharray="2.2 4.6" stroke-linecap="round"/>
             <path d="M182 28 L193 30.5 L191 32.2 L181 31.2 Z" fill="#1a2030"/>
+            <path d="M40 34.6 L170 34.6" stroke="url(#g-tail)" stroke-width="1.6" stroke-linecap="round" opacity="0.9"/>
+            <rect x="160" y="26.5" width="5" height="9.5" rx="1.2" fill="none" stroke="#7d8696" stroke-width="0.6"/>
+            <rect x="48" y="26.5" width="4.5" height="9" rx="1.2" fill="none" stroke="#7d8696" stroke-width="0.6"/>
+            <ellipse cx="108.5" cy="43" rx="2" ry="4.4" fill="#2b3240"/>
+            <circle class="beacon" cx="112" cy="23.4" r="1.5" fill="#ff453a"/>
+            <circle class="beacon b2" cx="104" cy="40.6" r="1.3" fill="#ff453a"/>
+            <circle class="beacon" cx="11.5" cy="5.6" r="1.4" fill="#ffffff"/>
           </symbol>
         </defs>
-        <rect width="1600" height="900" fill="url(#g-sky)"/>
+        <rect x="-2400" y="-1200" width="6400" height="3300" fill="url(#g-sky)"/>
         <g id="s-stars"></g>
         <g id="s-clouds-far"></g>
         <g id="s-hexes" opacity="0"></g>
@@ -450,8 +466,10 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
       </svg>
 
       <div class="cap intro on" data-ch="0">
-        <p class="eyebrow">Turbulence detection<i>·</i>15-minute nowcasting<i>·</i>validated against pilot reports</p>
-        <h1>Horus.</h1>
+        <div>
+          <p class="eyebrow">Turbulence detection<i>·</i>15-minute nowcasting<i>·</i>validated against pilot reports</p>
+          <h1>Horus.</h1>
+        </div>
         <p class="tagline-big grad">Turbulence, sensed by the aircraft already flying.</p>
       </div>
       <div class="cap" data-ch="1"><p class="k" data-n="1" style="--c:var(--wind)">Broadcast</p>
@@ -1287,7 +1305,7 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
     // ---- build the static scene ----
     let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
     const stars = $("#s-stars");
-    for (let i = 0; i < 110; i++) el("circle", { cx: rnd() * 1600, cy: rnd() * 600, r: 0.5 + rnd() * 1.1, fill: "#fff", opacity: 0.15 + rnd() * 0.55 }, stars);
+    for (let i = 0; i < 200; i++) el("circle", { cx: -700 + rnd() * 3000, cy: -300 + rnd() * 900, r: 0.5 + rnd() * 1.1, fill: "#fff", opacity: 0.15 + rnd() * 0.55 }, stars);
     const far = $("#s-clouds-far"), near = $("#s-clouds-near");
     for (let i = 0; i < 9; i++) el("ellipse", { cx: rnd() * 2000, cy: 160 + rnd() * 460, rx: 200 + rnd() * 220, ry: 34 + rnd() * 40, fill: "url(#g-cloud)" }, far);
     for (let i = 0; i < 6; i++) el("ellipse", { cx: rnd() * 2600, cy: 520 + rnd() * 200, rx: 320 + rnd() * 300, ry: 50 + rnd() * 50, fill: "url(#g-cloud)", opacity: 0.9 }, near);
@@ -1323,7 +1341,7 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
     };
     const chip = $("#s-chip");
     el("circle", { cx: ZX, cy: ZY, r: 12, fill: "none", stroke: "#ffad3b", "stroke-width": 2.5, class: "ring" }, chip);
-    const chipG = el("g", { transform: `translate(${ZX},${ZY - 96})` }, chip);
+    const chipG = el("g", { transform: `translate(${ZX},${ZY + 84})` }, chip);
     label(chipG, "TURBULENCE", "#d07a00", `${tur.id} · ${tur.type} · FL${tur.fl} · ${peak[1].toFixed(1)}×`, 370);
     const fc = $("#s-fc");
     const fcG = el("g", {}, fc);
@@ -1358,22 +1376,21 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
     // ---- render from scroll position ----
     const plane = $("#s-plane"), plane2 = $("#s-plane2"), trail = $("#s-trail");
     const caps = $$(".cap", sec), dots = $$(".story-dots i", sec), hint = $("#scroll-hint");
-    const CH = [0, 0.08, 0.28, 0.44, 0.6, 0.72, 0.86];
-    let chShown = -1, bob = 0, vbX = 0, visible = true, narrow = null;
-    function placeLabels(n) {  // phones: captions fill the top, so labels go under the cell
-      narrow = n;
-      fcG.setAttribute("transform", `translate(${ZX + 100},${n ? ZY + 112 : ZY - 104})`);
-      pirepG.setAttribute("transform", `translate(${ZX + 100},${n ? ZY + 164 : ZY - 186})`);
+    const CH = [0, 0.12, 0.3, 0.45, 0.6, 0.72, 0.86];
+    let chShown = -1, bob = 0, visible = true;
+    // labels sit under the cell, clear of the captions at the top
+    fcG.setAttribute("transform", `translate(${ZX + 100},${ZY + 108})`);
+    pirepG.setAttribute("transform", `translate(${ZX + 100},${ZY + 160})`);
+    const ease = (k) => (k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2);
+    function frameBox() {  // the part of the 1600x900 scene that fits this screen at zoom 1
+      const ar = svg.clientWidth / svg.clientHeight;
+      return ar > 16 / 9 ? [1600, 1600 / ar] : [900 * ar, 900];
     }
-    function camera(focus, frac) {
-      const W = svg.clientWidth, H = svg.clientHeight, ar = W / H;
-      let vw = 1600, vh = 900, vy = 0;
-      if (ar < 16 / 9) vw = Math.max(400, 900 * ar);
-      else { vh = 1600 / ar; vy = 900 - vh; }
-      if ((vw < 900) !== narrow) placeLabels(vw < 900);
-      const goal = clamp(focus - vw * (vw < 900 ? 0.5 : frac), 0, 1600 - vw);
-      vbX = Math.abs(goal - vbX) > vw * 0.6 ? goal : lerp(vbX, goal, 0.14);  // snap after big jumps
-      svg.setAttribute("viewBox", `${vbX.toFixed(1)} ${vy.toFixed(1)} ${vw.toFixed(1)} ${vh.toFixed(1)}`);
+    function camera(fx, fy, z) {
+      const [bw, bh] = frameBox(), vw = bw / z, vh = bh / z;
+      let vx = fx - vw / 2, vy = fy - vh / 2;
+      if (z < 1.01) { vx = clamp(vx, 0, Math.max(0, 1600 - vw)); vy = clamp(vy, 0, Math.max(0, 900 - vh)); }
+      svg.setAttribute("viewBox", `${vx.toFixed(1)} ${vy.toFixed(1)} ${vw.toFixed(2)} ${vh.toFixed(2)}`);
     }
     function render(p, now) {
       let ch = 0; while (ch + 1 < CH.length && p >= CH[ch + 1]) ch++;
@@ -1381,9 +1398,9 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
       hint.style.opacity = p < 0.02 ? 1 : 0;
       // plane 1: time along the real trace
       let x, s = null;
-      if (p < 0.1) x = X0;
+      if (p < 0.12) x = X0;
       else if (p < 0.6) {
-        s = p < 0.3 ? lerp(0, sPk - 120, seg(p, 0.1, 0.3)) : p < 0.46 ? lerp(sPk - 120, sPk + 180, seg(p, 0.3, 0.46)) : lerp(sPk + 180, span, seg(p, 0.46, 0.6));
+        s = p < 0.3 ? lerp(0, sPk - 120, seg(p, 0.12, 0.3)) : p < 0.46 ? lerp(sPk - 120, sPk + 180, seg(p, 0.3, 0.46)) : lerp(sPk + 180, span, seg(p, 0.46, 0.6));
         x = tx(s);
       } else x = lerp(X0 + XW, 1900, seg(p, 0.6, 0.72));
       const v = s === null ? 0 : vrAt(s);
@@ -1395,7 +1412,7 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
       const rot = -(v / vmax) * 5 + shake * 0.6;
       set(plane, { x: (x - 100).toFixed(1), y: (y - 28).toFixed(1), transform: `rotate(${rot.toFixed(2)} ${x.toFixed(1)} ${y.toFixed(1)})` });
       set(trail, { x: (x - 78 - 520).toFixed(1), y: (y + 1).toFixed(1) });
-      clipRect.setAttribute("width", Math.max(0, s === null ? (p < 0.1 ? 0 : XW) : x - X0).toFixed(1));
+      clipRect.setAttribute("width", Math.max(0, s === null ? (p < 0.12 ? 0 : XW) : x - X0).toFixed(1));
       for (const b of bars) {
         const on = s === null ? p >= 0.6 : b.s + 60 <= s;
         if (on !== b.on) { b.on = on; const hgt = on ? Math.max(2, 856 - by(b.v)) : 0; set(b.r, { height: hgt, y: 856 - hgt }); }
@@ -1404,7 +1421,7 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
       near.setAttribute("transform", `translate(${(-p * 800).toFixed(1)},0)`);
       rough.setAttribute("opacity", (seg(p, 0.18, 0.28) * (1 - seg(p, 0.6, 0.66))).toFixed(3));
       chip.setAttribute("opacity", (seg(p, 0.44, 0.47) * (1 - seg(p, 0.62, 0.66))).toFixed(3));
-      panel.setAttribute("opacity", (seg(p, 0.05, 0.1) * (1 - seg(p, 0.62, 0.68))).toFixed(3));
+      panel.setAttribute("opacity", (seg(p, 0.08, 0.13) * (1 - seg(p, 0.62, 0.68))).toFixed(3));
       hexes.setAttribute("opacity", (0.9 * seg(p, 0.58, 0.64)).toFixed(3));
       lit.setAttribute("opacity", seg(p, 0.6, 0.63).toFixed(3));
       lit.setAttribute("transform", `translate(${(100 * seg(p, 0.63, 0.84)).toFixed(1)},0)`);
@@ -1415,8 +1432,15 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
       set(plane2, { opacity: p >= 0.72 ? 1 : 0, x: (x2 - 100).toFixed(1), y: (y2 - 28).toFixed(1) });
       fc.setAttribute("opacity", seg(p, 0.79, 0.82).toFixed(3));
       pirep.setAttribute("opacity", seg(p, 0.87, 0.9).toFixed(3));
-      const focus = p < 0.44 ? Math.max(x, 500) : p < 0.6 ? (narrow ? ZX : x) : ZX + 100;
-      camera(focus, p < 0.6 ? 0.42 : 0.66);
+      // camera: close on the plane, ease out to the whole sky, then hold it centred
+      // (narrow screens cannot show the whole sky, so they keep following the action)
+      const [bw, bh] = frameBox(), narrow = bw < 1100;
+      const k = ease(seg(p, 0.02, 0.12)), z = lerp(clamp(bw / 250, 1.6, 4.2), 1, k);
+      const wide = narrow ? (p < 0.45 ? x : p < 0.6 ? ZX : ZX + 100) : 800;
+      // while zooming out, pan no faster than keeps the plane 15% inside the left edge
+      const fx = p < 0.12 ? Math.min(lerp(x, wide, k), x + 0.35 * (bw / z)) : wide;
+      const fy = lerp(ZY, bh >= 900 ? 450 : 900 - bh / 2, k);
+      camera(fx, fy, z);
     }
     const progress = () => { const b = sec.getBoundingClientRect(); return clamp(-b.top / (b.height - innerHeight)); };
     // deep link / screenshot hook: ?p=0.5 opens the story halfway through
