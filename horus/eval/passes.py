@@ -17,10 +17,16 @@ from horus.core import geo, grid
 
 
 def cell_ids(lat: np.ndarray, lon: np.ndarray, res: int) -> np.ndarray:
+    """H3 int id per point; 0 (never a valid cell, so outside any lattice) where the
+    position is missing."""
+    la, lo = np.asarray(lat, dtype=float), np.asarray(lon, dtype=float)
     return np.fromiter(
-        (h3.str_to_int(h3.latlng_to_cell(a, b, res)) for a, b in zip(lat, lon, strict=True)),
+        (
+            h3.str_to_int(h3.latlng_to_cell(a, b, res)) if np.isfinite(a) and np.isfinite(b) else 0
+            for a, b in zip(la, lo, strict=True)
+        ),
         dtype=np.int64,
-        count=len(lat),
+        count=len(la),
     )
 
 

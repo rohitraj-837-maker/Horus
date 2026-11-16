@@ -35,3 +35,10 @@ def test_passes_collapse_consecutive_minutes_in_one_cell() -> None:
     assert len(p) == 2
     assert p["T"].tolist() == [2.0, 0.5]
     assert p["t0"].tolist() == [0, 300] and p["t1"].tolist() == [180, 360]
+
+
+def test_cell_ids_missing_position_is_outside_lattice() -> None:
+    ids = grid.region_cells(38.0, 40.0, -101.0, -99.0, CFG.grid.h3_res)
+    c = passes.cell_ids(np.array([39.0, np.nan]), np.array([-100.0, -100.0]), CFG.grid.h3_res)
+    idx = grid.cell_index(c, ids)
+    assert idx[0] >= 0 and idx[1] == -1
