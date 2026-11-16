@@ -42,3 +42,12 @@ def test_cell_ids_missing_position_is_outside_lattice() -> None:
     c = passes.cell_ids(np.array([39.0, np.nan]), np.array([-100.0, -100.0]), CFG.grid.h3_res)
     idx = grid.cell_index(c, ids)
     assert idx[0] >= 0 and idx[1] == -1
+
+
+def test_reliability_plot_handles_constant_forecast(tmp_path) -> None:
+    from horus.eval import plots
+
+    y = np.r_[np.ones(10), np.zeros(990)].astype(bool)
+    plots.reliability(y, np.full(1000, 0.01), "clim", tmp_path / "c.png")
+    plots.reliability(y, np.linspace(0.001, 0.2, 1000), "n1", tmp_path / "n.png")
+    assert (tmp_path / "c.png").stat().st_size > 0 and (tmp_path / "n.png").exists()

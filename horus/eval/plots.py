@@ -19,6 +19,8 @@ def reliability(y: np.ndarray, p: np.ndarray, title: str, path: Path, bins: int 
     Log-log axes; the dashed diagonal is perfect calibration."""
     y, p = np.asarray(y, dtype=float), np.asarray(p, dtype=float)
     edges = np.unique(np.quantile(p, np.linspace(0, 1, bins + 1)))
+    if len(edges) < 2:  # constant forecast (e.g. climatology): one bin
+        edges = np.array([edges[0], np.nextafter(edges[0], np.inf)])
     b = np.clip(np.searchsorted(edges, p, side="right") - 1, 0, len(edges) - 2)
     n = np.bincount(b, minlength=len(edges) - 1)
     ok = n > 0
