@@ -296,7 +296,7 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
 }
 
 /* ---------- scroll story: a plane flies through, Horus does its job ---------- */
-.story { position: relative; height: 720vh; margin-top: -56px; }
+.story { position: relative; height: 840vh; margin-top: -56px; }
 .stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: #000; }
 .scene { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .scene text { font-family: var(--sans); }
@@ -322,7 +322,7 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
 .cap h2 { margin: 0; font-size: clamp(30px, 4vw, 54px); line-height: 1.06; font-weight: 700; letter-spacing: -0.035em; text-wrap: balance; }
 .cap p { margin: 16px auto 0; max-width: 680px; font-size: clamp(16px, 1.3vw, 19px); line-height: 1.55; color: #d1d1d6; text-wrap: pretty; }
 .cap p b { color: #fff; font-weight: 600; }
-.cap.intro { inset: 0; top: 0; left: 0; width: auto; transform: none; display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 10vh 24px 17vh; }
+.cap.intro { inset: 0; top: 0; left: 0; width: auto; transform: none; display: flex; flex-direction: column; justify-content: flex-start; gap: 14px; align-items: center; padding: 9vh 24px 0; }
 .cap.intro.on { transform: none; }
 .cap.intro .eyebrow { margin: 0 0 12px; }
 .cap.intro h1 { font-size: clamp(72px, 13vw, 168px); }
@@ -361,6 +361,11 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
 @keyframes breathe { 50% { transform: scale(1.07); } }
 .illus .short { display: none; }
 #s-stars { display: none; }  /* daytime: no stars */
+/* the opening shot: the flight deck, which then shrinks into the plane's cockpit windows */
+.cockpit { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; transform-origin: 50% 50%; will-change: transform, opacity; }
+.cockpit .nw { display: none; }
+.cockpit.narrow .nw { display: inline; }
+.cockpit.narrow .ww { display: none; }
 .illus { color: #fff; background: rgba(3, 14, 42, 0.72); padding: 4px 10px; border-radius: 980px; }
 .scroll-hint { color: #fff; text-shadow: 0 1px 10px rgba(3, 14, 42, 0.7); }
 .cap.intro .tagline-big.grad { color: #e6eefb; }
@@ -385,7 +390,7 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
 }
 @media (max-width: 720px) {
   .cap { top: 9vh; }
-  .cap.intro { padding: 9vh 20px 18vh; }
+  .cap.intro { padding: 9vh 20px 0; }
   .chapters { right: 6px; }
   .chapters button span, .chapters:hover button span { display: none; }
   .illus .long { display: none; }
@@ -467,20 +472,35 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
           <clipPath id="clip-trace"><rect id="clip-trace-rect" x="200" y="600" width="0" height="300"/></clipPath>
           <!-- a generic twin-jet in side view, nose right (our own drawing, no livery) -->
           <symbol id="sym-plane" viewBox="0 0 200 56">
-            <!-- Boeing 737-800, side view, nose right; generic paint, no livery -->
+            <!-- Boeing 737-800, side view, nose right; generic paint, no livery or registration -->
             <path d="M29 30.6 L9 4.2 L19.5 4.2 L46 25.8 L60 25.4 L44 23.6 Z" fill="#3a4357"/>
+            <path d="M14.6 9.6 L27.6 29.2" stroke="#2a3142" stroke-width="0.5"/>
+            <ellipse cx="11.6" cy="31.6" rx="1.1" ry="0.8" fill="#4a505b"/>
             <path d="M31 31.4 L7.5 35.4 L12 36.6 L39 32.8 Z" fill="#c4c9d1"/>
+            <path d="M11 35.1 L33 32.2" stroke="#a3a9b3" stroke-width="0.4"/>
             <path d="M12 31.2 L31 25.6 L168 25.1 C181 25.1 190.5 27.8 195.6 31.5 C196.6 32.3 196.4 33.4 195 34 C189 37.2 180 38.8 168 39 L54 39.2 C42 39.2 28 36.6 12 31.9 Z" fill="url(#g-body)"/>
+            <path d="M31.5 26 L168 25.6 C178 25.6 186 27 192.2 29.6" fill="none" stroke="#ffffff" stroke-width="0.9" opacity="0.85"/>
             <path d="M54 39.2 L168 39 C176 38.9 183 38.2 188 36.9 L60 37.3 Z" fill="#a9b0bb" opacity="0.55"/>
+            <path d="M84 38.6 C95 41.6 118 41.8 130 38.4 Z" fill="#cfd4db"/>
             <path d="M93 35 L60.5 49.2 L66.5 50.6 L120 36.4 Z" fill="#c1c6ce"/>
+            <path d="M93 35 L120 36.4" stroke="#e9ecf0" stroke-width="0.6"/>
             <path d="M60.5 49.2 L57.6 42.6 L60 42.4 L64.6 49.8 Z" fill="#aab1bc"/>
+            <circle cx="61.4" cy="49.6" r="0.7" fill="#ff453a"/>
+            <path d="M74 44.6 l-6 2.8 l1.6 0.5 l6.2 -2.6 z M84 40.6 l-6 2.8 l1.6 0.5 l6.2 -2.6 z" fill="#b5bbc4"/>
+            <path d="M96 37.4 L113 37.2 L111 39.2 L98 39.4 Z" fill="#c7ccd3"/>
             <path d="M85 38.2 H110 C113.4 38.2 115 40 115 43 C115 45.9 113.6 47.4 110.6 47.4 H87.4 C85.2 47.4 84.2 46.6 83.8 45.2 L83.4 41.4 C83.3 39.4 84 38.2 85 38.2 Z" fill="#b3b9c3"/>
+            <path d="M100 38.3 V47.3" stroke="#9aa1ac" stroke-width="0.35"/>
             <ellipse cx="114" cy="42.8" rx="1.5" ry="4.2" fill="#1b2029"/>
+            <ellipse cx="114.3" cy="42.8" rx="0.7" ry="2.6" fill="#3a414d"/>
             <path d="M83.4 39.8 L78.6 41.2 L78.6 44.2 L83.6 45.4 Z" fill="#6e7684"/>
             <line x1="52" y1="29.6" x2="176" y2="29.6" stroke="#2a303b" stroke-width="1.7" stroke-dasharray="1.7 3.9" stroke-linecap="round"/>
             <rect x="45.5" y="27.2" width="4" height="9" rx="1" fill="none" stroke="#8a919d" stroke-width="0.5"/>
             <rect x="170" y="27" width="4.2" height="9.4" rx="1" fill="none" stroke="#8a919d" stroke-width="0.5"/>
-            <path d="M183.2 28.4 L190.6 30.6 L189.7 31.8 L182.5 30.8 Z" fill="#1b2029"/>
+            <rect x="97.6" y="27.6" width="2.6" height="4.6" rx="0.6" fill="none" stroke="#8a919d" stroke-width="0.4"/>
+            <rect x="103" y="27.6" width="2.6" height="4.6" rx="0.6" fill="none" stroke="#8a919d" stroke-width="0.4"/>
+            <path d="M178.6 28.7 L182.9 28.3 L182.6 30.7 L178.4 30.9 Z M183.5 28.3 L187.9 28.9 L187.5 31.1 L183.1 30.7 Z M188.5 29.1 L191.7 30.5 L190.6 32 L188.1 31.3 Z" fill="#1b2029" stroke="#59606d" stroke-width="0.3"/>
+            <path d="M70 25.5 l1.2 -2.4 h0.7 l-0.6 2.4 z M140 25.3 l1 -1.9 h0.6 l-0.5 1.9 z" fill="#9aa1ac"/>
+            <path d="M118 39.1 L132 38.9" stroke="#9aa1ac" stroke-width="0.4"/>
             <circle class="beacon" cx="108" cy="24.9" r="1.3" fill="#ff453a"/>
             <circle class="beacon b2" cx="104" cy="39.4" r="1.2" fill="#ff453a"/>
             <circle class="beacon" cx="9.6" cy="4.6" r="1.2" fill="#ffffff"/>
@@ -503,6 +523,7 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
         <g id="s-pirep" opacity="0"></g>
         <g id="s-panel"></g>
       </svg>
+      <svg class="cockpit" id="cockpit" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
 
       <div class="cap intro on" data-ch="0">
         <div>
@@ -1433,7 +1454,7 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
       const fs = 14, lh = 21, pad = 12, cw = fs * 0.61;
       const w = Math.max(...rows.map((r) => r.reduce((n, [t]) => n + t.length, 0))) * cw + 2 * pad;
       const h = rows.length * lh + 2 * pad - 6;
-      if (ax !== undefined) el("line", { x1: ax, y1: ay, x2: 0, y2: -h / 2, stroke: "rgba(255,255,255,0.35)", "stroke-width": 1 }, parent);
+      if (ax !== undefined) el("line", { x1: ax, y1: ay, x2: 0, y2: ay > 0 ? h / 2 : -h / 2, stroke: "rgba(255,255,255,0.35)", "stroke-width": 1 }, parent);
       el("rect", { x: -w / 2, y: -h / 2, width: w, height: h, rx: 6, fill: "rgba(8,9,12,0.9)", stroke: "rgba(255,255,255,0.14)" }, parent);
       rows.forEach((r, i) => {
         const t = el("text", { x: -w / 2 + pad, y: -h / 2 + pad + fs - 1 + i * lh, "font-size": fs, "font-family": MONO }, parent);
@@ -1479,6 +1500,116 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
         [[[date + " ", "#8e8e93"], ["PILOT REPORT", "#ff6b61", 700]], [[`${word} ${flr(c.fl)} ${c.where}`, "#f5f5f7"]], [[`felt ${d.m ? Math.abs(d.m) + " min" : "just"} earlier, ${Math.round(d.d)} km`, "#d1d1d6"]]]);
     }
 
+
+    // ---- the opening shot: a 737-style flight deck, built from the real numbers ----
+    const ck = $("#cockpit");
+    let ckVs = [], ckTag = [];
+    if (ck) {
+      const d0 = el("defs", {}, ck);
+      const gsk = el("linearGradient", { id: "ck-sky", x1: 0, y1: 0, x2: 0, y2: 1 }, d0);
+      [[0, "#0a3070"], [0.55, "#2a72c2"], [0.8, "#9cc6ec"], [0.86, "#e7eff8"], [1, "#cbd8e5"]].forEach(([o, c]) => el("stop", { offset: o, "stop-color": c }, gsk));
+      el("rect", { width: 1600, height: 900, fill: "#0d1015" }, ck);
+      ["0,96 292,50 312,440 0,452", "318,44 788,22 788,428 336,438", "812,22 1282,44 1264,438 812,428", "1308,50 1600,96 1600,452 1288,440"]
+        .forEach((pts) => el("polygon", { points: pts, fill: "url(#ck-sky)" }, ck));
+      const frame = "#1a1e25";
+      el("rect", { x: 786, y: 0, width: 28, height: 440, fill: frame }, ck);
+      el("rect", { x: 0, y: 0, width: 1600, height: 26, fill: frame }, ck);
+      ["290,50 320,43 338,438 310,441", "1280,43 1310,50 1290,441 1262,438"].forEach((pts) => el("polygon", { points: pts, fill: frame }, ck));
+      // glareshield + autopilot panel (MCP)
+      el("rect", { x: 0, y: 432, width: 1600, height: 98, fill: "#14171d" }, ck);
+      el("line", { x1: 0, x2: 1600, y1: 433, y2: 433, stroke: "#3a404b", "stroke-width": 2 }, ck);
+      el("rect", { x: 470, y: 450, width: 670, height: 62, rx: 6, fill: "#2a2f37", stroke: "#3b414c" }, ck);
+      const mono = (x, y, txt, size, fill, anchor = "middle", wt = 400) => { const t = el("text", { x, y, "text-anchor": anchor, fill, "font-size": size, "font-family": MONO, "font-weight": wt }, ck); t.textContent = txt; return t; };
+      const mcp = (x, w, label, val) => { mono(x + w / 2, 464, label, 9, "#c8ccd4"); el("rect", { x, y: 469, width: w, height: 28, rx: 2, fill: "#07080a" }, ck); return mono(x + w - 6, 490, val, 17, "#ff9f2e", "end"); };
+      mcp(488, 84, "IAS/MACH", ".780"); mcp(642, 70, "HDG", "095"); mcp(800, 110, "ALTITUDE", "36000");
+      const mcpVs = mcp(984, 96, "VERT SPEED", "");
+      [["LNAV", 607], ["VNAV", 755], ["CMD A", 945], ["A/T ARM", 1103]].forEach(([n, x]) => {
+        el("rect", { x: x - 22, y: 476, width: 44, height: 20, rx: 3, fill: "#3a404a" }, ck);
+        el("rect", { x: x - 15, y: 479, width: 30, height: 3, rx: 1.5, fill: "#3df07a" }, ck);
+        mono(x, 493, n, 7.5, "#e2e5ea");
+      });
+      // instrument panel with display units
+      el("rect", { x: 0, y: 530, width: 1600, height: 370, fill: "#22262d" }, ck);
+      const du = (x, y, w, h) => { el("rect", { x: x - 9, y: y - 9, width: w + 18, height: h + 18, rx: 10, fill: "#101216" }, ck); el("rect", { x, y, width: w, height: h, rx: 3, fill: "#000" }, ck); };
+      function pfd(x0) {
+        du(x0, 552, 270, 250);
+        const cx = x0 + 120, cy = 680, cid = "ck-att-" + x0;
+        el("rect", { x: cx - 76, y: cy - 92, width: 152, height: 184, rx: 10 }, el("clipPath", { id: cid }, d0));
+        const g = el("g", { "clip-path": `url(#${cid})` }, ck);
+        el("rect", { x: cx - 80, y: cy - 100, width: 160, height: 108, fill: "#2f80d4" }, g);
+        el("rect", { x: cx - 80, y: cy + 8, width: 160, height: 100, fill: "#8b5a2b" }, g);
+        el("line", { x1: cx - 80, x2: cx + 80, y1: cy + 8, y2: cy + 8, stroke: "#fff", "stroke-width": 1.5 }, g);
+        for (const [dy, w] of [[-12, 24], [-32, 44], [-52, 24], [28, 24], [48, 44]]) el("line", { x1: cx - w / 2, x2: cx + w / 2, y1: cy + 8 + dy, y2: cy + 8 + dy, stroke: "#fff", "stroke-width": 1.2 }, g);
+        for (const sx of [-1, 1]) el("path", { d: `M${cx + sx * 16},${cy} h${sx * 32} v6 h${-sx * 6} v-3 h${-sx * 26} z`, fill: "#ffd60a", stroke: "#000", "stroke-width": 1 }, ck);
+        el("rect", { x: cx - 3, y: cy - 3, width: 6, height: 6, fill: "#000", stroke: "#ffd60a", "stroke-width": 1.5 }, ck);
+        // speed tape, altitude tape, vertical speed scale
+        el("rect", { x: x0 + 6, y: cy - 92, width: 32, height: 184, fill: "#3b4048" }, ck);
+        [["300", -50], ["280", 0], ["260", 50]].forEach(([v, dy]) => mono(x0 + 34, cy + dy + 4, v, 11, "#fff", "end"));
+        el("rect", { x: x0 + 4, y: cy - 11, width: 38, height: 22, fill: "#000", stroke: "#fff", "stroke-width": 1 }, ck);
+        mono(x0 + 38, cy + 5, "282", 13, "#fff", "end", 700);
+        el("rect", { x: x0 + 202, y: cy - 92, width: 44, height: 184, fill: "#3b4048" }, ck);
+        [["36200", -50], ["35800", 50]].forEach(([v, dy]) => mono(x0 + 243, cy + dy + 4, v, 10, "#fff", "end"));
+        el("rect", { x: x0 + 198, y: cy - 12, width: 52, height: 24, fill: "#000", stroke: "#fff", "stroke-width": 1 }, ck);
+        mono(x0 + 245, cy + 5, "36000", 12, "#fff", "end", 700);
+        el("rect", { x: x0 + 252, y: cy - 86, width: 14, height: 172, fill: "#1d2026" }, ck);
+        for (const [v, lab] of [[1000, "1"], [2000, "2"], [6000, "6"]]) for (const sg of [-1, 1]) {
+          const yy = cy - sg * (v === 1000 ? 30 : v === 2000 ? 55 : 82);
+          el("line", { x1: x0 + 252, x2: x0 + 258, y1: yy, y2: yy, stroke: "#fff", "stroke-width": 1 }, ck);
+          mono(x0 + 263, yy + 3, lab, 8, "#fff");
+        }
+        const ptr = el("line", { x1: x0 + 290, y1: cy, x2: x0 + 254, y2: cy, stroke: "#fff", "stroke-width": 2 }, ck);
+        const txt = mono(x0 + 259, cy - 92, "", 10, "#fff", "middle", 700);
+        mono(x0 + 135, 568, "N1    VNAV PTH    LNAV    CMD", 9.5, "#3df07a");
+        mono(x0 + 224, 792, "STD", 9, "#3df07a");
+        return { ptr, txt, x0, cy };
+      }
+      function nd(x0) {
+        du(x0, 552, 270, 250);
+        const ax = x0 + 135, ay = 780;
+        for (const r of [80, 160]) el("path", { d: `M${ax - r},${ay} A${r},${r} 0 0 1 ${ax + r},${ay}`, fill: "none", stroke: "rgba(255,255,255,0.55)", "stroke-width": 1, "stroke-dasharray": r === 80 ? "3 4" : "none" }, ck);
+        el("line", { x1: ax, y1: ay - 6, x2: ax + 20, y2: 590, stroke: "#ff3bd4", "stroke-width": 2 }, ck);
+        el("path", { d: `M${ax + 14},${640} l4,-6 l4,6 l-4,6 z`, fill: "none", stroke: "#ff3bd4", "stroke-width": 1.5 }, ck);
+        el("path", { d: `M${ax},${ay - 14} l9,18 h-18 z`, fill: "none", stroke: "#fff", "stroke-width": 1.6 }, ck);
+        mono(ax, 572, "TRK 095 MAG", 11, "#3df07a");
+        mono(x0 + 10, 572, `${ctx.wind_from ?? "—"}°/${ctx.wind_kt ?? "—"}`, 10, "#fff", "start");
+        el("path", { d: `M${x0 + 24},${584} l0,16 m-4,-5 l4,5 l4,-5`, fill: "none", stroke: "#fff", "stroke-width": 1.4, transform: `rotate(${((ctx.wind_from ?? 0) + 180) % 360 - 95},${x0 + 24},${592})` }, ck);
+        mono(x0 + 10, 794, "GS 512", 10, "#fff", "start");
+      }
+      function eicas(x0) {
+        du(x0, 552, 180, 250);
+        for (const [cx, n1] of [[x0 + 48, "86.4"], [x0 + 132, "86.2"]]) {
+          el("path", { d: `M${cx - 30},${625} A30,30 0 1 1 ${cx + 26},${640}`, fill: "none", stroke: "#fff", "stroke-width": 1.4 }, ck);
+          el("line", { x1: cx, y1: 625, x2: cx + 24, y2: 607, stroke: "#fff", "stroke-width": 2 }, ck);
+          el("rect", { x: cx - 2, y: 588, width: 34, height: 15, fill: "#000", stroke: "#fff", "stroke-width": 0.8 }, ck);
+          mono(cx + 30, 600, n1, 10, "#fff", "end");
+          el("path", { d: `M${cx - 22},${712} A22,22 0 1 1 ${cx + 19},${722}`, fill: "none", stroke: "#fff", "stroke-width": 1.2 }, ck);
+          el("line", { x1: cx, y1: 712, x2: cx + 14, y2: 698, stroke: "#fff", "stroke-width": 1.6 }, ck);
+        }
+        mono(x0 + 90, 628, "N1", 10, "#7fd3ff"); mono(x0 + 90, 716, "EGT", 10, "#7fd3ff");
+        mono(x0 + 90, 780, "TAT -38C", 9.5, "#fff");
+      }
+      const capPfd = pfd(110); nd(410); eicas(710); nd(920); const foPfd = pfd(1220);
+      ckVs = [capPfd, foPfd];
+      ckVs.mcp = mcpVs;
+      // control yokes in the foreground
+      for (const cx of [250, 1350]) {
+        el("rect", { x: cx - 15, y: 806, width: 30, height: 100, fill: "#0a0c10" }, ck);
+        el("rect", { x: cx - 108, y: 762, width: 216, height: 24, rx: 12, fill: "#0b0d11", stroke: "#2b2f37" }, ck);
+        el("rect", { x: cx - 108, y: 762, width: 26, height: 70, rx: 11, fill: "#0b0d11", stroke: "#2b2f37" }, ck);
+        el("rect", { x: cx + 82, y: 762, width: 26, height: 70, rx: 11, fill: "#0b0d11", stroke: "#2b2f37" }, ck);
+      }
+      // the callout: this number is what Horus reads (two cuts: wide screens, narrow screens)
+      const wideRows = [[["V/S ", "#8e8e93"], ["+0000", "#f5f5f7", 700], [" ft/min, as broadcast", "#d1d1d6"]],
+        [["ADS-B sends it about once a second.", "#8e8e93"]], [["Horus reads it.", "#ffad3b", 700]]];
+      const shortRows = [[["V/S ", "#8e8e93"], ["+0000", "#f5f5f7", 700], [" ft/min", "#d1d1d6"]],
+        [["sent by ADS-B ~1/s.", "#8e8e93"]], [["Horus reads it.", "#ffad3b", 700]]];
+      for (const [cls, lx, ly, rows] of [["ww", 330, 372, wideRows], ["nw", 300, 462, shortRows]]) {
+        const g = el("g", { class: cls, transform: `translate(${lx},${ly})` }, ck);
+        draw(g, rows, capPfd.x0 + 259 - lx, capPfd.cy - 60 - ly);
+        ckTag.push([...g.querySelectorAll("tspan")].find((t) => t.textContent === "+0000"));
+      }
+    }
+
     // trace panel (real data)
     const panel = $("#s-panel");
     el("rect", { x: 120, y: 612, width: 1360, height: 264, rx: 24, fill: "rgba(6,14,32,0.8)", stroke: "rgba(255,255,255,0.12)" }, panel);
@@ -1507,7 +1638,7 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
     const bar = $("#story-progress"), skip = $("#skip");
     // jump to a chapter: scroll to a point where that chapter is fully set up
     const AT = [0, 0.18, 0.37, 0.53, 0.68, 0.83, 0.96];
-    dots.forEach((b) => b.addEventListener("click", () => scrollTo({ top: sec.offsetTop + AT[+b.dataset.to] * (sec.offsetHeight - innerHeight), behavior: reduce ? "auto" : "smooth" })));
+    dots.forEach((b) => b.addEventListener("click", () => scrollTo({ top: sec.offsetTop + (+b.dataset.to ? P0 + AT[+b.dataset.to] * (1 - P0) : 0) * (sec.offsetHeight - innerHeight), behavior: reduce ? "auto" : "smooth" })));
     const CH = [0, 0.12, 0.3, 0.45, 0.6, 0.72, 0.86];
     let chShown = -1, bob = 0, visible = true;
     // more facts from the data
@@ -1550,11 +1681,15 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
       svg.setAttribute("viewBox", `${vx.toFixed(1)} ${vy.toFixed(1)} ${vw.toFixed(2)} ${vh.toFixed(2)}`);
       return { vx, vy, s: cam.s };
     }
-    function render(p, now) {
+    const P0 = 0.12;  // share of the story spent in the cockpit opening
+    const WIN_X = X0 - 100 + 185, WIN_Y = ZY + 2;  // the cockpit windows on the plane, scene units
+    function render(pRaw, now) {
+      const pc = seg(pRaw, 0, P0);
+      let p = clamp((pRaw - P0) / (1 - P0));
       let ch = 0; while (ch + 1 < CH.length && p >= CH[ch + 1]) ch++;
       if (ch !== chShown) { chShown = ch; caps.forEach((c) => c.classList.toggle("on", +c.dataset.ch === ch)); dots.forEach((n, i) => n.classList.toggle("on", i === ch)); }
-      hint.style.opacity = p < 0.02 ? 1 : 0;
-      bar.style.transform = "scaleX(" + p.toFixed(4) + ")";
+      hint.style.opacity = pRaw < 0.02 ? 1 : 0;
+      bar.style.transform = "scaleX(" + pRaw.toFixed(4) + ")";
       // the skip button would cover the trace panel, so it steps aside while the panel shows
       // (the nav's "Live map" link and the chapter list still lead on)
       const panelShown = p > 0.08 && p < 0.62;
@@ -1571,7 +1706,7 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
       bob = lerp(bob, -(v / vmax) * 24, 0.12);
       const r = s === null ? 0 : idxAt(s);
       const shake = reduce || r < 0.5 ? 0 : (Math.sin(now / 31) * 1.6 + Math.sin(now / 11)) * r * 1.4;
-      const idle = reduce ? 0 : Math.sin(now / 950) * 3;
+      const idle = reduce ? 0 : Math.sin(now / 950) * 3 * (pRaw < P0 ? seg(pc, 0.7, 1) : 1);
       const y = ZY + bob + shake + (s === null ? idle : 0);
       const rot = -(v / vmax) * 5 + shake * 0.6;
       set(plane, { x: (x - 100).toFixed(1), y: (y - 28).toFixed(1), transform: `rotate(${rot.toFixed(2)} ${x.toFixed(1)} ${y.toFixed(1)})` });
@@ -1627,13 +1762,44 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
       if (vwF < 1350) fT.cx = p < 0.44 ? x : lerp(x, ZX, ease(seg(p, 0.44, 0.5)));  // can't show it all: follow
       const fcT = fit(ZX + drift, ZY - 96, compact ? ZY + 262 : ZY + 236, 1.45, fcCap);
       let t;
-      if (p < 0.12) {
+      const zc = clamp(frameBox()[0] / 250, 1.6, 4.2);
+      if (pRaw < P0) {
+        // inside the flight deck: the camera sits on the cockpit windows, then pulls back
+        const zk = ease(seg(pc, 0.3, 1)), pan = ease(seg(pc, 0.8, 1));
+        t = {
+          cx: lerp(WIN_X, X0, pan),
+          cy: lerp(WIN_Y, ZY, pan),
+          s: Math.exp(lerp(Math.log(W / 14), Math.log(base * zc), zk)),
+        };
+      } else if (p < 0.12) {
         const k = ease(seg(p, 0.02, 0.12)), z0 = clamp(frameBox()[0] / 250, 1.6, 4.2);
         t = mix({ cx: X0, cy: ZY, s: base * z0 }, { ...fT, cx: vwF < 1350 ? x : fT.cx }, k);
         t.cx = Math.min(t.cx, x + 0.35 * (W / t.s));  // keep the plane in frame while panning
       } else if (p < 0.6) t = fT;
       else t = mix({ ...fT, cx: vwF < 1350 ? ZX : fT.cx }, fcT, ease(seg(p, 0.6, 0.66)));
       const v2 = apply(t);
+      if (ck) {
+        // the flight deck shrinks into the cockpit windows as the camera pulls back
+        const Wc = svg.clientWidth, Hc = svg.clientHeight;
+        const k = clamp((13 * v2.s) / Wc, 0, 1);  // window width on screen / screen width
+        const wx = (WIN_X - v2.vx) * v2.s - Wc / 2, wy = (WIN_Y - v2.vy) * v2.s - Hc / 2;
+        ck.style.transform = `translate(${(wx * (1 - k)).toFixed(1)}px,${(wy * (1 - k)).toFixed(1)}px) scale(${k.toFixed(4)})`;
+        ck.style.opacity = seg(k, 0.16, 0.5).toFixed(3);
+        ck.style.visibility = pRaw >= P0 ? "hidden" : "visible";
+        if (pRaw < P0) {
+          const ar = ck.clientWidth / ck.clientHeight, narrowCk = ar < 1.05;
+          ck.classList.toggle("narrow", narrowCk);
+          const vwc = Math.min(1600, 900 * ar);
+          ck.setAttribute("viewBox", narrowCk ? `${clamp(300 - vwc / 2, 0, 1600 - vwc).toFixed(1)} 0 ${vwc.toFixed(1)} 900` : "0 0 1600 900");
+          // the real broadcast vertical rate from the start of the trace, looping
+          const vsNow = reduce ? vrAt(0) : vrAt((now / 1000) % 110);
+          const f = (v) => Math.sign(v) * (Math.abs(v) <= 1000 ? Math.abs(v) * 0.03 : Math.abs(v) <= 2000 ? 30 + (Math.abs(v) - 1000) * 0.025 : 55 + Math.min(Math.abs(v) - 2000, 4000) * 0.00675);
+          const txtV = (vsNow >= 0 ? "+" : "−") + Math.abs(Math.round(vsNow));
+          for (const u of ckVs) { u.ptr.setAttribute("y2", (u.cy - f(vsNow)).toFixed(1)); u.txt.textContent = txtV; }
+          if (ckVs.mcp) ckVs.mcp.textContent = "";
+          ckTag.forEach((tn) => tn && (tn.textContent = txtV));
+        }
+      }
       // altitude markers follow the camera; shown while the plane flies
       const showAlt = p > 0.1 && p < 0.6;
       alts.style.opacity = showAlt ? 1 : 0;
