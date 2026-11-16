@@ -70,11 +70,22 @@ def load_tracks(
     # Rows of a UTC day can sit in that day's or the next day's partition.
     dates = f"'{day}', '{day + timedelta(days=1)}'"
     k, n = part
+    h = cfg.hold
+    # Plausibility gate (fixed physical limits, not tuned): |vr| above max_abs_vr_fpm
+    # (incl. the +-32,640 ft/min field-saturation code) becomes missing; rows above
+    # max_alt_ft are dropped. See data_notes.md.
+    cols = [
+        f"case when abs(vr_fpm) > {h.max_abs_vr_fpm} then null else vr_fpm end as vr_fpm"
+        if c == "vr_fpm"
+        else c
+        for c in TRACK_COLS
+    ]
     q = f"""
-        select {", ".join(TRACK_COLS)}
+        select {", ".join(cols)}
         from read_parquet('{glob}', hive_partitioning=true, union_by_name=true)
         where cast(date as varchar) in ({dates})
           and time >= {t0} and time < {t0 + 86400}
+          and baro_alt_ft <= {h.max_alt_ft}
           and msg_type in ({types}) and baro_alt_ft is not null
           and lat is not null and lon is not null
           and hash(icao24) % {n} = {k}

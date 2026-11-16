@@ -43,3 +43,29 @@ def test_turbulent_aircraft_outscores_smooth_one_after_thinning_and_hold() -> No
     assert np.nanmax(smooth["b2"]) == 0.0  # held smooth air: no residual at all
     # Level segments trim 30 s at each end of the half-hour track.
     assert 0.8 < smooth["n_b2"].sum() / smooth["n_s"].sum() < 1.0
+
+
+def test_plausibility_gate_in_load_tracks(tmp_path) -> None:
+    from datetime import date
+
+    import pandas as pd
+
+    d = tmp_path / "date=2025-12-02"
+    d.mkdir()
+    t0 = 1_764_633_600
+    pd.DataFrame(
+        {
+            "icao24": ["a"] * 4,
+            "time": [t0, t0 + 1, t0 + 2, t0 + 3],
+            "lat": [40.0] * 4,
+            "lon": [-100.0] * 4,
+            "baro_alt_ft": [35000.0, 35000.0, 121200.0, 35000.0],
+            "vr_fpm": [64.0, 32640.0, 0.0, -9984.0],
+            "on_ground": [False] * 4,
+            "typecode": ["B738"] * 4,
+            "msg_type": ["adsb_icao"] * 4,
+        }
+    ).to_parquet(d / "part-0.parquet")
+    tab = scores.load_tracks(date(2025, 12, 2), CFG, root=tmp_path).to_pandas()
+    assert tab["time"].tolist() == [t0, t0 + 1, t0 + 3]  # 121,200 ft row dropped
+    assert tab["vr_fpm"].isna().tolist() == [False, True, False]  # field-max code -> missing

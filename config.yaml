@@ -85,10 +85,12 @@ match:                       # SPEC §6.1
 hold:                        # change-driven archives (adsb.lol history = readsb traces)
   max_gap_s: 25              # hold a value until the next point if it comes within this (heartbeat 20 s)
   msg_types: [adsb_icao, adsr_icao]   # MLAT has an 8 ft/min step and no rate dead band: excluded
+  max_abs_vr_fpm: 10000.0    # plausibility gate: larger |vr| -> missing (incl. +-32,640 field-max code)
+  max_alt_ft: 60000.0        # rows above this altitude are decode glitches: dropped
 
 bench:                       # SPEC §6.2 detector ablation (B0-B2 at M2)
   source: adsblol_hist
-  scores_dir: data/derived/scores
+  scores_dir: data/derived/scores_gated   # plausibility-gated (hold.max_abs_vr_fpm / max_alt_ft); ungated run kept in data/derived/scores
   min_fl: 200                # positive PIREPs must reach FL200 (detector scope)
   neg_per_day: 1000          # candidate no-PIREP windows drawn per test day
   seed: 20251202

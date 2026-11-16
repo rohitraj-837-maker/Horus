@@ -140,6 +140,8 @@ class Eval:
 class Hold:
     max_gap_s: int
     msg_types: list[str]
+    max_abs_vr_fpm: float
+    max_alt_ft: float
 
 
 @dataclass(frozen=True)
