@@ -105,19 +105,26 @@ class Hub:
         return self._lattice_bytes
 
     def aircraft(self) -> list[dict[str, Any]]:
-        a = self.loop.latest
-        if a.empty:
+        """Latest raw position per aircraft (updates every snapshot, so the map can
+        glide between them) with its latest scored B3 index."""
+        with self.lock:
+            tr = self.loop.tracks
+            lt = self.loop.latest
+        if tr.empty:
             return []
-        a = a[a["minute"] >= self.now - 300]
+        last = tr[tr["time"] > self.now - 120].groupby("icao24", sort=False).tail(1)
+        last = last[last["baro_alt_ft"] >= self.cfg.segment.min_alt_ft]
+        T = lt.set_index("icao24")["T"] if not lt.empty else pd.Series(dtype=float)
+        tv = last["icao24"].map(T)
         return [
             {
                 "icao24": r.icao24,
                 "lat": round(float(r.lat), 4),
                 "lon": round(float(r.lon), 4),
-                "fl": int(round(float(r.alt_ft) / 100)),
-                "T": None if pd.isna(r.T) else round(float(r.T), 3),
+                "fl": int(round(float(r.baro_alt_ft) / 100)),
+                "T": None if pd.isna(t) else round(float(t), 3),
             }
-            for r in a.itertuples()
+            for r, t in zip(last.itertuples(), tv, strict=True)
         ]
 
     def changed(self, floor: float) -> list[list[Any]]:

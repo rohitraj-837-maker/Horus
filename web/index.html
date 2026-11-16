@@ -9,47 +9,84 @@
 </head>
 <body>
   <header class="bar">
-    <span class="brand">HORUS</span>
+    <div class="brand">Horus <span class="sub">turbulence nowcast</span></div>
     <nav class="modes" role="tablist" aria-label="Mode">
-      <button role="tab" data-mode="live" aria-selected="true">Live feed</button>
-      <button role="tab" data-mode="replay" aria-selected="false">Replays</button>
+      <button role="tab" data-mode="live" aria-selected="true">Live</button>
+      <button role="tab" data-mode="replay" aria-selected="false">Case studies</button>
     </nav>
-    <span id="clock" class="mono">--:--Z</span>
-    <span class="warn">Research prototype · not for operational use</span>
+    <div class="clock"><span id="clock" class="mono">--:--Z</span><span id="clockNote" class="small"></span></div>
   </header>
+
   <main class="stage">
-    <canvas id="map" aria-label="Turbulence nowcast map"></canvas>
+    <div class="mapwrap">
+      <canvas id="map" aria-label="Turbulence nowcast map. Drag to pan, scroll to zoom."></canvas>
+
+      <section id="intro" class="card intro">
+        <h2>What you are looking at</h2>
+        <ol>
+          <li><b>Dots</b> are airliners at the selected altitude. A <span class="hit">ringed dot</span> is one whose own vertical-speed data shows turbulence right now.</li>
+          <li><b>Orange cells</b> are the forecast: the chance that the next aircraft through that area in the next 15 min meets turbulence. Brighter = more likely.</li>
+          <li><b>Carets ^</b> are pilot reports of turbulence (<span class="mod">moderate</span>, <span class="sev">severe</span>).</li>
+        </ol>
+        <p class="small">Live replays a real archived day (2026-01-01) at 30× speed, because free live feeds are too sparse for the detector. Research prototype, not for flight decisions.</p>
+        <button id="introClose" class="btn">Got it</button>
+      </section>
+
+      <div class="zoom" role="group" aria-label="Zoom">
+        <button id="zin" aria-label="Zoom in">+</button>
+        <button id="zout" aria-label="Zoom out">−</button>
+        <button id="zreset" aria-label="Reset view">⟲</button>
+      </div>
+      <div id="tip" class="tip" hidden></div>
+      <div id="loading" class="loading">Loading map…</div>
+    </div>
+
     <aside class="side">
       <section>
-        <h2>Flight level</h2>
-        <select id="fl" aria-label="Flight level bin"></select>
+        <h3>Altitude</h3>
+        <div id="flList" class="fl-list" role="radiogroup" aria-label="Flight level"></div>
+        <p class="small">Each band is 2,000 ft. Most airliners cruise at FL340–380.</p>
       </section>
+
       <section id="replayBox" hidden>
-        <h2>Replay</h2>
-        <select id="replaySel" aria-label="Replay"></select>
+        <h3>Case study</h3>
+        <div id="replayList" class="cases"></div>
         <p id="replayMeta" class="small"></p>
       </section>
+
       <section>
-        <h2>Layers</h2>
-        <label><input type="checkbox" id="lyCells" checked> Nowcast cells</label>
-        <label><input type="checkbox" id="lyAc" checked> Aircraft</label>
-        <label><input type="checkbox" id="lyPirep" checked> PIREPs</label>
+        <h3>Forecast chance</h3>
+        <div id="legend" class="legend"></div>
+        <div class="keys">
+          <span><i class="dot"></i>aircraft</span>
+          <span><i class="dot ring"></i>turbulence detected</span>
+          <span><i class="caret mod"></i>MOD report</span>
+          <span><i class="caret sev"></i>SEV report</span>
+        </div>
       </section>
+
       <section>
-        <h2>Legend</h2>
-        <div class="ramp" aria-hidden="true"></div>
-        <div class="ramp-labels small"><span id="rampLo">prior</span><span id="rampHi">high</span></div>
-        <p class="small">Cell colour: chance the next aircraft through the cell detects turbulence in 15 min (grid N2). Dots: aircraft; orange = detection (B3 index ≥ threshold). Carets: pilot reports, <span class="mod">MOD</span> / <span class="sev">SEV</span>.</p>
+        <h3>Show</h3>
+        <label class="toggle"><input type="checkbox" id="lyCells" checked><span>Forecast cells</span></label>
+        <label class="toggle"><input type="checkbox" id="lyAc" checked><span>Aircraft</span></label>
+        <label class="toggle"><input type="checkbox" id="lyPirep" checked><span>Pilot reports</span></label>
       </section>
-      <section>
-        <h2>Status</h2>
-        <p id="status" class="small mono">connecting…</p>
+
+      <section class="stats">
+        <div><span id="sAc" class="num">–</span><span class="small">aircraft shown</span></div>
+        <div><span id="sHit" class="num">–</span><span class="small">detecting now</span></div>
+        <div><span id="sCells" class="num">–</span><span class="small">forecast cells</span></div>
       </section>
+      <p id="status" class="small status">Connecting…</p>
     </aside>
   </main>
+
   <footer class="timeline">
-    <button id="play" aria-label="Play or pause">▶</button>
-    <input id="scrub" type="range" min="0" max="0" value="0" aria-label="Time" disabled>
+    <button id="play" class="btn icon" aria-label="Play">▶</button>
+    <div class="speeds" role="radiogroup" aria-label="Playback speed">
+      <button data-speed="1">1×</button><button data-speed="4" aria-pressed="true">4×</button><button data-speed="12">12×</button>
+    </div>
+    <input id="scrub" type="range" min="0" max="1000" value="0" step="1" aria-label="Time in case study">
     <span id="tlabel" class="mono small"></span>
   </footer>
   <script src="/static/app.js"></script>
