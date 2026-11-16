@@ -38,6 +38,7 @@ from horus import config
 from horus.api.live_loop import LiveLoop
 from horus.config import Config
 from horus.core import grid
+from horus.core.winds import WindField, wind_at
 from horus.eval import detector_bench as db
 from horus.eval import nowcast_bench as nb
 from horus.eval import scores
@@ -76,6 +77,7 @@ class Hub:
     cfg: Config
     pireps: pd.DataFrame
     speed: float = 30.0
+    winds: WindField | None = None
     now: int = 0
     latency_ms: list[float] = field(default_factory=list)
     clients: set[WebSocket] = field(default_factory=set)
@@ -222,7 +224,7 @@ def build_hub(cfg: Config, day: str | None = None, hour: int = 15, hours: float 
     loop = LiveLoop(cfg, norm, sizes, params, ids, cw.at, lat, t0=t0)
     pir = db.load_pireps([day])
     pir = pir[pir["has_tb"] & pir["lat"].notna()]
-    return Hub(loop, Feed(rows.reset_index(drop=True)), cfg, pir)
+    return Hub(loop, Feed(rows.reset_index(drop=True)), cfg, pir, winds=wf)
 
 
 def create_app(hub: Hub | None = None, start_feed: bool = True) -> FastAPI:
@@ -250,6 +252,7 @@ def create_app(hub: Hub | None = None, start_feed: bool = True) -> FastAPI:
             "time": h.now,
             "tick": h.loop.tick,
             "aircraft": len(h.aircraft()),
+            "window": [h.feed.t_first, h.feed.t_last] if h.feed is not None else None,
             "disclaimer": DISCLAIMER,
         }
 
@@ -270,6 +273,28 @@ def create_app(hub: Hub | None = None, start_feed: bool = True) -> FastAPI:
     def lattice() -> Response:
         """Cell outlines (built once, cached as bytes; the client caches them too)."""
         return Response(H().lattice_json(), media_type="application/json")
+
+    @app.get("/api/winds")
+    def winds(fl: int = 340, t: int = 0) -> dict[str, Any]:
+        """Upper wind (u, v m/s) on the GFS lattice at flight level `fl`, for the hour
+        containing `t` (default: the feed time). Drives the animated wind layer."""
+        h = H()
+        if h.winds is None:
+            raise HTTPException(404, "no wind field loaded")
+        w = h.winds
+        tt = float(t or h.now)
+        hour = float(np.floor(tt / 3600) * 3600 + 1800)
+        la, lo = np.meshgrid(w.lat, w.lon, indexing="ij")
+        n = la.size
+        u, v = wind_at(w, np.full(n, hour), la.ravel(), lo.ravel(), np.full(n, fl * 100.0))
+        return {
+            "t": int(hour - 1800),
+            "fl": fl,
+            "lat": [float(x) for x in w.lat],
+            "lon": [float(x) for x in w.lon],
+            "u": np.round(u.reshape(la.shape), 2).tolist(),
+            "v": np.round(v.reshape(la.shape), 2).tolist(),
+        }
 
     @app.get("/api/thresholds")
     def thresholds() -> dict[str, float]:
