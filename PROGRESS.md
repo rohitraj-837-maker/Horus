@@ -69,13 +69,35 @@ Key findings (details in `reports/data_notes.md`):
 - Also built after the first gate run: `ingest/adsblol_history.py` (streams adsb.lol daily tar releases, CONUS ≥ FL180 to Parquet with bounded memory), `scripts/fetch_adsblol_history.py`. The IEM PIREP ingest is now resumable with retries; an earlier run had silently stopped partway when IEM dropped a connection.
 - Study period fixed: 2025-12-02 → 2026-01-15 (most MOD+ PIREPs); train Dec 2–31, test Jan 1–15. History download started 2026-11-15 ~02:13 AEDT (`data/raw/adsblol_hist/_log.csv`).
 
-## M2 — Segmentation, residual, B0–B2 ⏳ eval built; scoring the study window
+## M2 — Segmentation, residual, B0–B2 ✅ gate passed (2026-11-16 ~01:30 UTC)
 
-Done (synthetic tests only; no benchmark rows):
-- `core/geo.py` (haversine, ISA pressure ↔ altitude, FL bins, H3), `core/rolling.py` (NaN-aware centred windows), `core/segment.py` (level flight, trims, sparse-data aware), `core/residual.py` (median trend, flicker-weighted variance, Sheppard, B0/B1 acceleration RMS), `tests/synth.py`.
-- `make check`: ruff ✔, mypy strict on core ✔ (5 files), **pytest 162 passed**.
-- Verified by tests: injected σ ∈ {40, 64, 100, 150} ft/min recovered within 3% after quantisation (Sheppard helps every case); smooth air with 2% flicker stays below every turbulent window; step-climbs never enter segments and never trigger; sparse 20 s data needs wider windows.
+`make gate-m2`: ruff ✔, mypy strict (core + eval) ✔, pytest ✔; 44/44 days scored; B0/B1/B2 rows ✔; thresholds fitted on the 29 train days only ✔.
 
-Built after the M1 gate (commit 3090233): `core/hold.py`, `eval/scores.py` (per-minute B0/B1/B2), `eval/match.py`, `eval/negatives.py`, `eval/metrics.py`, `eval/detector_bench.py`, `eval/splits.py` + `tests/test_leakage.py`, `scripts/score_days.py`, `scripts/gate_m2.py`; `make scores`, `make bench-detector`, `make gate-m2`. pytest 241 passed; mypy strict on core + eval.
+Results (held 1 s adsb.lol series, plausibility-gated; test 2026-01-01 → 01-15; 1,788 MOD+ and 4,388 no-PIREP windows; prevalence 0.35). Full tables: `reports/detector_ablation.md`.
 
-Next: score 44 days (`make scores`), run `make bench-detector`, then `make gate-m2`.
+| Row | PR-AUC | ROC-AUC | Recall @ 1 FA/1000 h | Recall @ 10 FA/1000 h |
+|---|---|---|---|---|
+| B0 textbook RMS accel | 0.479 | 0.710 | 0.001 | 0.011 |
+| B1 + quantisation noise removed | 0.479 | 0.710 | 0.001 | 0.011 |
+| B2 + level segments + residual σ | 0.509 | 0.686 | 0.001 | 0.024 |
+
+Findings:
+- **B1 = B0** on this source: the 64 ft/min noise floor is a constant shift on a 200 ft/min dead-band series (data_notes.md).
+- **Detection at a strict alarm rate is very weak.** "Clear air" means only "no PIREP within 2 h / 150 km", and most turbulence is never reported, so the FA rates are upper bounds. The threshold-free ranking (PR-AUC) improves B0 → B2.
+- **Glitch gate.** The first run had thresholds set by decode glitches (±32,640 ft/min field-max code). A fixed physical gate was added; the ungated run is kept as an ablation section.
+- **Bugs fixed on the way:** segment trim at data edges, a config edit during a run (crash), PIREPs without a position.
+
+## M3 — Normalisation, B3, rates, window sensitivity ✅ gate passed (2026-11-16 ~01:35 UTC)
+
+`scripts/gate_m3.py`: B3 rows at 1 / 5 / 10 s ✔, 9-cell window sweep ✔, `models/type_norm.parquet` ✔, 6 artefacts leakage-free ✔.
+
+| Rate | B0 PR-AUC | B2 PR-AUC | B3 PR-AUC | B3 recall @ 10 FA/1000 h |
+|---|---|---|---|---|
+| 1 s | 0.479 | 0.509 | **0.566** | 0.057 |
+| 5 s | 0.494 | 0.478 | **0.536** | 0.040 |
+| 10 s | 0.461 | 0.482 | **0.550** | 0.043 |
+
+- **B3 normalisation = σ / q99 of that type's smooth-air σ** (fallback size class → global; ≥ 200 aircraft-days per group). The SPEC's robust z is undefined here (90.2% of smooth σ is exactly 0); B3-pct ranks similarly but saturates at 1.0, so its threshold is meaningless. Both are reported.
+- **Rate gap.** On this source 5 s and 10 s lose little versus 1 s, because the archive is already dead-band thinned. To be repeated on full-rate Trino data.
+- **Window sensitivity.** B3 beats B2 in all 9 cells (±5/10/20 min × 20/40/80 km). PR-AUC grows with window size (more aircraft per window).
+

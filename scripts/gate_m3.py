@@ -30,7 +30,11 @@ def main() -> int:
             f"B3 row at {r} s", len(nums) >= 4, f"{len(nums)} numeric cells" if line else "missing"
         )
     sens = config.resolve("reports/window_sensitivity.md")
-    body = sens.read_text() if sens.exists() else ""
+    stext = sens.read_text() if sens.exists() else ""
+    ms = re.search(
+        r"<!-- BEGIN:window-sensitivity-1s -->(.*?)<!-- END:window-sensitivity-1s -->", stext, re.S
+    )
+    body = ms.group(1) if ms else ""
     n_cells = len(re.findall(r"^\| ±\d+ min \| \d+ km \|", body, re.M))
     want = len(cfg.match.sensitivity.window_s) * len(cfg.match.sensitivity.dist_km)
     check("window sensitivity", n_cells >= want, f"{n_cells}/{want} cells")
