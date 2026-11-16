@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Horus Turbulence Map</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="bar">
+    <span class="brand">HORUS</span>
+    <nav class="modes" role="tablist" aria-label="Mode">
+      <button role="tab" data-mode="live" aria-selected="true">Live feed</button>
+      <button role="tab" data-mode="replay" aria-selected="false">Replays</button>
+    </nav>
+    <span id="clock" class="mono">--:--Z</span>
+    <span class="warn">Research prototype · not for operational use</span>
+  </header>
+  <main class="stage">
+    <canvas id="map" aria-label="Turbulence nowcast map"></canvas>
+    <aside class="side">
+      <section>
+        <h2>Flight level</h2>
+        <select id="fl" aria-label="Flight level bin"></select>
+      </section>
+      <section id="replayBox" hidden>
+        <h2>Replay</h2>
+        <select id="replaySel" aria-label="Replay"></select>
+        <p id="replayMeta" class="small"></p>
+      </section>
+      <section>
+        <h2>Layers</h2>
+        <label><input type="checkbox" id="lyCells" checked> Nowcast cells</label>
+        <label><input type="checkbox" id="lyAc" checked> Aircraft</label>
+        <label><input type="checkbox" id="lyPirep" checked> PIREPs</label>
+      </section>
+      <section>
+        <h2>Legend</h2>
+        <div class="ramp" aria-hidden="true"></div>
+        <div class="ramp-labels small"><span id="rampLo">prior</span><span id="rampHi">high</span></div>
+        <p class="small">Cell colour: chance the next aircraft through the cell detects turbulence in 15 min (grid N2). Dots: aircraft; orange = detection (B3 index ≥ threshold). Carets: pilot reports, <span class="mod">MOD</span> / <span class="sev">SEV</span>.</p>
+      </section>
+      <section>
+        <h2>Status</h2>
+        <p id="status" class="small mono">connecting…</p>
+      </section>
+    </aside>
+  </main>
+  <footer class="timeline">
+    <button id="play" aria-label="Play or pause">▶</button>
+    <input id="scrub" type="range" min="0" max="0" value="0" aria-label="Time" disabled>
+    <span id="tlabel" class="mono small"></span>
+  </footer>
+  <script src="/static/app.js"></script>
+</body>
+</html>

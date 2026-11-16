@@ -1,4 +1,4 @@
-.PHONY: setup test lint types check gate-m0 gate-m1 gate-m2 gate-m3 gate-m4 gate-m5 scores bench-detector bench-rates winds bench-nowcast bench record recorder-status trino-smoke demo demo-data bundle gate-demo
+.PHONY: setup test lint types check gate-m0 gate-m1 gate-m2 gate-m3 gate-m4 gate-m5 gate-m6 serve replays latency scores bench-detector bench-rates winds bench-nowcast bench record recorder-status trino-smoke demo demo-data bundle gate-demo
 
 setup:
 	uv sync
@@ -60,6 +60,19 @@ gate-m4: check
 
 gate-m5: check bench
 	uv run python scripts/gate_nowcast.py m5
+
+# M6: API + live map (http://127.0.0.1:8000), curated replays, live latency
+serve:
+	uv run uvicorn horus.api.main:app --host 127.0.0.1 --port 8000
+
+replays:
+	uv run python scripts/make_replays.py --n 3
+
+latency:
+	uv run python scripts/measure_latency.py
+
+gate-m6: check
+	uv run python scripts/gate_m6.py
 
 record:
 	nohup caffeinate -i uv run python scripts/record_live.py > data/raw/live/nohup-opensky.out 2>&1 & echo $$! > data/raw/live/recorder.pid

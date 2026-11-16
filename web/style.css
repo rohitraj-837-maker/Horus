@@ -1,0 +1,28 @@
+:root {
+  --bg: #000; --panel: #0b0b0c; --line: rgba(255,255,255,.10); --ink: #ececec; --muted: #8b8b90;
+  --accent: #ffc845; --mod: #ff9900; --sev: #ec2a2a;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+  font: 300 14px/1.45 -apple-system, "Helvetica Neue", Arial, sans-serif; }
+.mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+.small { font-size: 12px; color: var(--muted); }
+.bar { height: 44px; display: flex; align-items: center; gap: 20px; padding: 0 16px; border-bottom: 1px solid var(--line); }
+.brand { letter-spacing: .2em; font-weight: 500; }
+.modes button { background: none; border: 0; color: var(--muted); font: inherit; padding: 6px 10px; cursor: pointer; border-bottom: 1px solid transparent; }
+.modes button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.warn { margin-left: auto; font-size: 12px; color: var(--muted); }
+.stage { position: absolute; top: 44px; bottom: 48px; left: 0; right: 0; display: flex; }
+#map { flex: 1; min-width: 0; height: 100%; display: block; }
+.side { width: 260px; border-left: 1px solid var(--line); background: var(--panel); overflow-y: auto; padding: 8px 16px; }
+.side section { padding: 12px 0; border-bottom: 1px solid var(--line); }
+.side h2 { margin: 0 0 8px; font-size: 11px; font-weight: 500; letter-spacing: .12em; color: var(--muted); text-transform: uppercase; }
+.side label { display: block; padding: 3px 0; }
+select { width: 100%; background: #111; color: var(--ink); border: 1px solid var(--line); padding: 6px; font: inherit; }
+.ramp { height: 10px; background: linear-gradient(90deg, #2a1a05, #7a4a08, #ff9900, #ffd27a); }
+.ramp-labels { display: flex; justify-content: space-between; }
+.mod { color: var(--mod); } .sev { color: var(--sev); }
+.timeline { position: absolute; bottom: 0; left: 0; right: 0; height: 48px; display: flex; align-items: center; gap: 12px; padding: 0 16px; border-top: 1px solid var(--line); }
+.timeline input { flex: 1; accent-color: var(--accent); }
+#play { width: 32px; height: 28px; background: none; color: var(--ink); border: 1px solid var(--line); cursor: pointer; }
+@media (max-width: 700px) { .side { display: none; } .warn { display: none; } }

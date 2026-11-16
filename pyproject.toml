@@ -23,6 +23,7 @@ dependencies = [
     "orjson>=3.13.0",
     "pyopensky>=2.0",
     "keyring>=25.7.0",
+    "websockets>=17.4",
 ]
 
 [project.optional-dependencies]

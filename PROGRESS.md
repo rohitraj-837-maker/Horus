@@ -69,6 +69,17 @@ Key findings (details in `reports/data_notes.md`):
 - Also built after the first gate run: `ingest/adsblol_history.py` (streams adsb.lol daily tar releases, CONUS ≥ FL180 to Parquet with bounded memory), `scripts/fetch_adsblol_history.py`. The IEM PIREP ingest is now resumable with retries; an earlier run had silently stopped partway when IEM dropped a connection.
 - Study period fixed: 2025-12-02 → 2026-01-15 (most MOD+ PIREPs); train Dec 2–31, test Jan 1–15. History download started 2026-11-15 ~02:13 AEDT (`data/raw/adsblol_hist/_log.csv`).
 
+## M6 — API, live loop, map, replays ✅ gate passed (2026-11-16 ~08:45 UTC)
+
+`make gate-m6`: check ✔ (incl. `tests/api`), live latency p95 < 10 s ✔, 3 curated replays ✔, front end ✔, screenshots ✔.
+
+- **Live loop** (`horus/api/live_loop.py`): per-aircraft 15-min buffers, re-scored each snapshot with the offline scorer and normalisation. Only *settled* minutes (240 s) reach the grid. The grid advances on epoch-aligned 60 s ticks (advect, then evidence). **Equivalence test:** a recorded 30-min real replay (150 aircraft) fed in 90 s and 7 s chunks ends in grid states bit-identical to each other and to the offline run.
+- **API** (`horus/api/main.py`, FastAPI): health, grid, aircraft, PIREPs, lattice (cached), basemap, thresholds, replays, metrics, `WS /ws/live`. Scoring runs in a worker thread so HTTP stays responsive. The feed replays a test-day archive window through the live loop: free live sources give ~90 s per aircraft, too sparse for the detector (data_notes.md).
+- **Map** (`web/`, Rohit chose the aviation-tool look): canvas renderer, no CDN or tiles (runs offline; deviation from SPEC's MapLibre). H3 cells on a single-hue orange ramp, aircraft (orange = detection), PIREP carets coloured MOD/SEV and filtered to the FL band, FL selector, layers, legend, Z clock, replay timeline. Screenshots: `docs/img/horus-map-live.png`, `horus-map-replay.png`.
+- **Replays** (`scripts/make_replays.py`): the 3 MOD test-day PIREPs with the highest B3 window score (one per day), labelled as such in the UI. Two light up grid cells near the report; r1 (FL220–270) shows none, an honest miss.
+- **Latency** (`reports/perf.md`): snapshot → WS send p50 1.7 s, **p95 2.9 s** for ~2,400 CONUS aircraft per snapshot (budget 10 s).
+- Dependency added: `websockets` (uvicorn needs it for the WS endpoint).
+
 ## M5 — Advection N2, negative evidence N3, performance ✅ gate passed (2026-11-16 02:14 UTC)
 
 `make gate-m5`: check ✔, `make bench` ✔, N0–N3 rows ✔, reliability plots ✔, 7 artefacts leakage-free ✔.
