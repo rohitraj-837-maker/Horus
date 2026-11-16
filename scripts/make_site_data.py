@@ -72,9 +72,13 @@ def run(cfg: config.Config) -> dict[str, Any]:
     ai = last["icao24"].map(idx).to_numpy()
     pos[ai, last["f"].to_numpy(), 0] = np.round(last["lon"].to_numpy() * 100)
     pos[ai, last["f"].to_numpy(), 1] = np.round(last["lat"].to_numpy() * 100)
+    # flight level / 2 as uint8 (FL450 -> 225), for colouring aircraft by altitude
+    alt = np.zeros((len(icaos), nf), dtype=np.uint8)
+    alt[ai, last["f"].to_numpy()] = np.clip(np.round(last["baro_alt_ft"].to_numpy() / 200), 0, 255)
     per_frame = [int((pos[:, k, 0] != -32768).sum()) for k in range(nf)]  # true counts
     seen = (pos[:, :, 0] != -32768).sum(axis=1)
     pos = pos[seen >= 4]  # drawn: aircraft visible for >= 8 min (smaller file, same picture)
+    alt = alt[seen >= 4]
     icaos = [a for a, s in zip(icaos, seen, strict=True) if s >= 4]
 
     # the live loop, exactly as `make watch` drives it
@@ -150,6 +154,7 @@ def run(cfg: config.Config) -> dict[str, Any]:
         "frames": nf,
         "n": len(icaos),
         "pos": base64.b64encode(pos.tobytes()).decode(),
+        "alt": base64.b64encode(alt.tobytes()).decode(),
         "perFrame": per_frame,
         "detections": detections,
         "cells": {str(k - t0): v for k, v in sorted(cells.items())},

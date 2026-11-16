@@ -114,6 +114,7 @@ h1 { margin: 0; font-size: clamp(64px, 13vw, 168px); line-height: 0.95; font-wei
 .legend span { display: inline-flex; align-items: center; gap: 7px; }
 .sw { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 .sw.ac { width: 4px; height: 4px; background: #c8d7eb; }
+.sw.alt { width: 40px; height: 6px; border-radius: 3px; background: linear-gradient(90deg, #1f6f99, #2f94c8, #6dbfe8, #b5e2f8, #f2fbff); }
 .sw.turb { background: var(--turb); box-shadow: 0 0 0 3px rgba(208, 122, 0, 0.3); }
 .sw.fc { border-radius: 3px; background: rgba(179, 92, 232, 0.55); border: 1px solid var(--fc); }
 .sw.rep { width: 0; height: 0; border-radius: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 10px solid var(--rep); }
@@ -226,8 +227,8 @@ svg.chart .ptitle { fill: var(--ink-2); font-weight: 600; font-size: 11.5px; }
 .bar-name { color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .bar-name b { color: var(--ink); font-weight: 600; margin-right: 4px; }
 .bar-track { position: relative; height: 14px; }
-.bar-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; border-radius: 2px 4px 4px 2px; background: var(--muted-mark); transition: width 1.1s var(--ease); }
-.bar-row.hl .bar-fill { background: var(--c); }
+.bar-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; border-radius: 2px 4px 4px 2px; background: var(--c); opacity: 0.42; transition: width 1.1s var(--ease); }
+.bar-row.hl .bar-fill { opacity: 1; }
 .bar-row:hover .bar-fill { filter: brightness(1.25); }
 .bar-val { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 600; }
 .ref { position: absolute; top: -6px; bottom: -6px; width: 0; border-left: 1px dashed var(--ink-2); pointer-events: none; }
@@ -308,7 +309,7 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
 .bar-s { transition: height 0.6s var(--ease), y 0.6s var(--ease), opacity 0.4s; }
 .stage::after {  /* scrim: keeps captions readable over the sky */
   content: ""; position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(180deg, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.45) 26%, rgba(0,0,0,0) 44%);
+  background: linear-gradient(180deg, rgba(3,14,42,0.88) 0%, rgba(3,14,42,0.62) 28%, rgba(3,14,42,0) 50%);
 }
 .cap {
   position: absolute; z-index: 2; left: 50%; top: 10vh; width: min(820px, calc(100vw - 40px)); text-align: center;
@@ -359,8 +360,16 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
 .breathe { transform-box: fill-box; transform-origin: center; animation: breathe 2.6s ease-in-out infinite; }
 @keyframes breathe { 50% { transform: scale(1.07); } }
 .illus .short { display: none; }
+#s-stars { display: none; }  /* daytime: no stars */
+.illus { color: #fff; background: rgba(3, 14, 42, 0.72); padding: 4px 10px; border-radius: 980px; }
+.scroll-hint { color: #fff; text-shadow: 0 1px 10px rgba(3, 14, 42, 0.7); }
+.cap.intro .tagline-big.grad { color: #e6eefb; }
+.cap p { color: #eaf0fa; }
+.facts > span { color: #cfdcef; border-left-color: rgba(255, 255, 255, 0.3); }
+.chapters button { color: rgba(255, 255, 255, 0.62); }
+.chapters button:hover { color: #fff; }
 .alts { position: absolute; inset: 0; z-index: 1; pointer-events: none; transition: opacity 0.4s; }
-.alts span { position: absolute; left: 0; transform: translateY(-50%); display: flex; align-items: center; gap: 8px; font: 600 11px var(--mono); letter-spacing: 0.06em; color: rgba(255, 255, 255, 0.4); }
+.alts span { position: absolute; left: 0; transform: translateY(-50%); display: flex; align-items: center; gap: 8px; font: 600 11px var(--mono); letter-spacing: 0.06em; color: rgba(255, 255, 255, 0.65); }
 .alts span::before { content: ""; width: 14px; height: 1px; background: rgba(255, 255, 255, 0.35); }
 .alts span.cur { color: rgba(255, 255, 255, 0.85); }
 .scene .lc { display: none; }
@@ -447,14 +456,14 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
       <svg class="scene" id="scene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
         <defs>
           <linearGradient id="g-sky" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="900">
-            <stop offset="0" stop-color="#02040a"/><stop offset="0.55" stop-color="#0a1528"/><stop offset="1" stop-color="#010103"/>
+            <stop offset="0" stop-color="#08296a"/><stop offset="0.34" stop-color="#124c9f"/><stop offset="0.58" stop-color="#3b84cc"/><stop offset="0.7" stop-color="#93c3ea"/><stop offset="0.78" stop-color="#dce9f6"/><stop offset="1" stop-color="#c2d1e2"/>
           </linearGradient>
-          <radialGradient id="g-cloud"><stop offset="0" stop-color="#cfe0ff" stop-opacity="0.11"/><stop offset="1" stop-color="#cfe0ff" stop-opacity="0"/></radialGradient>
+          <radialGradient id="g-cloud"><stop offset="0" stop-color="#ffffff" stop-opacity="0.6"/><stop offset="0.6" stop-color="#f4f8fc" stop-opacity="0.25"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></radialGradient>
           <radialGradient id="g-rough"><stop offset="0" stop-color="#d07a00" stop-opacity="0.42"/><stop offset="0.5" stop-color="#b35ce8" stop-opacity="0.16"/><stop offset="1" stop-color="#b35ce8" stop-opacity="0"/></radialGradient>
           <radialGradient id="g-lit"><stop offset="0" stop-color="#b35ce8" stop-opacity="0.55"/><stop offset="1" stop-color="#b35ce8" stop-opacity="0"/></radialGradient>
           <linearGradient id="g-body" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7f8fa"/><stop offset="0.55" stop-color="#e3e6eb"/><stop offset="1" stop-color="#b7bdc7"/></linearGradient>
           <linearGradient id="g-tail" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2a9fd6"/><stop offset="1" stop-color="#b35ce8"/></linearGradient>
-          <linearGradient id="g-trail" x1="0" x2="1"><stop offset="0" stop-color="#ffffff" stop-opacity="0"/><stop offset="1" stop-color="#ffffff" stop-opacity="0.32"/></linearGradient>
+          <linearGradient id="g-trail" x1="0" x2="1"><stop offset="0" stop-color="#ffffff" stop-opacity="0"/><stop offset="1" stop-color="#ffffff" stop-opacity="0.75"/></linearGradient>
           <clipPath id="clip-trace"><rect id="clip-trace-rect" x="200" y="600" width="0" height="300"/></clipPath>
           <!-- a generic twin-jet in side view, nose right (our own drawing, no livery) -->
           <symbol id="sym-plane" viewBox="0 0 200 56">
@@ -485,7 +494,7 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
         <g id="s-wind" opacity="0"></g>
         <g id="s-rough" opacity="0"></g>
         <g id="s-clouds-near"></g>
-        <rect id="s-trail" x="0" y="0" width="520" height="3" rx="1.5" fill="url(#g-trail)"/>
+        <rect id="s-trail" x="0" y="0" width="520" height="3.4" rx="1.7" fill="url(#g-trail)"/>
         <use id="s-plane" href="#sym-plane" width="200" height="56"/>
         <use id="s-plane2" href="#sym-plane" width="200" height="56" opacity="0"/>
         <g id="s-chip" opacity="0"></g>
@@ -576,7 +585,7 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
           </div>
         </div>
         <div class="legend">
-          <span><i class="sw ac"></i>aircraft</span>
+          <span><i class="sw alt"></i>aircraft by altitude, FL200 → FL450</span>
           <span><i class="sw turb"></i>turbulence detected</span>
           <span><i class="sw fc"></i>forecast cell</span>
           <span><i class="sw rep"></i>pilot report</span>
@@ -596,7 +605,7 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
       </div>
       <div class="panel ticker-mobile"><h4>What Horus is saying</h4><ol id="ticker-m"></ol></div>
       <p class="map-caption">
-        Real data, not a mock-up: every dot is an aircraft that was above FL200 over the US on
+        Real data, not a mock-up: every dot is an aircraft that was above FL200, coloured by its altitude, over the US on
         1 January 2026, 15:00–16:00 UTC, replayed through the same code as the live loop.
         Detections appear at the minute they happened; hover a pulse or a triangle for details.
       </p>
@@ -1024,6 +1033,10 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
     const bin = atob(D.pos), u8 = new Uint8Array(bin.length);
     for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
     const P = new Int16Array(u8.buffer);
+    // flight level / 2 per aircraft and frame; colour ramp validated (one hue, monotone L)
+    const ALT = D.alt ? Uint8Array.from(atob(D.alt), (c) => c.charCodeAt(0)) : null;
+    const RAMP = [[0, "#1f6f99"], [280, "#2f94c8"], [330, "#6dbfe8"], [370, "#b5e2f8"], [410, "#f2fbff"]];
+    const band = (fl) => { let j = 0; while (j + 1 < RAMP.length && fl >= RAMP[j + 1][0]) j++; return j; };
     const COS = Math.cos((37 * Math.PI) / 180), LON0 = -126, LON1 = -65.5, LAT0 = 23.5, LAT1 = 50.2;
     let W = 0, H = 0, dpr = 1, S = 1, OX = 0, OY = 0;
     const base = document.createElement("canvas");
@@ -1103,8 +1116,8 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
       }
       // aircraft, interpolated between 2-min fixes
       const k = Math.min(Math.floor(t / STEP), F - 2), f = t / STEP - k;
-      ctx.fillStyle = "rgba(200,215,235,0.62)";
-      const sz = W < 600 ? 1.2 : 1.6, h = sz / 2;
+      const sz = W < 600 ? 1.4 : 1.9, h = sz / 2;
+      const buckets = RAMP.map(() => []);
       for (let i = 0; i < N; i++) {
         const a = (i * F + k) * 2, b = a + 2;
         const ax = P[a], ay = P[a + 1], bx = P[b], by = P[b + 1];
@@ -1113,8 +1126,13 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
         else if (ax !== MISS && f < 0.5) { lon = ax / 100; lat = ay / 100; }
         else if (bx !== MISS && f >= 0.5) { lon = bx / 100; lat = by / 100; }
         else continue;
-        ctx.fillRect(X(lon) - h, Y(lat) - h, sz, sz);
+        const fl = ALT ? 2 * (ALT[i * F + (f < 0.5 ? k : k + 1)] || ALT[i * F + k] || ALT[i * F + k + 1]) : 350;
+        buckets[band(fl)].push(X(lon) - h, Y(lat) - h);
       }
+      buckets.forEach((pts, j) => {
+        ctx.fillStyle = RAMP[j][1];
+        for (let q = 0; q < pts.length; q += 2) ctx.fillRect(pts[q], pts[q + 1], sz, sz);
+      });
       // detections: a ring that grows and fades, a dot that lingers
       let ndet = 0;
       for (const d of D.detections) {
@@ -1364,27 +1382,29 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
     const far = $("#s-clouds-far"), near = $("#s-clouds-near");
     for (let i = 0; i < 9; i++) el("ellipse", { cx: rnd() * 2000, cy: 160 + rnd() * 460, rx: 200 + rnd() * 220, ry: 34 + rnd() * 40, fill: "url(#g-cloud)" }, far);
     for (let i = 0; i < 6; i++) el("ellipse", { cx: rnd() * 2600, cy: 520 + rnd() * 200, rx: 320 + rnd() * 300, ry: 50 + rnd() * 50, fill: "url(#g-cloud)", opacity: 0.9 }, near);
+    // the cloud deck below the cruise level
+    for (let i = 0; i < 16; i++) el("ellipse", { cx: -700 + i * 230 + rnd() * 80, cy: 800 + rnd() * 70, rx: 260 + rnd() * 140, ry: 60 + rnd() * 34, fill: "url(#g-cloud)" }, near);
     const rough = $("#s-rough");
     // rough air: faint streaks only (the real trace below is the evidence)
     const waves = el("g", { class: "waves" }, rough);
     for (let j = 0; j < 5; j++) {
       let d = ""; const y0 = ZY - 64 + j * 32, amp = 3 + (2 - Math.abs(j - 2)) * 2.5;
       for (let k = 0; k <= 36; k++) { const xx = ZX - 180 + k * 10; d += `${k ? "L" : "M"}${xx.toFixed(1)},${(y0 + Math.sin(k * 1.1 + j) * amp).toFixed(1)}`; }
-      el("path", { d, stroke: "rgba(255,255,255,0.22)", style: `animation-delay:${-j * 0.35}s` }, waves);
+      el("path", { d, stroke: "rgba(255,255,255,0.45)", style: `animation-delay:${-j * 0.35}s` }, waves);
     }
     const hexPts = (cx, cy, r) => [...Array(6)].map((_, k) => { const a = Math.PI / 180 * (60 * k + 30); return `${(cx + r * Math.cos(a)).toFixed(1)},${(cy + r * Math.sin(a)).toFixed(1)}`; }).join(" ");
     const hexes = $("#s-hexes");
     for (let j = -3; j <= 3; j++) for (let k = -9; k <= 9; k++) {
       const cx = ZX + k * 100 + (j % 2 ? 50 : 0), cy = ZY + j * 87;
       if (cx < -60 || cx > 1660) continue;
-      el("polygon", { points: hexPts(cx, cy, 57), fill: "none", stroke: "rgba(255,255,255,0.07)", "stroke-width": 1 }, hexes);
+      el("polygon", { points: hexPts(cx, cy, 57), fill: "none", stroke: "rgba(255,255,255,0.18)", "stroke-width": 1 }, hexes);
     }
     const lit = $("#s-lit");
-    const litHex = el("polygon", { points: hexPts(ZX, ZY, 57), fill: "rgba(179,92,232,0.32)", stroke: "#b35ce8", "stroke-width": 1.6 }, lit);
+    const litHex = el("polygon", { points: hexPts(ZX, ZY, 57), fill: "rgba(179,92,232,0.62)", stroke: "#f3e6ff", "stroke-width": 1.6 }, lit);
     const wind = $("#s-wind");
     for (let i = 0; i < 10; i++) {
       const g = el("g", { transform: `translate(${(ZX - 420 + rnd() * 760).toFixed(0)},${(ZY - 170 + rnd() * 340).toFixed(0)})` }, wind);
-      el("path", { d: "M0,-5 L9,0 L0,5", fill: "none", stroke: "rgba(42,159,214,0.8)", "stroke-width": 1.6, "stroke-linecap": "round", "stroke-linejoin": "round", class: "wind-arrow", style: `animation-delay:${(-rnd() * 2.6).toFixed(2)}s` }, g);
+      el("path", { d: "M0,-5 L9,0 L0,5", fill: "none", stroke: "rgba(255,255,255,0.8)", "stroke-width": 1.6, "stroke-linecap": "round", "stroke-linejoin": "round", class: "wind-arrow", style: `animation-delay:${(-rnd() * 2.6).toFixed(2)}s` }, g);
     }
     // labels are the lines Horus actually printed (make watch), in terminal type,
     // tied to what they describe by a hairline
@@ -1461,7 +1481,7 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
 
     // trace panel (real data)
     const panel = $("#s-panel");
-    el("rect", { x: 120, y: 612, width: 1360, height: 264, rx: 24, fill: "rgba(10,12,16,0.74)", stroke: "rgba(255,255,255,0.08)" }, panel);
+    el("rect", { x: 120, y: 612, width: 1360, height: 264, rx: 24, fill: "rgba(6,14,32,0.8)", stroke: "rgba(255,255,255,0.12)" }, panel);
     set(el("text", { x: 152, y: 648, fill: "#a1a1a6", "font-size": 14, "font-weight": 600 }, panel), {}).textContent = "Vertical rate as broadcast (ft/min)";
     const readout = el("text", { x: 1448, y: 648, "text-anchor": "end", fill: "#a1a1a6", "font-size": 13, "font-family": MONO }, panel);
     readout.textContent = `${tur.id} · ${tur.type} · FL${tur.fl}`;
