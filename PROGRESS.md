@@ -122,6 +122,8 @@ Key findings (details in `reports/data_notes.md`):
 
 - **2026-11-17: night again, colourful text, a plane designed for night (Rohit).** The story sky is night again: navy to black, twinkling stars (some warm), a crescent moon that barely moves, moonlit cloud tops. The 737 is redrawn for it: moonlit paint, a warm glow along the cabin windows, the fin lit from the tailplane by logo lights, a steady red wingtip navigation light, flashing red beacons and a double-flash white tail strobe, cockpit windows with a faint instrument glow (the symbol gained a 12-unit margin so the light glows are not clipped). Text is colourful by meaning across the whole site, using light tints for reading (≥ 7:1 on black): amber turbulence, purple forecast, rose pilot reports, cyan aircraft and wind, blue actions, green "a hit". Every section heading has its key phrase in colour; key terms in ledes and cards, fact-chip numbers, bento figures and labels, step titles and the big result numbers take their meaning's tint. The words still say what the colour means, so it stays colour-blind safe.
 
+- **2026-11-17: new logo (Rohit: "change the logo").** The hexagon-and-dot mark is replaced by an original eye after the ancient Eye of Horus (public-domain motif): white lids with the two markings beneath, a lower lid drawn as a turbulent vertical-rate trace in amber, and a cyan pupil as the point of detection. Used in the nav and footer (26 px); the favicon puts the same mark on a navy rounded tile so it stays visible on light tab bars. Checked at 16–128 px.
+
 ## M6 — API, live loop, map, replays ✅ gate passed (2026-11-16 ~08:45 UTC)
 
 `make gate-m6`: check ✔ (incl. `tests/api`), live latency p95 < 10 s ✔, 3 curated replays ✔, front end ✔, screenshots ✔.
