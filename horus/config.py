@@ -208,6 +208,7 @@ class Watch:
     pirep_lookback_s: int
     case_pace_s: float
     case_radius_km: float
+    cases_dir: str
 
 
 @dataclass(frozen=True)

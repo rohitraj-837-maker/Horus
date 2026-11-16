@@ -46,7 +46,7 @@ COLOUR = {
 LEGEND = """\
   TURBULENCE    an aircraft's own climb/descent data turned bumpy (strength vs the threshold)
   calm          a bump that lasted 2 min or more has ended
-  FORECAST      a ~26 km patch where the next aircraft is likely to hit turbulence ({h} min)
+  FORECAST      a ~45 km cell where the next aircraft is likely to hit turbulence ({h} min)
   PILOT REPORT  a real pilot report (FL200+): never fed in, only used to check Horus"""
 
 
@@ -556,7 +556,7 @@ def main(argv: list[str] | None = None) -> int:
 
         hl = json.loads(config.resolve("models/half_life.json").read_text())
         tau = nb.grid_params(cfg, hl)[0].tau
-        files = sorted(config.resolve("data/replays").glob("*.json"))
+        files = sorted(config.resolve(w.cases_dir).glob("*.json"))
         if not files:
             out.raw("No case studies found: run `make replays` first.")
             return 1

@@ -8,6 +8,7 @@ __pycache__/
 /data/
 models/*
 !models/*.json
+!models/type_norm*.parquet
 reports/figures/*.tmp
 .DS_Store
 credentials.json

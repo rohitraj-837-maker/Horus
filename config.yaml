@@ -135,3 +135,4 @@ watch:                         # text stream (horus/watch.py): what counts as a 
   pirep_lookback_s: 600        # ... in the previous 10 min (live: only the past is known)
   case_pace_s: 0.4             # seconds per replay minute in case stories
   case_radius_km: 150          # case stories follow aircraft and cells this close to the report
+  cases_dir: cases             # curated replays (committed: they need deleted bulk data to rebuild)

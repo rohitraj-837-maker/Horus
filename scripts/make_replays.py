@@ -57,7 +57,7 @@ def main() -> int:
     g = cfg.grid
     cw = nb.CellWinds(lat_c, wf, (np.arange(g.fl_min, g.fl_max, g.fl_bin) + g.fl_bin / 2) * 100.0)
     floor = float(grid.sigmoid(np.array(params.l0))) * 2
-    out_dir = config.resolve("data/replays")
+    out_dir = config.resolve(cfg.watch.cases_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
     for k, ev in enumerate(picks.itertuples(), 1):

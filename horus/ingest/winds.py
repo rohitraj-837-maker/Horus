@@ -133,6 +133,19 @@ def path(cfg: Config, start: date, end: date) -> Path:
     return config.resolve(OUT_DIR) / f"{start}_{end}.npz"
 
 
+def find(day: date) -> Path | None:
+    """The widest saved wind file whose inclusive date range covers `day`."""
+    best: tuple[int, Path] | None = None
+    for p in sorted(config.resolve(OUT_DIR).glob("*_*.npz")):
+        try:
+            a, b = (date.fromisoformat(x) for x in p.stem.split("_"))
+        except ValueError:
+            continue
+        if a <= day <= b and (best is None or (b - a).days > best[0]):
+            best = ((b - a).days, p)
+    return best[1] if best else None
+
+
 def save(w: WindField, p: Path) -> None:
     p.parent.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(p, time=w.time, levels_hpa=w.levels_hpa, lat=w.lat, lon=w.lon, u=w.u, v=w.v)

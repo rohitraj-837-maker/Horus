@@ -116,6 +116,11 @@ def test_hours_between():
     assert [x.hour for x in hrs] == [18, 19, 20]
 
 
+# These tests are about writing, retries and errors, not the host's free disk: the
+# floor is off here and has its own test (test_run_hours_disk_floor).
+QUIET = {"log": lambda *_: None, "min_free_gb": 0.0}
+
+
 def test_run_hours_writes_resumes_and_cleans_cache(tmp_path, region):
     out, cache = tmp_path / "hist", tmp_path / "cache"
     cache.mkdir()
@@ -128,12 +133,12 @@ def test_run_hours_writes_resumes_and_cleans_cache(tmp_path, region):
 
     t = CachingTrino()
     hours = h.hours_between(HOUR, HOUR + pd.Timedelta(hours=2))
-    res = h.run_hours(t, hours, region, out_dir=str(out), cache_dir=cache, log=lambda *_: None)
+    res = h.run_hours(t, hours, region, out_dir=str(out), cache_dir=cache, **QUIET)
     assert [r["status"] for r in res] == ["ok", "ok"] and res[0]["rows"] == 3
     assert sorted(p.name for p in cache.iterdir()) == ["someone-elses.parquet"]
     back = pd.read_parquet(h.hour_path(HOUR, str(out)))
     assert back["time"].min() == T0
-    again = h.run_hours(t, hours, region, out_dir=str(out), cache_dir=cache, log=lambda *_: None)
+    again = h.run_hours(t, hours, region, out_dir=str(out), cache_dir=cache, **QUIET)
     assert [r["status"] for r in again] == ["skipped", "skipped"] and len(t.calls) == 2
 
 
@@ -141,7 +146,7 @@ def test_run_hours_retries_with_backoff(tmp_path, region):
     waits = []
     t = HistoryOnly(fail_times=2)
     res = h.run_hours(
-        t, [HOUR], region, out_dir=str(tmp_path), sleep=waits.append, log=lambda *_: None
+        t, [HOUR], region, out_dir=str(tmp_path), sleep=waits.append, **QUIET
     )
     assert res[0]["status"] == "ok" and waits == [30.0, 60.0]
 
@@ -155,7 +160,7 @@ def test_run_hours_gives_up_and_logs(tmp_path, region):
         out_dir=str(tmp_path),
         attempts=2,
         sleep=lambda s: None,
-        log=lambda *_: None,
+        **QUIET,
     )
     assert res[0]["status"] == "failed" and "QUERY_QUEUE_FULL" in res[0]["error"]
     assert not h.hour_path(HOUR, str(tmp_path)).exists()
@@ -189,7 +194,7 @@ def test_run_hours_stops_on_permission_denied(tmp_path, region):
     t = HistoryOnly(fail_times=99, exc=permission_denied())
     hours = h.hours_between(HOUR, HOUR + pd.Timedelta(hours=3))
     res = h.run_hours(
-        t, hours, region, out_dir=str(tmp_path), sleep=waits.append, log=lambda *_: None
+        t, hours, region, out_dir=str(tmp_path), sleep=waits.append, **QUIET
     )
     # one query, no retries, no further hours
     assert len(t.calls) == 1 and waits == []

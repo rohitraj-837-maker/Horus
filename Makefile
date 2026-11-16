@@ -1,7 +1,12 @@
-.PHONY: setup test lint types check gate-m0 gate-m1 gate-m2 gate-m3 gate-m4 gate-m5 gate-m6 serve replays latency watch cases watch-sample scores bench-detector bench-rates winds bench-nowcast bench record recorder-status trino-smoke demo demo-data bundle gate-demo
+.PHONY: setup test lint types check gate-m0 gate-m1 gate-m2 gate-m3 gate-m4 gate-m5 gate-m6 serve replays latency watch cases watch-sample up readme gif gate-m7 scores bench-detector bench-rates winds bench-nowcast bench record recorder-status trino-smoke demo demo-data bundle gate-demo
 
 setup:
 	uv sync
+
+# M7: one-command setup for a fresh checkout: env + the demo day's data (only what is missing)
+up:
+	uv sync --frozen
+	uv run python scripts/setup_data.py
 
 test:
 	uv run pytest -q
@@ -85,6 +90,16 @@ latency:
 
 gate-m6: check
 	uv run python scripts/gate_m6.py
+
+# M7: README numbers regenerated from reports/ (after `bench` refreshes perf.md), demo GIF
+readme:
+	uv run python scripts/readme_numbers.py --write
+
+gif:
+	uv run python scripts/make_demo_gif.py
+
+gate-m7: check bench readme
+	uv run python scripts/gate_m7.py
 
 record:
 	nohup caffeinate -i uv run python scripts/record_live.py > data/raw/live/nohup-opensky.out 2>&1 & echo $$! > data/raw/live/recorder.pid

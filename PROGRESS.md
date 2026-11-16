@@ -88,6 +88,20 @@ Key findings (details in `reports/data_notes.md`):
 - Also built after the first gate run: `ingest/adsblol_history.py` (streams adsb.lol daily tar releases, CONUS ≥ FL180 to Parquet with bounded memory), `scripts/fetch_adsblol_history.py`. The IEM PIREP ingest is now resumable with retries; an earlier run had silently stopped partway when IEM dropped a connection.
 - Study period fixed: 2025-12-02 → 2026-01-15 (most MOD+ PIREPs); train Dec 2–31, test Jan 1–15. History download started 2026-11-15 ~02:13 AEDT (`data/raw/adsblol_hist/_log.csv`).
 
+## M7 — Hardening ✅ gate passed (2026-11-17)
+
+`make gate-m7` = `make check` (ruff, mypy core + eval, **pytest 275 passed**, leakage test) + `make bench` (grid update p95 32 ms / 10k aircraft) + `make readme` + `scripts/gate_m7.py`: all PASS.
+
+- **One-command setup** (`make up` = `uv sync --frozen` + `scripts/setup_data.py`). The setup fetches only what is missing for `make watch` / `make cases`: the archive day (adsb.lol, ~3.5 GB streamed), one day of IEM PIREPs, the Doc 8643 type table (new `aircraft_db.build_types`, without the 100 MB aircraft DB) and one day of GFS winds (Open-Meteo, ~8 min). `build_hub` now finds any wind file covering the day (`winds.find`).
+  - **Verified in a clean copy** of exactly the files git would commit, with no `data/`: install ✔, 275 tests ✔, `--check` lists the 4 missing items ✔, real downloads of PIREPs, types and winds ✔ (archive day copied in, to avoid re-streaming 3.5 GB; same `fetch_day` that fetched all 44 days), then `make watch` output identical to this machine's.
+- **Now committed** (they can no longer be rebuilt after the bulk-data deletion): `models/type_norm*.parquet` (9 KB each) and the 3 case studies, moved to `cases/` (`config.yaml: watch.cases_dir`). The release packager excludes `data/`, hence the new folder.
+- **README** rewritten for people new to the project: what it does, quick start, a sample of the stream, results, limitations (low recall at strict alarm rates, weak labels, held 200 ft/min dead-band data, replay not live, one winter, not EDR), layout and attribution. Every number sits in generated blocks (`scripts/readme_numbers.py --write`, `make readme`) built from `reports/`; `--check` fails on any drift and runs in CI.
+- **CI**: `.github/workflows/ci.yml` (uv sync, ruff, mypy, pytest, README check). Written, never pushed (no remote by rule); its steps were run locally in the clean copy.
+- **Demo**: `docs/img/horus-watch.gif` rendered by `scripts/make_demo_gif.py` from the real `docs/watch-sample.txt` (DejaVu Sans Mono from matplotlib, shared 32-colour palette, 2.2 MB), plus `docs/cases-sample.txt`.
+- **Test fix**: four Trino-history tests read the host's free disk (they failed at 97% full and would on a CI runner with less than 20 GB). They now pass `min_free_gb=0`; the floor keeps its own dedicated test.
+- **Fix**: the H3 res-4 cell was described as "~26 km" (that is its edge); it is ~45 km across. Corrected in the stream legend and README.
+- **SPEC deviations (Rohit):** no public demo link and no hosting, because the project rule is local commits only (no remote, no push). The demo is the README GIF and the text samples. No Docker: `make up` uses uv, as there are no services to orchestrate for a text stream.
+
 ## M6 — API, live loop, map, replays ✅ gate passed (2026-11-16 ~08:45 UTC)
 
 `make gate-m6`: check ✔ (incl. `tests/api`), live latency p95 < 10 s ✔, 3 curated replays ✔, front end ✔, screenshots ✔.

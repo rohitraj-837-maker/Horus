@@ -36,17 +36,21 @@ horus/watch.py    text stream: one line per event (M6; replaced the web map and 
 demo/             offline demo: stdlib server + static UI + synthetic scenarios (not a milestone)
 scripts/          CLI entry points (recorder, fetchers, fits)
 reports/          benchmark tables + figures (committed)
-data/, models/    gitignored (small JSON in models/ allowed)
+cases/            the 3 curated case studies (committed: rebuilding them needs the deleted bulk data)
+data/, models/    gitignored (small JSON and type_norm*.parquet in models/ are committed)
 ```
 
 ## Commands
 ```
+make up                       # fresh checkout: uv sync + fetch the demo day's data if missing
 uv sync                       # install
 uv run pytest -q              # all offline tests
 uv run pytest -m trino -q     # Trino integration (needs OpenSky research creds)
 uv run ruff check .           # lint
 uv run mypy horus/core     # types (core only)
-make gate-m1 … gate-m7        # milestone acceptance gates
+make gate-m1 … gate-m7        # milestone acceptance gates (m1–m5 need the full 45-day archive)
+make readme                   # regenerate README numbers from reports/ (CI checks they match)
+make gif                      # docs/img/horus-watch.gif from docs/watch-sample.txt
 make bench                    # performance benchmark
 make watch                    # live text stream (live loop in-process); ARGS="--fl 340"
 make cases                    # the 3 curated case studies, told minute by minute

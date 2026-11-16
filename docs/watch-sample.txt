@@ -6,7 +6,7 @@ Research prototype. Not for flight decisions.
 
   TURBULENCE    an aircraft's own climb/descent data turned bumpy (strength vs the threshold)
   calm          a bump that lasted 2 min or more has ended
-  FORECAST      a ~26 km patch where the next aircraft is likely to hit turbulence (15 min)
+  FORECAST      a ~45 km cell where the next aircraft is likely to hit turbulence (15 min)
   PILOT REPORT  a real pilot report (FL200+): never fed in, only used to check Horus
 Lines run about 5 min behind the flights: each minute of data settles before it counts.
 

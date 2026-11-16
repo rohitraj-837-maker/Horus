@@ -23,7 +23,7 @@ def main() -> int:
     perf = config.resolve("reports/perf.md").read_text()
     sec = perf.split("<!-- BEGIN:live-latency -->")[-1].split("<!-- END:live-latency -->")[0]
     check("live latency p95 < 10 s", "**PASS**" in sec, "reports/perf.md live-latency")
-    reps = sorted(config.resolve("data/replays").glob("*.json"))
+    reps = sorted(config.resolve(config.load().watch.cases_dir).glob("*.json"))
     good = [p for p in reps if len(json.loads(p.read_text())["frames"]) >= 30]
     check("curated replays", len(good) >= 3, f"{len(good)} replays with >= 30 frames")
     watch = config.resolve("horus/watch.py")

@@ -128,14 +128,14 @@ def test_case_story(tmp_path: Path, monkeypatch, capsys) -> None:  # type: ignor
         "intensity": "MOD",
         "floor": 0.002,
     }
-    d = tmp_path / "data" / "replays"
+    d = tmp_path / "cases"
     d.mkdir(parents=True)
     (d / "r1-x.json").write_text(json.dumps({"meta": meta, "frames": frames}))
     import horus.config as hc
 
     real = hc.resolve
     monkeypatch.setattr(
-        hc, "resolve", lambda p: tmp_path / p if str(p).startswith("data/replays") else real(p)
+        hc, "resolve", lambda p: tmp_path / p if str(p) == "cases" else real(p)
     )
     assert main(["--case", "1", "--fast", "--no-color"]) == 0
     out = capsys.readouterr().out

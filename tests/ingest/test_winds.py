@@ -71,3 +71,21 @@ def test_download_via_mock_transport(fixtures_dir: Path) -> None:
     )
     want = np.mean([u[3, 2, 0], u[3, 2, 1], u[4, 2, 0], u[4, 2, 1]])
     assert um[0] == pytest.approx(float(want), rel=1e-4)
+
+
+def test_find_picks_the_widest_file_covering_the_day(tmp_path, monkeypatch) -> None:
+    from datetime import date
+
+    from horus import config as hc
+    from horus.ingest import winds as wio
+
+    d = tmp_path / "winds"
+    d.mkdir()
+    for name in ("2026-01-01_2026-01-01", "2025-12-02_2026-01-15", "2026-02-01_2026-02-03"):
+        (d / f"{name}.npz").write_bytes(b"")
+    (d / "notes_x.npz").write_bytes(b"")
+    real = hc.resolve
+    monkeypatch.setattr(hc, "resolve", lambda p: d if p == wio.OUT_DIR else real(p))
+    assert wio.find(date(2026, 1, 1)).name == "2025-12-02_2026-01-15.npz"
+    assert wio.find(date(2026, 2, 3)).name == "2026-02-01_2026-02-03.npz"
+    assert wio.find(date(2026, 3, 1)) is None

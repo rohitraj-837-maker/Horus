@@ -7,7 +7,7 @@ Endpoints
     GET  /api/grid?fl=350&floor=     cells [h3, p] for one FL bin with p above floor
     GET  /api/aircraft               latest per-aircraft position and B3 index
     GET  /api/pireps?since=          turbulence PIREPs near the data time
-    GET  /api/replays                curated replays (data/replays/*.json)
+    GET  /api/replays                curated replays (config watch.cases_dir)
     GET  /api/replay/{id}            frames: aircraft + grid cells per minute
     GET  /api/metrics                end-to-end latency p50/p95 (snapshot -> WS send)
     WS   /ws/live                    one message per snapshot: aircraft + changed cells
@@ -197,15 +197,14 @@ def build_hub(cfg: Config, day: str | None = None, hour: int = 15, hours: float 
     ids = grid.region_cells(r.lat_min, r.lat_max, r.lon_min, r.lon_max, cfg.grid.h3_res)
     from horus.ingest import winds as wio
 
-    wf = wio.load(
-        wio.path(
-            cfg, date.fromisoformat(cfg.splits.train_start), date.fromisoformat(cfg.splits.test_end)
-        )
-    )
+    day = day or cfg.splits.test[0]
+    wpath = wio.find(date.fromisoformat(day))
+    if wpath is None:
+        raise FileNotFoundError(f"no wind file in data/winds covers {day}: run `make up`")
+    wf = wio.load(wpath)
     g = cfg.grid
     lat = grid.Lattice.build(ids)
     cw = nb.CellWinds(lat, wf, (np.arange(g.fl_min, g.fl_max, g.fl_bin) + g.fl_bin / 2) * 100.0)
-    day = day or cfg.splits.test[0]
     t0 = int(pd.Timestamp(date.fromisoformat(day), tz="UTC").timestamp()) + hour * 3600
     tab = scores.load_tracks(date.fromisoformat(day), cfg).to_pandas()
     rows = tab[(tab["time"] >= t0) & (tab["time"] < t0 + hours * 3600)].sort_values("time")
@@ -306,7 +305,7 @@ def create_app(hub: Hub | None = None, start_feed: bool = True) -> FastAPI:
 
     @app.get("/api/replays")
     def replays() -> list[dict[str, Any]]:
-        d = config.resolve("data/replays")
+        d = config.resolve(H().cfg.watch.cases_dir)
         return (
             [json.loads(p.read_text())["meta"] for p in sorted(d.glob("*.json"))]
             if d.exists()
@@ -315,7 +314,7 @@ def create_app(hub: Hub | None = None, start_feed: bool = True) -> FastAPI:
 
     @app.get("/api/replay/{rid}")
     def replay(rid: str) -> dict[str, Any]:
-        p = config.resolve("data/replays") / f"{rid}.json"
+        p = config.resolve(H().cfg.watch.cases_dir) / f"{rid}.json"
         if not rid.replace("-", "").isalnum() or not p.exists():
             raise HTTPException(404, "no such replay")
         return json.loads(p.read_text())

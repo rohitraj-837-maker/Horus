@@ -104,11 +104,11 @@ def attach_types(
     return out
 
 
-def download(force: bool = False) -> None:
+def download(force: bool = False, urls: tuple[str, ...] = (AIRCRAFT_DB_URL, DOC8643_URL)) -> None:
     raw = config.resolve(RAW_DIR)
     raw.mkdir(parents=True, exist_ok=True)
     with httpx.Client(timeout=600, headers={"User-Agent": USER_AGENT}) as client:
-        for url in (AIRCRAFT_DB_URL, DOC8643_URL):
+        for url in urls:
             path = raw / url.rsplit("/", 1)[1]
             if path.exists() and not force:
                 continue
@@ -133,6 +133,18 @@ def build() -> tuple[pd.DataFrame, pd.DataFrame]:
         p.parent.mkdir(parents=True, exist_ok=True)
         df.to_parquet(p, index=False)
     return aircraft, types
+
+
+def build_types() -> pd.DataFrame:
+    """Only the typecode -> size-class table (all the live stream needs: adsb.lol traces
+    carry the typecode). Downloads the small Doc 8643 file, not the aircraft database."""
+    download(urls=(DOC8643_URL,))
+    raw = config.resolve(RAW_DIR)
+    types = build_type_table(pd.read_csv(raw / "doc8643AircraftTypes.csv", dtype=str))
+    p = config.resolve(TYPES_PARQUET)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    types.to_parquet(p, index=False)
+    return types
 
 
 def coverage(source: str = "opensky") -> pd.Series:
