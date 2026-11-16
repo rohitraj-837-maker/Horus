@@ -1,0 +1,634 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Horus — turbulence from the aircraft already flying</title>
+<meta name="description" content="Horus detects turbulence in the vertical rate airliners broadcast over ADS-B, forecasts the next 15 minutes on a 3D grid, and checks itself against pilot reports. Research prototype.">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#000000">
+<!-- Set this once: every GitHub link on the page is built from it (see the script at the end). -->
+<meta name="horus-repo" content="https://github.com/YOUR-USERNAME/horus">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 3l11.3 6.5v13L16 29 4.7 22.5v-13z' fill='none' stroke='%232997ff' stroke-width='2.5'/%3E%3C/svg%3E">
+<style>
+:root {
+  --bg: #000;
+  --surface: #0c0c0e;
+  --surface-2: #161618;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-2: rgba(255, 255, 255, 0.14);
+  --ink: #f5f5f7;
+  --ink-2: #a1a1a6;
+  --ink-3: #6e6e73;
+  --accent: #2997ff;
+  --accent-ink: #000;
+  --accent-soft: rgba(41, 151, 255, 0.12);
+  --term: #0a0c0f;
+  --radius: 28px;
+  --radius-sm: 16px;
+  --wrap: 1120px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", Inter, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 17px/1.55 var(--sans);
+  letter-spacing: -0.011em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+img { max-width: 100%; display: block; }
+a { color: inherit; text-decoration: none; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+::selection { background: var(--accent); color: var(--accent-ink); }
+code, .mono { font-family: var(--mono); font-size: 0.9em; letter-spacing: 0; }
+[data-metric] { white-space: nowrap; }
+
+.wrap { width: min(var(--wrap), 100% - 32px); margin-inline: auto; }
+section, #limits { scroll-margin-top: 80px; }
+
+/* ---------- nav (glass) ---------- */
+.nav {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(0, 0, 0, 0.62);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.3s var(--ease);
+}
+.nav.scrolled { border-bottom-color: var(--line); }
+.nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 56px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 19px; letter-spacing: -0.02em; }
+.brand svg { width: 20px; height: 20px; }
+.nav-links { display: flex; gap: 28px; font-size: 13px; color: var(--ink-2); }
+.nav-links a { transition: color 0.2s; }
+.nav-links a:hover { color: var(--ink); }
+.pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 34px; padding: 0 16px; border-radius: 980px;
+  background: var(--accent); color: var(--accent-ink);
+  font-size: 14px; font-weight: 600; letter-spacing: -0.01em;
+  transition: transform 0.2s var(--ease), background 0.2s;
+}
+.pill:hover { background: #4aa8ff; }
+.pill:active { transform: scale(0.97); }
+.pill.big { height: 46px; padding: 0 24px; font-size: 16px; }
+.link-arrow { color: var(--accent); font-size: 17px; display: inline-flex; align-items: center; gap: 4px; }
+.link-arrow:hover { text-decoration: underline; text-underline-offset: 4px; }
+
+/* ---------- hero ---------- */
+.hero { padding: clamp(72px, 12vw, 140px) 0 40px; text-align: center; }
+.eyebrow { color: var(--ink-2); font-size: 15px; font-weight: 600; letter-spacing: 0; margin: 0 0 18px; }
+.eyebrow b { color: var(--accent); font-weight: 600; }
+h1 {
+  margin: 0;
+  font-size: clamp(64px, 13vw, 168px);
+  line-height: 0.95;
+  font-weight: 700;
+  letter-spacing: -0.055em;
+}
+.hero h2 {
+  margin: 18px auto 0;
+  max-width: 900px;
+  font-size: clamp(30px, 4.6vw, 56px);
+  line-height: 1.06;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  color: var(--ink-2);
+}
+.lede {
+  margin: 28px auto 0;
+  max-width: 720px;
+  font-size: clamp(17px, 1.6vw, 21px);
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.lede strong { color: var(--ink); font-weight: 500; }
+.cta { margin-top: 36px; display: flex; justify-content: center; align-items: center; gap: 28px; flex-wrap: wrap; }
+
+/* ---------- terminal window ---------- */
+.stage { margin: clamp(56px, 8vw, 96px) auto 0; width: min(1180px, 100% - 32px); }
+.term {
+  margin: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--term);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 30px 60px -12px rgba(0, 0, 0, 0.9),
+    0 60px 140px -40px rgba(41, 151, 255, 0.18);
+}
+.term-bar {
+  position: relative;
+  display: flex; align-items: center; gap: 8px;
+  height: 38px; padding: 0 14px;
+  background: linear-gradient(#1f2024, #18191c);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.6);
+}
+.term-dot { width: 12px; height: 12px; border-radius: 50%; }
+.term-dot:nth-child(1) { background: #ff5f57; }
+.term-dot:nth-child(2) { background: #febc2e; }
+.term-dot:nth-child(3) { background: #28c840; }
+.term-title {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  font-size: 13px; color: var(--ink-3); white-space: nowrap; font-weight: 500;
+}
+.term img { width: 100%; height: auto; aspect-ratio: 1180 / 582; background: var(--term); }
+.stage-caption { margin: 18px auto 0; max-width: 760px; text-align: center; font-size: 14px; color: var(--ink-3); }
+.stage-caption a { color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line-2); }
+.disclaimer {
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-top: 28px; padding: 8px 16px; border-radius: 18px; text-align: left;
+  border: 1px solid var(--line-2); color: var(--ink-2); font-size: 13px;
+}
+.disclaimer::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.term a { display: block; cursor: zoom-in; }
+
+/* ---------- section heads ---------- */
+.section { padding: clamp(96px, 12vw, 160px) 0 0; }
+.kicker { color: var(--accent); font-size: 17px; font-weight: 600; margin: 0 0 10px; letter-spacing: -0.01em; }
+.section h3 {
+  margin: 0; max-width: 820px;
+  font-size: clamp(40px, 6vw, 72px);
+  line-height: 1.02; font-weight: 700; letter-spacing: -0.045em;
+}
+.section .sub { margin: 20px 0 0; max-width: 680px; font-size: clamp(17px, 1.5vw, 21px); color: var(--ink-2); }
+
+/* ---------- bento ---------- */
+.bento {
+  margin-top: 56px;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
+}
+.card {
+  position: relative;
+  grid-column: span 2;
+  padding: 32px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  overflow: hidden;
+  isolation: isolate;
+  transition: border-color 0.3s var(--ease), transform 0.4s var(--ease);
+}
+.card:hover { border-color: var(--line-2); }
+.card.w3 { grid-column: span 3; }
+.card.w4 { grid-column: span 4; }
+.card .label { font-size: 14px; font-weight: 600; color: var(--ink-2); margin: 0 0 18px; letter-spacing: -0.005em; }
+.card .figure {
+  margin: 0;
+  font-size: clamp(44px, 5.2vw, 68px);
+  line-height: 1; font-weight: 700; letter-spacing: -0.05em;
+}
+.card .figure small { font-size: 0.42em; letter-spacing: -0.02em; font-weight: 600; color: var(--ink-2); margin-left: 4px; }
+.card p.body { margin: 16px 0 0; color: var(--ink-2); font-size: 16px; line-height: 1.5; max-width: 46ch; }
+.card p.body strong { color: var(--ink); font-weight: 500; }
+.chip {
+  display: inline-flex; align-items: center; gap: 10px;
+  margin-top: 22px; padding: 10px 14px; border-radius: 12px;
+  background: var(--surface-2); border: 1px solid var(--line);
+  font-family: var(--mono); font-size: 14px; color: var(--ink);
+}
+.chip .prompt { color: var(--accent); }
+.card.feature { background: radial-gradient(120% 140% at 100% 0%, rgba(41, 151, 255, 0.10), transparent 55%), var(--surface); }
+.hexes { position: absolute; right: -18px; bottom: -22px; width: 190px; opacity: 0.9; z-index: -1; }
+.hexes path { fill: none; stroke: rgba(255, 255, 255, 0.09); stroke-width: 1.2; }
+.hexes path.on { stroke: var(--accent); fill: var(--accent-soft); }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.tag { font-size: 13px; color: var(--ink-2); padding: 6px 12px; border-radius: 980px; border: 1px solid var(--line-2); }
+
+/* ---------- metrics ---------- */
+.stats { margin-top: 56px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.stat {
+  padding: 28px; border-radius: var(--radius-sm);
+  background: var(--surface); border: 1px solid var(--line);
+}
+.stat .num { font-size: clamp(40px, 4.4vw, 56px); font-weight: 700; letter-spacing: -0.05em; line-height: 1; }
+.stat .num small { font-size: 0.42em; color: var(--ink-2); font-weight: 600; letter-spacing: -0.02em; margin-left: 3px; }
+.stat .what { margin: 12px 0 0; font-size: 15px; font-weight: 600; color: var(--ink); }
+.stat .ctx { margin: 6px 0 0; font-size: 14px; color: var(--ink-2); line-height: 1.45; }
+
+/* high-contrast, inverted: the one box meant to be impossible to skim past */
+.warn {
+  margin-top: 16px;
+  display: grid; grid-template-columns: auto 1fr; gap: 20px 24px;
+  padding: clamp(28px, 4vw, 44px);
+  border-radius: var(--radius);
+  background: #f5f5f7; color: #1d1d1f;
+}
+.warn svg { width: 36px; height: 36px; margin-top: 4px; }
+.warn h4 { margin: 0 0 10px; font-size: 14px; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; color: #1d1d1f; }
+.warn .say { margin: 0; font-size: clamp(21px, 2.4vw, 30px); line-height: 1.25; font-weight: 600; letter-spacing: -0.025em; }
+.warn .nums { grid-column: 2; display: flex; flex-wrap: wrap; gap: 12px 40px; padding-top: 18px; border-top: 1px solid rgba(0, 0, 0, 0.12); }
+.warn .nums div { font-size: 15px; color: #424245; max-width: 32ch; }
+.warn .nums b { display: block; font-size: 34px; letter-spacing: -0.04em; color: #1d1d1f; line-height: 1.1; }
+
+.limits { margin-top: 16px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.limit { padding: 24px 26px; border-radius: var(--radius-sm); border: 1px solid var(--line); }
+.limit h5 { margin: 0 0 6px; font-size: 16px; font-weight: 600; }
+.limit p { margin: 0; font-size: 14px; color: var(--ink-2); line-height: 1.5; }
+
+/* ---------- run it ---------- */
+.run { margin-top: 48px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); overflow: hidden; }
+.run-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px 14px 24px; border-bottom: 1px solid var(--line); font-size: 13px; color: var(--ink-3); }
+.copy {
+  font: 600 13px var(--sans); color: var(--accent); background: var(--accent-soft);
+  border: 0; border-radius: 980px; padding: 6px 14px; cursor: pointer; transition: background 0.2s;
+}
+.copy:hover { background: rgba(41, 151, 255, 0.2); }
+.run pre { margin: 0; padding: 22px 24px 26px; overflow-x: auto; font: 15px/1.9 var(--mono); color: var(--ink); }
+.run pre .c { color: var(--ink-3); }
+.run pre .p { color: var(--accent); user-select: none; }
+
+/* ---------- footer ---------- */
+footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line); padding: 40px 0 56px; font-size: 13px; color: var(--ink-3); }
+.foot-top { display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; }
+.foot-links { display: flex; gap: 24px; flex-wrap: wrap; }
+.foot-links a { color: var(--ink-2); transition: color 0.2s; }
+.foot-links a:hover { color: var(--ink); }
+.credits { margin: 28px 0 0; max-width: 900px; line-height: 1.6; }
+.credits a { text-decoration: underline; text-underline-offset: 2px; text-decoration-color: var(--line-2); }
+
+/* ---------- motion (light: opacity + transform only) ---------- */
+.js .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.9s var(--ease), transform 0.9s var(--ease); transition-delay: var(--d, 0ms); }
+.js .reveal.in { opacity: 1; transform: none; }
+.js .stage.reveal { transform: translateY(40px) scale(0.965); }
+.js .stage.reveal.in { transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .js .reveal, .js .stage.reveal { opacity: 1; transform: none; transition: none; }
+}
+
+/* ---------- responsive ---------- */
+@media (max-width: 1000px) {
+  .card.hex-card { padding-bottom: 150px; }
+  .bento { grid-template-columns: repeat(2, 1fr); }
+  .card, .card.w3 { grid-column: span 1; }
+  .card.w4 { grid-column: span 2; }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .limits { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 720px) {
+  .nav-links { display: none; }
+  .bento, .stats, .limits { grid-template-columns: 1fr; }
+  .card, .card.w3, .card.w4 { grid-column: auto; }
+  .card { padding: 26px; }
+  .warn { grid-template-columns: 1fr; }
+  .warn .nums { grid-column: auto; }
+  .term-title { display: none; }
+  .cta { gap: 20px; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav" id="nav">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Horus, back to top">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3l11.3 6.5v13L16 29 4.7 22.5v-13z" fill="none" stroke="#2997ff" stroke-width="2.5"/><circle cx="16" cy="16" r="3.2" fill="#2997ff"/></svg>
+      Horus
+    </a>
+    <div class="nav-links">
+      <a href="#architecture">Architecture</a>
+      <a href="#results">Results</a>
+      <a href="#limits">Limits</a>
+      <a href="#run">Run it</a>
+    </div>
+    <a class="pill" data-repo-path="" href="#">GitHub</a>
+  </div>
+</nav>
+
+<main id="top">
+
+  <!-- ===================== HERO ===================== -->
+  <section class="hero">
+    <div class="wrap">
+      <p class="eyebrow reveal">Turbulence detection <b>·</b> 15-minute nowcasting</p>
+      <h1 class="reveal" style="--d:60ms">Horus.</h1>
+      <h2 class="reveal" style="--d:120ms">Turbulence, sensed by the aircraft already flying.</h2>
+      <p class="lede reveal" style="--d:180ms">
+        Every airliner broadcasts its vertical rate about once a second. Horus reads it from
+        <strong>public ADS-B data</strong> (the adsb.lol archive and OpenSky), scales it by what
+        <strong>each aircraft type</strong> normally shows in smooth air, forecasts the next
+        15 minutes on a 3D grid, and checks itself against <strong>pilot reports</strong> it never sees.
+      </p>
+      <div class="cta reveal" style="--d:240ms">
+        <a class="pill big" data-repo-path="" href="#">View on GitHub</a>
+        <a class="link-arrow" href="#results">See the results <span aria-hidden="true">›</span></a>
+      </div>
+    </div>
+
+    <div class="stage reveal" style="--d:300ms">
+      <figure class="term">
+        <div class="term-bar" aria-hidden="true">
+          <span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span>
+          <span class="term-title">horus — make watch</span>
+        </div>
+        <a href="img/horus-watch.gif" aria-label="Open the recording full size">
+          <img src="img/horus-watch.gif" width="1180" height="582" fetchpriority="high" decoding="async"
+               alt="Terminal recording of make watch: lines appear as an archived afternoon replays. Amber TURBULENCE lines name an aircraft, its flight level and strength; FORECAST lines follow for the same area; PILOT REPORT lines show what Horus saw near each real report.">
+        </a>
+      </figure>
+      <p class="stage-caption">
+        Real output, not a mock-up: 1 January 2026, a test day the models never saw, replayed
+        through the live loop. <a href="watch-sample.txt">Full text</a> ·
+        <a href="cases-sample.txt">three case studies</a>
+      </p>
+    </div>
+    <div class="wrap" style="text-align:center">
+      <span class="disclaimer">Research prototype. Not for flight decisions or any operational use.</span>
+    </div>
+  </section>
+
+  <!-- ===================== ARCHITECTURE ===================== -->
+  <section class="section" id="architecture">
+    <div class="wrap">
+      <p class="kicker reveal">The architecture</p>
+      <h3 class="reveal" style="--d:60ms">A sensor network made of airliners.</h3>
+      <p class="sub reveal" style="--d:120ms">
+        One pure core runs both the offline benchmark and the live loop. Everything else feeds it
+        or measures it.
+      </p>
+
+      <div class="bento">
+        <!-- Data ingestion -->
+        <article class="card w4 feature reveal">
+          <p class="label">Data ingestion</p>
+          <p class="figure">3.5<small>GB</small></p>
+          <p class="body">
+            streamed per archive day and <strong>never written to disk</strong>. Only continental-US
+            traffic at FL180 and above is kept (about 220 MB a day), as typed, unit-checked Parquet.
+          </p>
+          <span class="chip"><span class="prompt">$</span> make up</span>
+          <p class="body" style="margin-top:12px">
+            One command installs the locked environment and fetches only what is missing: the archive
+            day, pilot reports, aircraft types and GFS winds.
+          </p>
+        </article>
+
+        <!-- Spatial mapping -->
+        <article class="card hex-card reveal" style="--d:80ms">
+          <p class="label">Spatial mapping</p>
+          <p class="figure">~45<small>km</small></p>
+          <p class="body">
+            hexagonal forecast cells, 2,000 ft deep:
+            <span data-metric="grid_cells">8,388</span> cells × <span data-metric="fl_bins">13</span>
+            flight levels over the continental US.
+          </p>
+          <svg class="hexes" viewBox="0 0 190 170" aria-hidden="true">
+            <path d="M47 10l26 15v30l-26 15-26-15V25z"/>
+            <path d="M99 10l26 15v30l-26 15-26-15V25z"/>
+            <path d="M151 10l26 15v30l-26 15-26-15V25z"/>
+            <path class="on" d="M73 55l26 15v30l-26 15-26-15V70z"/>
+            <path class="on" d="M125 55l26 15v30l-26 15-26-15V70z"/>
+            <path d="M177 55l26 15v30l-26 15-26-15V70z"/>
+            <path d="M47 100l26 15v30l-26 15-26-15v-30z"/>
+            <path class="on" d="M99 100l26 15v30l-26 15-26-15v-30z"/>
+            <path d="M151 100l26 15v30l-26 15-26-15v-30z"/>
+          </svg>
+        </article>
+
+        <!-- Detection -->
+        <article class="card reveal">
+          <p class="label">Detection</p>
+          <p class="figure">σ<small>/ type</small></p>
+          <p class="body">
+            Level flight only. The climb and descent trend is removed, ADS-B's 64 ft/min rounding is
+            corrected, and what is left is divided by that <strong>aircraft type's</strong> smooth-air scale.
+          </p>
+        </article>
+
+        <!-- Forecast -->
+        <article class="card reveal" style="--d:80ms">
+          <p class="label">Forecast</p>
+          <!-- auto-generated metric (scripts/readme_numbers.py): cruise-band half-life -->
+          <p class="figure"><span data-metric="t_half_mid">50.3</span><small>min</small></p>
+          <p class="body">
+            half-life of a detection at cruise, fitted from data
+            (<span data-metric="t_half_low">11.6</span> min lower down). The odds also drift with
+            GFS upper winds.
+          </p>
+        </article>
+
+        <!-- Efficiency -->
+        <article class="card reveal" style="--d:160ms">
+          <p class="label">Efficiency</p>
+          <!-- auto-generated metric (scripts/readme_numbers.py): grid update p95 -->
+          <p class="figure"><span data-metric="grid_p95_ms">32.3</span><small>ms</small></p>
+          <p class="body">
+            to update the whole grid for <strong>10,000 aircraft</strong> (p95) on an 8 GB M1.
+            Plain Python and NumPy, a <code>uv</code> lockfile for reproducible builds, no Docker.
+          </p>
+        </article>
+
+        <!-- Same code -->
+        <article class="card w3 reveal">
+          <p class="label">Offline equals live</p>
+          <p class="figure" style="font-size:clamp(36px,4vw,52px)">Bit-identical.</p>
+          <p class="body">
+            A test replays a recorded half hour of real traffic through both the live loop and the
+            offline pipeline, and requires the same grid, to the last bit.
+          </p>
+        </article>
+
+        <!-- Rigour -->
+        <article class="card w3 reveal" style="--d:80ms">
+          <p class="label">Engineering rigour</p>
+          <p class="figure" style="font-size:clamp(36px,4vw,52px)">Nothing leaks.</p>
+          <p class="body">
+            Fitted on December, scored on January. A leakage test fails if a test date reaches any
+            fitted artefact, and every modelling choice has a benchmark row.
+          </p>
+          <div class="tags"><span class="tag">time split</span><span class="tag">leakage test</span><span class="tag">recorded real fixtures</span><span class="tag">CI</span></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== RESULTS ===================== -->
+  <section class="section" id="results">
+    <div class="wrap">
+      <p class="kicker reveal">Metrics</p>
+      <h3 class="reveal" style="--d:60ms">Measured, not claimed.</h3>
+      <p class="sub reveal" style="--d:120ms">
+        Trained on <span data-metric="train_range">2025-12-02 → 2025-12-30</span>, tested on
+        <span data-metric="test_range">2026-01-01 → 2026-01-15</span>. Every number on this page is
+        generated from the project's <code>reports/</code>, the same tables the README and CI check.
+      </p>
+
+      <!-- Metric hooks: each <span data-metric="…"> is rewritten from reports/ by
+           scripts/readme_numbers.py (make readme); --check fails CI if they drift. -->
+      <div class="stats">
+        <div class="stat reveal">
+          <!-- auto-generated metric -->
+          <div class="num" data-metric="b3_pr_auc">0.566</div>
+          <p class="what">Detector PR-AUC</p>
+          <p class="ctx">Ranking <span data-metric="n_pos">1,788</span> pilot-reported turbulence windows
+            against <span data-metric="n_neg">4,388</span> quiet ones. Random scores:
+            <span data-metric="pr_baseline">0.290</span>.</p>
+        </div>
+        <div class="stat reveal" style="--d:80ms">
+          <!-- auto-generated metric -->
+          <div class="num" data-metric="n2_roc">0.676</div>
+          <p class="what">Forecast ROC-AUC</p>
+          <p class="ctx">Next 15 minutes, with wind advection. Climatology scores
+            <span data-metric="clim_roc">0.500</span>.</p>
+        </div>
+        <div class="stat reveal" style="--d:160ms">
+          <!-- auto-generated metric -->
+          <div class="num"><span data-metric="t_half_mid">50.3</span><small>min</small></div>
+          <p class="what">Half-life at cruise</p>
+          <p class="ctx">How long one detection keeps predicting the next aircraft's, FL290–370.</p>
+        </div>
+        <div class="stat reveal" style="--d:240ms">
+          <!-- auto-generated metric -->
+          <div class="num"><span data-metric="live_p95_s">2.9</span><small>s</small></div>
+          <p class="what">Live latency, p95</p>
+          <p class="ctx">About <span data-metric="aircraft_live">2,462</span> aircraft per snapshot.
+            Budget: 10&nbsp;s.</p>
+        </div>
+      </div>
+
+      <div class="warn reveal" id="limits" role="note" aria-labelledby="warn-title">
+        <svg viewBox="0 0 36 36" aria-hidden="true"><path d="M18 3L34 31H2z" fill="#1d1d1f"/><rect x="16.4" y="12" width="3.2" height="10" rx="1.6" fill="#f5f5f7"/><circle cx="18" cy="26.2" r="1.9" fill="#f5f5f7"/></svg>
+        <div>
+          <h4 id="warn-title">Limitation</h4>
+          <p class="say">At a strict false-alarm setting, the engine isolates high-confidence turbulence but currently captures a low overall percentage of reported events.</p>
+        </div>
+        <div class="nums">
+          <!-- auto-generated metrics: recall of B3 at two alarm rates -->
+          <div><b data-metric="recall_1fa">0.2%</b>of reported turbulence caught at 1 false alarm per 1,000 flight-hours</div>
+          <div><b data-metric="recall_10fa">5.7%</b>at 10 false alarms per 1,000 flight-hours</div>
+        </div>
+      </div>
+
+      <div class="limits">
+        <div class="limit reveal">
+          <h5>Weak labels</h5>
+          <p>Pilot reports are sparse, late and roughly placed, and most turbulence is never reported, so false-alarm rates are upper bounds.</p>
+        </div>
+        <div class="limit reveal" style="--d:80ms">
+          <h5>Coarse public data</h5>
+          <p>The archive stores a new vertical rate only when it moves 200 ft/min or more (plus a ~20 s heartbeat). Smaller jitter is lost.</p>
+        </div>
+        <div class="limit reveal" style="--d:160ms">
+          <h5>Replay, not live</h5>
+          <p>Free live feeds give about one point per aircraft every 90 s, too sparse to detect, so the live loop runs on an archived day.</p>
+        </div>
+        <div class="limit reveal">
+          <h5>One winter, one region</h5>
+          <p>44 days of data, continental US, FL200 to FL460.</p>
+        </div>
+        <div class="limit reveal" style="--d:80ms">
+          <h5>Roughness, not EDR</h5>
+          <p>Measured in ft/min per aircraft type; not calibrated to eddy dissipation rate, the aviation standard.</p>
+        </div>
+        <div class="limit reveal" style="--d:160ms">
+          <h5>Negative evidence hurt</h5>
+          <p>Lowering the odds after smooth passes made the forecast worse (ROC-AUC <span data-metric="n3_roc">0.471</span>), so it stays off.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== RUN IT ===================== -->
+  <section class="section" id="run">
+    <div class="wrap">
+      <p class="kicker reveal">Run it</p>
+      <h3 class="reveal" style="--d:60ms">Three commands.</h3>
+      <p class="sub reveal" style="--d:120ms">
+        macOS or Linux with <a class="link-arrow" style="font-size:inherit" href="https://docs.astral.sh/uv/">uv</a>.
+        Public data only, no account or API key. The first <code>make up</code> streams about 3.5 GB.
+      </p>
+      <div class="run reveal" style="--d:180ms">
+        <div class="run-head"><span>Terminal</span><button class="copy" type="button" data-copy="make up&#10;make watch&#10;make cases">Copy</button></div>
+<pre><span class="p">$ </span>make up      <span class="c"># environment + the demo day's data</span>
+<span class="p">$ </span>make watch   <span class="c"># live text stream: an archived afternoon at 30x</span>
+<span class="p">$ </span>make cases   <span class="c"># three case studies, minute by minute</span></pre>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ===================== FOOTER ===================== -->
+<footer>
+  <div class="wrap">
+    <div class="foot-top">
+      <a class="brand" href="#top" style="font-size:16px">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 3l11.3 6.5v13L16 29 4.7 22.5v-13z" fill="none" stroke="#2997ff" stroke-width="2.5"/><circle cx="16" cy="16" r="3.2" fill="#2997ff"/></svg>
+        Horus
+      </a>
+      <nav class="foot-links" aria-label="Project links">
+        <a data-repo-path="" href="#">GitHub repository</a>
+        <a data-repo-path="blob/main/README.md" href="#">Documentation</a>
+        <a data-repo-path="tree/main/reports" href="#">Reports</a>
+        <a data-repo-path="blob/main/PROGRESS.md" href="#">Build log</a>
+        <a href="watch-sample.txt">Sample output</a>
+      </nav>
+    </div>
+    <p class="credits">
+      Data: adsb.lol historical traces © adsb.lol contributors,
+      <a href="https://opendatacommons.org/licenses/odbl/1-0/">ODbL 1.0</a> ·
+      OpenSky Network (Schäfer et al., “Bringing Up OpenSky”, IPSN 2014) ·
+      PIREPs from the Iowa Environmental Mesonet and NOAA Aviation Weather Center ·
+      NOAA GFS winds via <a href="https://open-meteo.com/">Open-Meteo</a> (CC BY 4.0) ·
+      Natural Earth outlines (public domain).<br>
+      © 2026 Rohit Raj · MIT License · Research prototype, not for operational use.
+    </p>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const root = document.documentElement;
+  root.classList.add("js");
+
+  // GitHub links from the one <meta name="horus-repo"> value
+  const repo = (document.querySelector('meta[name="horus-repo"]')?.content || "").replace(/\/$/, "");
+  document.querySelectorAll("[data-repo-path]").forEach((a) => {
+    const p = a.getAttribute("data-repo-path");
+    a.href = p ? `${repo}/${p}` : repo;
+  });
+
+  // reveal on scroll: opacity + transform only, each element once
+  const items = document.querySelectorAll(".reveal");
+  if ("IntersectionObserver" in window) {
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+      }
+    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
+    items.forEach((el) => io.observe(el));
+  } else {
+    items.forEach((el) => el.classList.add("in"));
+  }
+
+  // hairline under the glass nav once the page scrolls
+  const nav = document.getElementById("nav");
+  const onScroll = () => nav.classList.toggle("scrolled", window.scrollY > 8);
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+
+  // copy button
+  document.querySelectorAll("[data-copy]").forEach((b) => {
+    b.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(b.getAttribute("data-copy"));
+        b.textContent = "Copied";
+      } catch { b.textContent = "Select and copy"; }
+      setTimeout(() => (b.textContent = "Copy"), 1600);
+    });
+  });
+})();
+</script>
+</body>
+</html>

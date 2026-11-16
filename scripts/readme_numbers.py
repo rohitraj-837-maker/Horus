@@ -1,11 +1,13 @@
-"""README numbers come from reports/, never typed by hand (CLAUDE.md rule 5).
+"""README and site numbers come from reports/, never typed by hand (CLAUDE.md rule 5).
 
-    uv run python scripts/readme_numbers.py --write   # regenerate the README blocks
-    uv run python scripts/readme_numbers.py --check   # exit 1 if README differs
+    uv run python scripts/readme_numbers.py --write   # regenerate README blocks + site hooks
+    uv run python scripts/readme_numbers.py --check   # exit 1 if either differs
 
 Blocks in README.md:
     <!-- BEGIN:results --> ... <!-- END:results -->   headline + tables from reports/*.md
     <!-- BEGIN:sample -->  ... <!-- END:sample -->    excerpt of docs/watch-sample.txt
+Hooks in docs/index.html (the GitHub Pages site):
+    <span data-metric="KEY">value</span>   (also div / b); KEY must be in metrics()
 """
 
 from __future__ import annotations
@@ -159,6 +161,50 @@ def results() -> str:
     return "\n".join(out)
 
 
+def metrics() -> dict[str, str]:
+    """Single values for the site's data-metric hooks, from the same report tables."""
+    det1 = section("detector_ablation.md", "detector-ablation")
+    rec = table(section("detector_ablation.md", "recall-vs-fa"), "Rate")
+    now = table(section("nowcast_ablation.md", "nowcast-ablation"), "Row")
+    hl = {
+        r["FL band"]: r["t½ (min)"] for r in table(section("half_life.md", "half-life"), "FL band")
+    }
+    grid_body = section("perf.md", "grid-update")
+    live_body = section("perf.md", "live-latency")
+    b3r = pick(rec, Rate="1 s", Row="B3")
+    return {
+        "b3_pr_auc": pick(table(det1, "Row"), Row="B3")["PR-AUC"],
+        "pr_baseline": grab(r"prevalence (\d\.\d+)", det1),
+        "n_pos": f"{int(grab(r'Test windows: (\d+) positive', det1)):,}",
+        "n_neg": f"{int(grab(r'(\d+) negative', det1)):,}",
+        "recall_1fa": f"{float(b3r['Recall @ 1 FA/1000 h']):.1%}",
+        "recall_10fa": f"{float(b3r['Recall @ 10 FA/1000 h']):.1%}",
+        "n2_roc": pick(now, Row="N2", Target="aircraft")["ROC-AUC"],
+        "clim_roc": pick(now, Row="CLIM", Target="aircraft")["ROC-AUC"],
+        "n3_roc": pick(now, Row="N3", Target="aircraft")["ROC-AUC"],
+        "t_half_low": hl["FL200–290"],
+        "t_half_mid": hl["FL290–370"],
+        "grid_p95_ms": pick(table(grid_body, "Step"), Step="total")["p95 (ms)"],
+        "grid_cells": grab(r"Grid: ([\d,]+) H3 res-4 cells", grid_body),
+        "fl_bins": grab(r"cells × (\d+) FL bins", grid_body),
+        "live_p95_s": f"{float(table(live_body, 'p50 (ms)')[0]['p95 (ms)']) / 1000:.1f}",
+        "aircraft_live": grab(r"~([\d,]+) aircraft per snapshot", live_body),
+        "train_range": grab(r"Train \(normalisation \+ tau only\): (\S+ → \S+)", det1),
+        "test_range": grab(r"Test: (\S+ → \S+)", det1),
+    }
+
+
+METRIC_TAG = re.compile(r'(<(span|div|b)\b[^>]*\bdata-metric="(\w+)"[^>]*>)([^<]*)(</\2>)')
+
+
+def render_site(html: str) -> str:
+    m = metrics()
+    unknown = sorted({k for _, _, k, _, _ in METRIC_TAG.findall(html)} - m.keys())
+    if unknown:
+        raise SystemExit(f"docs/index.html: unknown data-metric keys {unknown}")
+    return METRIC_TAG.sub(lambda g: g.group(1) + m[g.group(3)] + g.group(5), html)
+
+
 def sample(n: int = 18) -> str:
     text = config.resolve("docs/watch-sample.txt").read_text().splitlines()
     events = [ln for ln in text if re.match(r"^\s*\d\d:\d\dZ  ", ln)]
@@ -182,21 +228,24 @@ def main(argv: list[str] | None = None) -> int:
     g.add_argument("--write", action="store_true")
     g.add_argument("--check", action="store_true")
     a = ap.parse_args(argv)
-    path = config.resolve("README.md")
-    cur = path.read_text()
-    new = render(cur)
-    if a.write:
-        path.write_text(new)
-        print(
-            "README.md: numbers regenerated from reports/"
-            if new != cur
-            else "README.md: up to date"
-        )
-        return 0
-    if new != cur:
-        print("README.md numbers differ from reports/: run `make readme`")
+    targets = [("README.md", render), ("docs/index.html", render_site)]
+    stale = []
+    for rel, fn in targets:
+        path = config.resolve(rel)
+        if not path.exists():
+            continue
+        cur = path.read_text()
+        new = fn(cur)
+        if a.write:
+            path.write_text(new)
+            print(f"{rel}: {'numbers regenerated from reports/' if new != cur else 'up to date'}")
+        elif new != cur:
+            stale.append(rel)
+    if a.check and stale:
+        print(f"{', '.join(stale)}: numbers differ from reports/: run `make readme`")
         return 1
-    print("README.md numbers match reports/")
+    if a.check:
+        print("README.md and docs/index.html numbers match reports/")
     return 0
 
 
