@@ -1,4 +1,4 @@
-.PHONY: setup test lint types check gate-m0 gate-m1 gate-m2 gate-m3 gate-m4 gate-m5 gate-m6 serve replays latency scores bench-detector bench-rates winds bench-nowcast bench record recorder-status trino-smoke demo demo-data bundle gate-demo
+.PHONY: setup test lint types check gate-m0 gate-m1 gate-m2 gate-m3 gate-m4 gate-m5 gate-m6 serve replays latency glass scores bench-detector bench-rates winds bench-nowcast bench record recorder-status trino-smoke demo demo-data bundle gate-demo
 
 setup:
 	uv sync
@@ -70,6 +70,10 @@ replays:
 
 latency:
 	uv run python scripts/measure_latency.py
+
+# Liquid-glass / bento front end -> web-glass/dist, served at /glass by `make serve`
+glass:
+	cd web-glass && npm install --no-audit --no-fund && npx vite build
 
 gate-m6: check
 	uv run python scripts/gate_m6.py

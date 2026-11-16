@@ -327,6 +327,10 @@ def create_app(hub: Hub | None = None, start_feed: bool = True) -> FastAPI:
         except WebSocketDisconnect:
             H().clients.discard(ws)
 
+    glass = config.resolve("web-glass/dist")
+    if glass.exists():  # liquid-glass / bento front end (built with `make glass`)
+        app.mount("/glass", StaticFiles(directory=glass, html=True), name="glass")
+
     web = config.resolve("web")
     if web.exists():
         app.mount("/static", StaticFiles(directory=web), name="static")
