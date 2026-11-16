@@ -27,7 +27,7 @@ import pandas as pd
 
 from horus import config
 from horus.api.main import build_hub
-from horus.core import geo
+from horus.core import geo, grid
 from horus.places import Places
 from horus.watch import Watcher
 
@@ -139,9 +139,7 @@ def run(cfg: config.Config) -> dict[str, Any]:
     lattice = hub.loop.lattice_ids
     used = sorted({c for v in cells.values() for c, _ in v})
     hexes = {
-        str(c): np.round(
-            np.array(h3.cell_to_boundary(h3.int_to_str(int(lattice[c]))))[:, ::-1], 3
-        )
+        str(c): np.round(np.array(h3.cell_to_boundary(h3.int_to_str(int(lattice[c]))))[:, ::-1], 3)
         .ravel()
         .tolist()
         for c in used
@@ -161,7 +159,93 @@ def run(cfg: config.Config) -> dict[str, Any]:
         "normal": normal,
         "forecastX": cfg.watch.forecast_x,
     }
-    return {"traffic": traffic, "fresh": allf, "rows": feed.rows, "tau": tau, "types": types}
+    return {
+        "traffic": traffic,
+        "fresh": allf,
+        "rows": feed.rows,
+        "tau": tau,
+        "types": types,
+        "hub": hub,
+        "cfg": cfg,
+    }
+
+
+def context(d: dict[str, Any], hit: pd.Series) -> dict[str, Any]:
+    """Real surroundings of the detection: its H3 cell, the GFS wind there, the lines
+    `make watch` printed for it, and the next aircraft that flew through that cell."""
+    from horus.core.winds import wind_at
+    from horus.eval import passes
+
+    cfg, hub, rows, allf, tau, types = (
+        d[k] for k in ("cfg", "hub", "rows", "fresh", "tau", "types")
+    )
+    g = cfg.grid
+    tc, lat, lon, alt = (
+        int(hit["minute"]),
+        float(hit["lat"]),
+        float(hit["lon"]),
+        float(hit["alt_ft"]),
+    )
+    cell = h3.latlng_to_cell(lat, lon, g.h3_res)
+    u, v = wind_at(
+        hub.winds, np.array([tc + 30.0]), np.array([lat]), np.array([lon]), np.array([alt])
+    )
+    spd_kt = float(np.hypot(u[0], v[0])) * 1.943844
+    dir_from = (math.degrees(math.atan2(-float(u[0]), -float(v[0]))) + 360) % 360
+    fbin = int(geo.fl_bin(np.array([alt]), g.fl_min, g.fl_max, g.fl_bin)[0])
+    # the next other aircraft inside a cell the real forecast had lit (>= forecast_x, the
+    # 2-min frames written above, so drift with the wind counts) within 2,000 ft of the
+    # detection's band, in the 15 min after the detection
+    t0, step = d["traffic"]["t0"], d["traffic"]["step"]
+    lit = {
+        int(k) + t0: {c for c, x in v if x >= cfg.watch.forecast_x}
+        for k, v in d["traffic"]["cells"].items()
+    }
+    w = rows[
+        (rows["time"] > tc + 60)
+        & (rows["time"] <= tc + 60 + 900)
+        & (rows["icao24"] != hit["icao24"])
+    ]
+    fb = geo.fl_bin(w["baro_alt_ft"].to_numpy(), g.fl_min, g.fl_max, g.fl_bin)
+    w = w[(fb >= 0) & (np.abs(fb - fbin) <= 1)]
+    idx = grid.cell_index(
+        passes.cell_ids(w["lat"].to_numpy(), w["lon"].to_numpy(), g.h3_res),
+        hub.loop.lattice_ids,
+    )
+    frame = (np.floor((w["time"].to_numpy() - t0) / step) * step + t0).astype(int)
+    inside = [int(j) in lit.get(int(f), set()) for j, f in zip(idx, frame, strict=True)]
+    w = w[np.array(inside, dtype=bool)].sort_values("time")
+    nxt = None
+    if len(w):
+        r = w.iloc[0]
+        a = str(r["icao24"])
+        m = allf[
+            (allf["icao24"] == a)
+            & (allf["minute"] >= int(r["time"]) - 60)
+            & (allf["minute"] <= int(r["time"]) + 900)
+        ]
+        xs = (m["T"].to_numpy(float) / tau) if len(m) else np.array([])
+        xs = xs[np.isfinite(xs)]
+        nxt = {
+            "id": a,
+            "type": types.get(a) or "",
+            "fl": int(round(float(r["baro_alt_ft"]) / 100)),
+            "after_min": round((int(r["time"]) - (tc + 60)) / 60),
+            "peak": round(float(xs.max()), 2) if len(xs) else None,
+        }
+    lines = config.resolve("docs/watch-sample.txt").read_text().splitlines()
+    turb = next((ln.strip() for ln in lines if "TURBULENCE" in ln and str(hit["icao24"]) in ln), "")
+    i = next((k for k, ln in enumerate(lines) if ln.strip() == turb), -1)
+    fc = next((ln.strip() for ln in lines[i + 1 : i + 6] if "FORECAST" in ln), "") if i >= 0 else ""
+    return {
+        "cell": cell,
+        "lat": round(lat, 3),
+        "lon": round(lon, 3),
+        "wind_kt": round(spd_kt),
+        "wind_from": round(dir_from),
+        "next": nxt,
+        "lines": {"turb": " ".join(turb.split()), "fc": " ".join(fc.split())},
+    }
 
 
 def signal(d: dict[str, Any]) -> dict[str, Any]:
@@ -211,6 +295,7 @@ def signal(d: dict[str, Any]) -> dict[str, Any]:
         "span": hi_t - lo_t,
         "turbulent": series(str(hit["icao24"])),
         "smooth": series(str(calm_id)),
+        "context": context(d, hit),
     }
 
 
