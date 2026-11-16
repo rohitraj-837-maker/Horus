@@ -1,6 +1,6 @@
 """Point -> US state code, for plain-language event lines ("over CO").
 
-Uses the bundled Natural Earth state outlines (demo/data/conus_states.json).
+Uses the bundled Natural Earth 1:110m state outlines (horus/data/conus_states.json).
 """
 
 from __future__ import annotations
@@ -14,7 +14,7 @@ from horus import config
 
 
 class Places:
-    def __init__(self, path: str = "demo/data/conus_states.json") -> None:
+    def __init__(self, path: str = "horus/data/conus_states.json") -> None:
         data = json.loads(config.resolve(path).read_text())
         self.rings: list[tuple[str, tuple[float, float, float, float], MplPath]] = []
         for st in data["states"]:

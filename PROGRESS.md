@@ -102,6 +102,8 @@ Key findings (details in `reports/data_notes.md`):
 - **Fix**: the H3 res-4 cell was described as "~26 km" (that is its edge); it is ~45 km across. Corrected in the stream legend and README.
 - **SPEC deviations (Rohit):** no public demo link and no hosting, because the project rule is local commits only (no remote, no push). The demo is the README GIF and the text samples. No Docker: `make up` uses uv, as there are no services to orchestrate for a text stream.
 
+- **2026-11-17, after M7: old synthetic web demo removed (Rohit, commit 3ac66e3).** That commit deleted `demo/` but left references, and `make watch` failed (the state outlines for "over NM" lived in `demo/data/`). Fixed: outlines restored from history to `horus/data/conus_states.json`; `tests/demo/` (tests of the deleted code) removed; `make demo`, `make demo-data` dropped and `gate-demo` became `gate-bundle`; the bundle test now expects `horus/watch.py`, the outlines and a case file. Also fixed a bundle break from M7 itself: the packager refused the newly committed `models/type_norm*.parquet` (and the M6 Parquet fixture). It now allows exactly those two kinds, still under the 5 MB cap, with tests that other Parquet is refused. 250 tests + 18 bundle tests pass; gates M6/M7 re-pass.
+
 ## M6 — API, live loop, map, replays ✅ gate passed (2026-11-16 ~08:45 UTC)
 
 `make gate-m6`: check ✔ (incl. `tests/api`), live latency p95 < 10 s ✔, 3 curated replays ✔, front end ✔, screenshots ✔.

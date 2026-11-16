@@ -40,9 +40,9 @@ def test_bundle_contents(built):
         "pyproject.toml",
         "uv.lock",
         "horus/__init__.py",
-        "demo/server.py",
-        "demo/static/app.js",
-        "demo/data/scenario-jet-cat.json",
+        "horus/watch.py",
+        "horus/data/conus_states.json",
+        "cases/r1-2026-01-13.json",
         "scripts/package_release.py",
         "tests/fixtures/pmset_sleep_sample.log",
     ):
@@ -88,12 +88,25 @@ def test_archive_is_reproducible(built, tmp_path):
         "big.bin",
         "logs/run.log",
         ".claude/settings.local.json",
+        "scores.parquet",
+        "models/scores.parquet",
+        "models/sub/type_norm.parquet",
+        "cases/r1.parquet",
     ],
 )
 def test_deny_list_refuses(path):
     size = pr.MAX_FILE_BYTES + 1 if path == "big.bin" else 10
     with pytest.raises(pr.BundleError):
         pr.check_path(path, size)
+
+
+@pytest.mark.parametrize(
+    "path", ["models/type_norm.parquet", "models/type_norm_5s.parquet", "tests/fixtures/x.parquet"]
+)
+def test_small_committed_parquet_allowed(path):
+    pr.check_path(path, 10_000)
+    with pytest.raises(pr.BundleError):  # the size cap still applies
+        pr.check_path(path, pr.MAX_FILE_BYTES + 1)
 
 
 def test_clean_extraction_passes_pytest(built, tmp_path):
@@ -103,7 +116,7 @@ def test_clean_extraction_passes_pytest(built, tmp_path):
     root = tmp_path / "horus"
     env = {**os.environ, "PYTHONPATH": str(root)}
     where = subprocess.run(
-        [sys.executable, "-c", "import horus, demo; print(horus.__file__); print(demo.__file__)"],
+        [sys.executable, "-c", "import horus; print(horus.__file__)"],
         cwd=root,
         env=env,
         capture_output=True,

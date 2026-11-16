@@ -30,7 +30,7 @@ MANIFEST_NAME = "PUSH_MANIFEST.txt"
 PREFIX = "horus"
 MAX_FILE_BYTES = 5_000_000
 
-# bulk data / outputs: excluded at the repo root only (demo/data/ is small, bundled)
+# bulk data / outputs: excluded at the repo root only (horus/data/ and cases/ are small, bundled)
 ROOT_EXCLUDED_DIRS = {"data", "dist", "build"}
 # tool/cache/secret directories: excluded at any depth
 EXCLUDED_DIRS = {
@@ -74,7 +74,13 @@ def check_path(path: str, size: int) -> None:
     if name in FORBIDDEN_NAMES or name.startswith(".env"):
         raise BundleError(f"refusing {path}: secret/credential file name")
     fixture = parts[:2] == ("tests", "fixtures")  # recorded real samples the tests need
-    if Path(name).suffix in FORBIDDEN_SUFFIXES and not (fixture and name.endswith(".log")):
+    # fitted per-type normalisation (9 KB each): committed because the bulk data that
+    # fits it is gone; small Parquet fixtures are recorded real samples like the logs
+    model = len(parts) == 2 and parts[0] == "models" and name.startswith("type_norm")
+    allowed = (fixture and Path(name).suffix in {".log", ".parquet"}) or (
+        model and name.endswith(".parquet")
+    )
+    if Path(name).suffix in FORBIDDEN_SUFFIXES and not allowed:
         raise BundleError(f"refusing {path}: data/log/binary type")
     if size > MAX_FILE_BYTES:
         raise BundleError(f"refusing {path}: {size:,} bytes > {MAX_FILE_BYTES:,}")

@@ -1,4 +1,4 @@
-.PHONY: setup test lint types check gate-m0 gate-m1 gate-m2 gate-m3 gate-m4 gate-m5 gate-m6 serve replays latency watch cases watch-sample up readme gif gate-m7 scores bench-detector bench-rates winds bench-nowcast bench record recorder-status trino-smoke demo demo-data bundle gate-demo
+.PHONY: setup test lint types check gate-m0 gate-m1 gate-m2 gate-m3 gate-m4 gate-m5 gate-m6 serve replays latency watch cases watch-sample up readme gif gate-m7 scores bench-detector bench-rates winds bench-nowcast bench record recorder-status trino-smoke bundle gate-bundle
 
 setup:
 	uv sync
@@ -110,23 +110,14 @@ recorder-status:
 trino-smoke:
 	uv run python scripts/fetch_trino_history.py --smoke-test
 
-# Offline demo (synthetic data, real core); prints the localhost URL
-demo:
-	uv run python -m demo.server $(if $(PORT),--port $(PORT),)
-
-# Regenerate the bundled synthetic scenarios (deterministic)
-demo-data:
-	uv run python -m demo.scenarios
-
 # Single-file push bundle: dist/horus-push-bundle.tar.gz + dist/PUSH_MANIFEST.txt
 bundle:
 	uv run python scripts/package_release.py
 
-# Demo gate: lint, types, demo endpoint/offline tests, bundle + clean-extraction test, clean tree
-gate-demo: lint
-	uv run mypy horus/core demo scripts/package_release.py
-	uv run pytest -q tests/demo
+# Bundle gate: lint, types, bundle + clean-extraction test, clean tree
+gate-bundle: lint
+	uv run mypy horus/core scripts/package_release.py
 	uv run pytest -q -m bundle
 	uv run python scripts/package_release.py
-	@test -z "$$(git status --porcelain)" || { echo "gate-demo: FAIL (uncommitted changes)"; git status --short; exit 1; }
-	@echo "gate-demo: PASS"
+	@test -z "$$(git status --porcelain)" || { echo "gate-bundle: FAIL (uncommitted changes)"; git status --short; exit 1; }
+	@echo "gate-bundle: PASS"
