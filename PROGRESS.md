@@ -43,6 +43,15 @@ One entry per milestone gate. A milestone is **complete** only when its `make ga
 - **2026-11-15: M2 evaluation design.** PIREP windows and no-PIREP windows have the same shape (±10 min, 40 km, ±2,000 ft), and both need ≥ 5 aircraft in the window. No-PIREP windows are centred on random aircraft-minutes with no turbulence PIREP within ±2 h / 150 km (1,000 candidates per test day, fixed seed). A window's score is the max over aircraft-minutes inside it; a detector with no value there scores 0, so it is charged with the miss. tau per row = lowest score giving ≤ 1 alarm event per 1,000 clear flight-hours on **train days only**. An event = a run of consecutive alarmed minutes on one aircraft (minute resolution, replacing the 30 s merge for the bench). Test-day metrics: PR-AUC, ROC-AUC, recall at tau, test FA rate, precision at recall 0.5.
 - **2026-11-15: Bug fixed in `core/segment.py`.** "Level" was assigned up to half a window beyond the observed data, so the 30 s trim was spent on empty grid points and climbs/descents next to data edges and coverage gaps were not trimmed. Found because B2 coverage changed with chunk size. Points must now lie inside observed data. Flicker is no longer detected across held pieces, and B1 round-off is snapped to 0. Scores are now identical under different chunk sizes; demo scenarios regenerated.
 
+- **2026-11-16: Terminal dashboard replaces the web map (Rohit).** After several web iterations (classic aviation-tool, liquid-glass/bento React app, Windy-style living map, guided zoom tour), Rohit chose a live terminal UI and asked to drop the web front ends. `horus/tui/` (Textual) runs the hub in-process, with no server or browser:
+  - Map: braille map at 4× character resolution. Background = GFS wind speed at the chosen FL (blue) or the forecast where a cell is lit (amber). Dots = aircraft; an amber block = detecting; `^` = pilot reports.
+  - Side panels: "Detecting now" (aircraft, FL, state, strength vs threshold), "Highest forecast" (chance, × normal, state), event log.
+  - Case mode: zoomed replay with a narration line.
+  - `?` explainer screen.
+  - Removed: `web/`, `web-glass/` and their routes (`/`, `/glass`, `/api/lattice`, `/api/basemap`).
+  - Kept: the JSON/WS API (`make serve`) and `/api/winds`.
+  - The M6 gate now checks `horus/tui` (tested in `tests/tui`) and `docs/img/horus-tui-{live,case}.svg`. SPEC deviation: the SPEC's MapLibre web UI.
+
 ## M1 — Ingestion ✅ gate passed (2026-11-15 22:30 UTC)
 
 `make gate-m1 DAY=2026-11-14` (2026-11-15 01:5x AEDT): ruff ✔, mypy ✔, **pytest 110 passed** (1 Trino test deselected until access), then:

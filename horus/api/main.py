@@ -13,7 +13,7 @@ Endpoints
     WS   /ws/live                    one message per snapshot: aircraft + changed cells
 The feed replays an archive day through the live loop at `speed`x real time (the
 free live sources give ~90 s per aircraft, too sparse for the detector; see
-reports/data_notes.md). Static map front end is served from web/.
+reports/data_notes.md). The terminal front end (horus.tui) runs the same hub in-process.
 """
 
 from __future__ import annotations
@@ -31,8 +31,6 @@ import h3
 import numpy as np
 import pandas as pd
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
-from fastapi.responses import FileResponse, Response
-from fastapi.staticfiles import StaticFiles
 
 from horus import config
 from horus.api.live_loop import LiveLoop
@@ -82,7 +80,6 @@ class Hub:
     latency_ms: list[float] = field(default_factory=list)
     clients: set[WebSocket] = field(default_factory=set)
     last_p: np.ndarray | None = None
-    _lattice_bytes: bytes | None = None
     lock: threading.Lock = field(default_factory=threading.Lock)
 
     @property
@@ -94,21 +91,6 @@ class Hub:
         p = self.loop.probabilities(float(self.now))[:, fl_idx]
         idx = np.flatnonzero(p > floor)
         return [[h3.int_to_str(int(self.loop.lattice_ids[i])), round(float(p[i]), 5)] for i in idx]
-
-    def lattice_json(self) -> bytes:
-        if self._lattice_bytes is None:
-            geo = {
-                c: [[round(lo, 3), round(la, 3)] for la, lo in h3.cell_to_boundary(c)]
-                for c in (h3.int_to_str(int(i)) for i in self.loop.lattice_ids)
-            }
-            g = self.cfg.grid
-            body = {
-                "cells": geo,
-                "fl_bins": list(range(g.fl_min, g.fl_max, g.fl_bin)),
-                "floor": self.floor,
-            }
-            self._lattice_bytes = json.dumps(body).encode()
-        return self._lattice_bytes
 
     def aircraft(self) -> list[dict[str, Any]]:
         """Latest raw position per aircraft (updates every snapshot, so the map can
@@ -233,7 +215,6 @@ def create_app(hub: Hub | None = None, start_feed: bool = True) -> FastAPI:
     @asynccontextmanager
     async def lifespan(_: FastAPI):  # type: ignore[no-untyped-def]
         state["hub"] = hub or build_hub(config.load())
-        state["hub"].lattice_json()  # build before the feed starts competing for the GIL
         task = asyncio.create_task(state["hub"].run()) if start_feed else None
         yield
         if task:
@@ -269,11 +250,6 @@ def create_app(hub: Hub | None = None, start_feed: bool = True) -> FastAPI:
             "cells": H().cells(i, f),
         }
 
-    @app.get("/api/lattice")
-    def lattice() -> Response:
-        """Cell outlines (built once, cached as bytes; the client caches them too)."""
-        return Response(H().lattice_json(), media_type="application/json")
-
     @app.get("/api/winds")
     def winds(fl: int = 340, t: int = 0) -> dict[str, Any]:
         """Upper wind (u, v m/s) on the GFS lattice at flight level `fl`, for the hour
@@ -299,10 +275,6 @@ def create_app(hub: Hub | None = None, start_feed: bool = True) -> FastAPI:
     @app.get("/api/thresholds")
     def thresholds() -> dict[str, float]:
         return {"tau_b3": float(H().loop.params.tau), "floor": H().floor}
-
-    @app.get("/api/basemap")
-    def basemap() -> FileResponse:
-        return FileResponse(config.resolve("demo/data/conus_states.json"))
 
     @app.get("/api/aircraft")
     def aircraft() -> dict[str, Any]:
@@ -351,18 +323,6 @@ def create_app(hub: Hub | None = None, start_feed: bool = True) -> FastAPI:
                 await ws.receive_text()
         except WebSocketDisconnect:
             H().clients.discard(ws)
-
-    glass = config.resolve("web-glass/dist")
-    if glass.exists():  # liquid-glass / bento front end (built with `make glass`)
-        app.mount("/glass", StaticFiles(directory=glass, html=True), name="glass")
-
-    web = config.resolve("web")
-    if web.exists():
-        app.mount("/static", StaticFiles(directory=web), name="static")
-
-        @app.get("/")
-        def index() -> FileResponse:
-            return FileResponse(web / "index.html")
 
     return app
 

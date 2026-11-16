@@ -24,6 +24,7 @@ dependencies = [
     "pyopensky>=2.0",
     "keyring>=25.7.0",
     "websockets>=17.4",
+    "textual>=8.2.8",
 ]
 
 [project.optional-dependencies]
