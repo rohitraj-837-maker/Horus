@@ -69,6 +69,23 @@ Key findings (details in `reports/data_notes.md`):
 - Also built after the first gate run: `ingest/adsblol_history.py` (streams adsb.lol daily tar releases, CONUS ≥ FL180 to Parquet with bounded memory), `scripts/fetch_adsblol_history.py`. The IEM PIREP ingest is now resumable with retries; an earlier run had silently stopped partway when IEM dropped a connection.
 - Study period fixed: 2025-12-02 → 2026-01-15 (most MOD+ PIREPs); train Dec 2–31, test Jan 1–15. History download started 2026-11-15 ~02:13 AEDT (`data/raw/adsblol_hist/_log.csv`).
 
+## M4 — Grid N0–N1, fitted half-life, GFS winds ✅ gate passed (2026-11-16 ~02:05 UTC)
+
+`make gate-m4`: check ✔, N0/N1 rows ✔, t½ per band ✔, GFS winds ✔, 7 artefacts leakage-free ✔.
+
+- **Grid:** H3 res-4 cells over the CONUS box × 13 FL bins (FL200–460). Evidence = B3 passes; a pass counts as detected at the train B3 threshold for 10 FA/1000 h (`grid.detect_fa_per_1000h`). l0 = logit(train pass base rate); a detection lifts L to logit(base + A).
+- **Fitted half-life** (`reports/half_life.md`, train only, 200 day-block bootstraps): FL200–290 **11.6 min** (95% 3.3–12.5, 9k pairs); FL290–370 **50.3 min** (39.4–62.5, 68k pairs); FL370–460 **49.9 min** (36.9–61.2, 41k pairs). Evidence persists ~4× longer at cruise levels than the SPEC's 12-min starting value.
+- **Winds:** Open-Meteo GFS, 400/300/250/200 hPa, 2° lattice, hourly, 45 days; 0% missing; max 101 m/s.
+- **Nowcast** (`reports/nowcast_ablation.md`; test, 5-min snapshots, 15-min horizon):
+
+| Row | Aircraft target PR-AUC (base 0.0009) | ROC-AUC | PIREP target ROC-AUC |
+|---|---|---|---|
+| CLIM | 0.0009 | 0.500 | 0.500 |
+| N0 persistence | 0.0015 | 0.511 | 0.502 |
+| N1 decay + evidence | **0.0026** | **0.520** | 0.491 |
+
+  N1 gives ~3× the base rate in PR-AUC on the aircraft target but almost no ranking skill. The PIREP target shows none. This follows from the weak per-aircraft detector (M2/M3): the grid can only spread evidence it receives. PIREP-target calibration numbers are not meaningful for CLIM (PIREP windows are conditioned on a report existing, base 0.34).
+
 ## M2 — Segmentation, residual, B0–B2 ✅ gate passed (2026-11-16 ~01:30 UTC)
 
 `make gate-m2`: ruff ✔, mypy strict (core + eval) ✔, pytest ✔; 44/44 days scored; B0/B1/B2 rows ✔; thresholds fitted on the 29 train days only ✔.
