@@ -293,6 +293,7 @@ function frame(now) {
     }
   }
   S.shown = shown;
+  if (T.i >= 0) tourPlace();
   if (now - chromeAt > 300) { chromeAt = now; updateChrome(t); }
   requestAnimationFrame(frame);
 }
@@ -358,12 +359,12 @@ cv.top.addEventListener("pointermove", (e) => {
   if (drag) {
     if (Math.abs(e.clientX - drag.sx) + Math.abs(e.clientY - drag.sy) > 3) cv.top.classList.add("drag");
     S.view.lon -= (e.clientX - drag.x) / (COSLAT * S.view.k); S.view.lat += (e.clientY - drag.y) / S.view.k;
-    drag = { ...drag, x: e.clientX, y: e.clientY }; S.user = true; viewChanged(); return;
+    drag = { ...drag, x: e.clientX, y: e.clientY }; S.user = true; S.dragging = true; viewChanged(); return;
   }
   cv.top.classList.toggle("hot", !!pick(e.clientX * DPR(), e.clientY * DPR()));
 });
 cv.top.addEventListener("pointerup", (e) => {
-  const moved = drag && Math.abs(e.clientX - drag.sx) + Math.abs(e.clientY - drag.sy) > 3; drag = null; cv.top.classList.remove("drag");
+  const moved = drag && Math.abs(e.clientX - drag.sx) + Math.abs(e.clientY - drag.sy) > 3; drag = null; S.dragging = false; cv.top.classList.remove("drag");
   if (moved) return;
   const hit = pick(e.clientX * DPR(), e.clientY * DPR());
   if (hit) { S.popup = hit; renderPopup(); } else closePopup();
@@ -423,6 +424,107 @@ function scales() {
   $("turbTicks").innerHTML = TURB_STEPS.map((p, i) => `<span>${i === 4 ? "≥" : ""}${p < 0.01 ? (p * 100).toFixed(1) : (p * 100).toFixed(0)}</span>`).join("");
 }
 
+// ---------- guided tour: fly into each part of the map and explain it ----------
+const T = { i: -1, steps: [], at: null };
+const kts = (ms) => Math.round(ms * 1.94384);
+function tourTargets() {
+  const fl = S.flBins[S.fl];
+  const steps = [{ title: "Welcome to Horus", body: "This map shows where airliners over the US are <b>hitting turbulence right now</b>, and forecasts where the <b>next ones will</b>. Here is what each part means.", home: true }];
+  if (S.wind) {
+    let best = null;
+    S.wind.lat.forEach((la, i) => S.wind.lon.forEach((lo, j) => {
+      if (la < 28 || la > 47 || lo < -118 || lo > -74) return;
+      const sp = Math.hypot(S.wind.u[i][j], S.wind.v[i][j]);
+      if (!best || sp > best.sp) best = { lon: lo, lat: la, sp };
+    }));
+    if (best) steps.push({ title: "The wind", body: `The moving streaks are the wind at <b>FL${fl}</b> (${(fl * 100).toLocaleString()} ft). Brighter and faster means stronger. This band is the <b>jet stream</b>, about <b>${kts(best.sp)} knots</b> here. Turbulence often hides along its edges.`, point: () => [best.lon, best.lat], zoom: 2.6 });
+  }
+  const cand = (S.shown || []).filter((a) => a.hd != null);
+  const hit = cand.find((a) => a.T != null && a.T >= S.tau);
+  const mid = fitView0();
+  const ac = hit || cand.sort((a, b) => Math.hypot(a.lon - mid.lon, a.lat - mid.lat) - Math.hypot(b.lon - mid.lon, b.lat - mid.lat))[0];
+  if (ac) {
+    const id = ac.id; let lastPos = [ac.lon, ac.lat];
+    steps.push({ title: hit ? "An aircraft in turbulence" : "An aircraft", body: `Each arrow is one airliner, pointing the way it flies. This is <b>${id}</b> at FL${ac.fl}. <b>White</b> = smooth air. <b class="amber">Amber with a ring</b> = its own vertical-speed data shows turbulence right now. Click any aircraft for its details.`,
+      point: () => { const a = (S.shown || []).find((x) => x.id === id); if (a) lastPos = [a.lon, a.lat]; return lastPos; }, zoom: 7, follow: true });
+  }
+  let cell = null;
+  for (const [k, c] of S.cells) { if (!c.on) continue; const [h, f] = k.split("|"); if (!cell || c.p > cell.p) cell = { h, f: +f, p: c.p }; }
+  if (cell && S.lattice[cell.h]) {
+    const r = S.lattice[cell.h], c0 = [r.reduce((a, q) => a + q[0], 0) / r.length, r.reduce((a, q) => a + q[1], 0) / r.length];
+    steps.push({ title: "The forecast", body: `Amber hexagons are the <b>15-minute forecast</b>: the chance that the next aircraft through this ~26 km patch meets turbulence. This one is <b>${(cell.p * 100).toFixed(1)}%</b>, against a normal <b>${(S.floor * 50).toFixed(2)}%</b>. It drifts with the wind and fades if nothing new is detected.`, point: () => c0, zoom: 6, fl: cell.f });
+  }
+  const pr = S.pireps.filter((p) => p.tb_max >= 4 && p.lat > 25 && p.lat < 49 && p.lon > -124 && p.lon < -67)
+    .sort((a, b) => Math.hypot(a.lon - mid.lon, a.lat - mid.lat) - Math.hypot(b.lon - mid.lon, b.lat - mid.lat))[0];
+  if (pr) steps.push({ title: "A pilot report", body: `A <b class="amber">^</b> marks a pilot who radioed in turbulence (<span class="amber">orange</span> = moderate, <span style="color:var(--sev)">red</span> = severe). This one: FL${pr.fl_lo}${pr.fl_hi !== pr.fl_lo ? "–" + pr.fl_hi : ""}. Horus never uses reports to detect; they are how we <b>check</b> it.`, point: () => [pr.lon, pr.lat], zoom: 3.5, fl: S.flBins.findIndex((f) => pr.fl_lo >= f && pr.fl_lo < f + 20) });
+  steps.push({ title: "Altitude", body: "Turbulence depends on height. Pick a flight level here: <b>340 = 34,000 ft</b>, where most airliners cruise. The ↑ ↓ keys work too.", el: ".alt", home: true });
+  steps.push({ title: "Layers", body: "Switch the wind, the forecast, aircraft and pilot reports on or off.", el: ".layers", home: true });
+  steps.push({ title: "Time", body: "Live replays a <b>real archived day at 30× speed</b> through the same code that would run on a live feed. The bar shows how far through that day we are.", el: ".timeline", home: true });
+  steps.push({ title: "Case studies", body: "<b>Cases</b> replays three real turbulence reports minute by minute: watch an aircraft feel it, the pilot report it, and the forecast appear. Click anything on the map for details; <b>?</b> brings back a short reminder.", el: ".seg", home: true });
+  return steps;
+}
+function tourStart() {
+  if (S.mode !== "live") setMode("live");
+  closePopup(); $("help").hidden = true;
+  T.steps = tourTargets(); T.home = { fl: S.fl }; tourShow(0);
+}
+function tourShow(i) {
+  if (i < 0) return;
+  if (i >= T.steps.length) { tourEnd(); return; }
+  T.i = i; const st = T.steps[i];
+  if (st.fl != null && st.fl >= 0 && st.fl !== S.fl) selectFl(st.fl);
+  else if (st.home && S.fl !== T.home.fl) selectFl(T.home.fl);
+  if (st.point) { const [lon, lat] = st.point(); S.user = true; flyTo({ lon, lat, k: fitView0().k * st.zoom }, 1300); }
+  else if (st.home) { S.user = false; flyTo(fitView0(), 900); }
+  $("cStep").textContent = `${i + 1} of ${T.steps.length}`;
+  $("cTitle").textContent = st.title; $("cBody").innerHTML = st.body;
+  $("cDots").innerHTML = T.steps.map((_, j) => `<i class="${j === i ? "on" : ""}"></i>`).join("");
+  $("cBack").style.visibility = i ? "visible" : "hidden";
+  $("cNext").textContent = i === T.steps.length - 1 ? "Start exploring" : "Next";
+  $("callout").hidden = false; document.body.classList.add("touring");
+  tourPlace();
+}
+function tourEnd() {
+  T.i = -1; $("callout").hidden = true; $("spot").hidden = true; document.body.classList.remove("touring");
+  if (T.home && S.fl !== T.home.fl) selectFl(T.home.fl);
+  S.user = false; flyTo(fitView0(), 900);
+  try { localStorage.setItem("horus.tour", "done"); } catch (_) { /* private mode */ }
+}
+function tourPlace() {
+  if (T.i < 0) return;
+  const st = T.steps[T.i], spot = $("spot"), co = $("callout"), cw = 320, ch = co.offsetHeight || 190;
+  let box = null;
+  if (st.point) {
+    const d = DPR(), [lon, lat] = st.point(), [x, y] = proj(lon, lat), r = 58;
+    if (st.follow && !S.dragging) { S.view.lon += (lon - S.view.lon) * 0.04; S.view.lat += (lat - S.view.lat) * 0.04; viewChanged(); }
+    box = { x: x / d - r, y: y / d - r, w: 2 * r, h: 2 * r, round: true };
+  } else if (st.el) {
+    const rc = document.querySelector(st.el).getBoundingClientRect();
+    box = { x: rc.left - 8, y: rc.top - 8, w: rc.width + 16, h: rc.height + 16 };
+  }
+  if (!box) { spot.hidden = true; co.style.left = `${(innerWidth - cw) / 2}px`; co.style.top = `${innerHeight / 2 - ch / 2}px`; return; }
+  spot.hidden = false;
+  Object.assign(spot.style, { left: `${box.x}px`, top: `${box.y}px`, width: `${box.w}px`, height: `${box.h}px`, borderRadius: box.round ? "50%" : "16px" });
+  let left = box.x + box.w + 18;
+  if (left + cw > innerWidth - 12) left = box.x - cw - 18;
+  if (left < 12) left = Math.min(innerWidth - cw - 12, Math.max(12, box.x));
+  let top = box.y + box.h / 2 - ch / 2;
+  if (box.y + box.h + ch + 18 > innerHeight && left === Math.max(12, box.x)) top = box.y - ch - 18;
+  top = Math.max(60, Math.min(innerHeight - ch - 12, top));
+  co.style.left = `${left}px`; co.style.top = `${top}px`;
+}
+$("tourBtn").onclick = tourStart;
+$("cNext").onclick = () => tourShow(T.i + 1);
+$("cBack").onclick = () => tourShow(T.i - 1);
+$("cSkip").onclick = tourEnd;
+window.addEventListener("keydown", (e) => {
+  if (T.i < 0) return;
+  if (e.key === "ArrowRight" || e.key === "Enter") { e.preventDefault(); tourShow(T.i + 1); }
+  if (e.key === "ArrowLeft") { e.preventDefault(); tourShow(T.i - 1); }
+  if (e.key === "Escape") tourEnd();
+}, true);
+window.addEventListener("resize", () => tourPlace());
+
 async function init() {
   const [lat, base, th, health] = await Promise.all([getJSON("/api/lattice"), getJSON("/api/basemap"), getJSON("/api/thresholds"), getJSON("/api/health")]);
   S.lattice = lat.cells; S.flBins = lat.fl_bins; S.floor = lat.floor; S.basemap = base; S.tau = th.tau_b3; S.win = health.window; S.simT = health.time;
@@ -432,5 +534,8 @@ async function init() {
   S.pireps = (await getJSON("/api/pireps?since=7200")).pireps;
   setInterval(async () => { if (S.mode === "live") try { S.pireps = (await getJSON("/api/pireps?since=7200")).pireps; } catch (_) { /* keep */ } }, 20000);
   connect(); requestAnimationFrame(frame);
+  let seen = null;
+  try { seen = localStorage.getItem("horus.tour"); } catch (_) { /* private mode */ }
+  if (!seen) setTimeout(() => { if (T.i < 0 && S.mode === "live") tourStart(); }, 9000);
 }
 init().catch((e) => document.body.insertAdjacentHTML("beforeend", `<p style="position:fixed;left:0;right:0;top:48%;text-align:center;color:#999">Could not load: ${e.message}</p>`));

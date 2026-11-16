@@ -21,6 +21,7 @@
       <button role="tab" data-mode="case" aria-selected="false">Cases</button>
     </div>
     <button id="helpBtn" class="round" aria-expanded="false" aria-controls="help" title="What am I looking at?">?</button>
+    <button id="tourBtn" class="pill" title="A guided tour of the map">Tour</button>
   </header>
   <div id="help" class="pop help" hidden>
     <p><b>Streaks</b> are the upper-level wind at the chosen altitude; colour is its speed.</p>
@@ -40,6 +41,19 @@
 
   <div id="cases" class="cases" hidden></div>
   <div id="popup" class="pop popup" hidden></div>
+
+  <div id="spot" class="spot" hidden></div>
+  <div id="callout" class="callout" role="dialog" aria-live="polite" hidden>
+    <div class="c-step" id="cStep"></div>
+    <h3 id="cTitle"></h3>
+    <p id="cBody"></p>
+    <div class="c-nav">
+      <button id="cSkip" class="link">Skip tour</button>
+      <span class="c-dots" id="cDots"></span>
+      <button id="cBack" class="pill">Back</button>
+      <button id="cNext" class="pill primary">Next</button>
+    </div>
+  </div>
 
   <div class="legend" aria-label="Legend">
     <div class="lg-row"><span class="lg-name">Wind</span><span id="windScale" class="scale"></span><span class="lg-u">kt</span></div>
