@@ -57,6 +57,10 @@ class Feed:
     def t_first(self) -> int:
         return int(self.rows["time"].min())
 
+    @property
+    def t_last(self) -> int:
+        return int(self.rows["time"].max())
+
     def next(self, now: int) -> pd.DataFrame:
         t = self.rows["time"].to_numpy()
         end = int(np.searchsorted(t, now, side="right"))
@@ -138,6 +142,25 @@ class Hub:
             if p[c, f] > floor or prev[c, f] > floor
         ]
 
+    def restart(self) -> None:
+        """Loop the archive window: fresh loop state, feed from the start."""
+        assert self.feed is not None
+        with self.lock:
+            lp = self.loop
+            self.loop = LiveLoop(
+                lp.cfg,
+                lp.norm,
+                lp.sizes,
+                lp.params,
+                lp.lattice_ids,
+                lp.wind_at,
+                lp.lattice,
+                t0=self.feed.t_first,
+            )
+            self.feed.pos = 0
+            self.now = self.feed.t_first
+            self.last_p = None
+
     def _advance(self, rows: pd.DataFrame, now: int) -> dict[str, Any]:
         with self.lock:
             self.loop.ingest(rows)
@@ -150,6 +173,8 @@ class Hub:
         snap = self.feed.snapshot_s
         while True:
             self.now += snap
+            if self.now > self.feed.t_last + snap:  # window played out: start it again
+                self.restart()
             t_recv = time.perf_counter()
             rows = self.feed.next(self.now)
             # scoring takes ~1 s for CONUS: run it off the event loop so HTTP stays responsive

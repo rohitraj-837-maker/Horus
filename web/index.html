@@ -21,17 +21,7 @@
     <div class="mapwrap">
       <canvas id="map" aria-label="Turbulence nowcast map. Drag to pan, scroll to zoom."></canvas>
 
-      <section id="intro" class="card intro">
-        <h2>What you are looking at</h2>
-        <ol>
-          <li><b>Dots</b> are airliners at the selected altitude. A <span class="hit">ringed dot</span> is one whose own vertical-speed data shows turbulence right now.</li>
-          <li><b>Orange cells</b> are the forecast: the chance that the next aircraft through that area in the next 15 min meets turbulence. Brighter = more likely.</li>
-          <li><b>Carets ^</b> are pilot reports of turbulence (<span class="mod">moderate</span>, <span class="sev">severe</span>).</li>
-        </ol>
-        <p class="small">Live replays a real archived day (2026-01-01) at 30× speed, because free live feeds are too sparse for the detector. Research prototype, not for flight decisions.</p>
-        <button id="introClose" class="btn">Got it</button>
-      </section>
-
+      <div id="caption" class="caption" hidden></div>
       <div class="zoom" role="group" aria-label="Zoom">
         <button id="zin" aria-label="Zoom in">+</button>
         <button id="zout" aria-label="Zoom out">−</button>
@@ -42,42 +32,45 @@
     </div>
 
     <aside class="side">
-      <section>
-        <h3>Altitude</h3>
-        <div id="flList" class="fl-list" role="radiogroup" aria-label="Flight level"></div>
-        <p class="small">Each band is 2,000 ft. Most airliners cruise at FL340–380.</p>
-      </section>
-
-      <section id="replayBox" hidden>
-        <h3>Case study</h3>
-        <div id="replayList" class="cases"></div>
-        <p id="replayMeta" class="small"></p>
-      </section>
-
-      <section>
-        <h3>Forecast chance</h3>
-        <div id="legend" class="legend"></div>
-        <div class="keys">
-          <span><i class="dot"></i>aircraft</span>
-          <span><i class="dot ring"></i>turbulence detected</span>
-          <span><i class="caret mod"></i>MOD report</span>
-          <span><i class="caret sev"></i>SEV report</span>
-        </div>
-      </section>
-
-      <section>
-        <h3>Show</h3>
-        <label class="toggle"><input type="checkbox" id="lyCells" checked><span>Forecast cells</span></label>
-        <label class="toggle"><input type="checkbox" id="lyAc" checked><span>Aircraft</span></label>
-        <label class="toggle"><input type="checkbox" id="lyPirep" checked><span>Pilot reports</span></label>
-      </section>
-
-      <section class="stats">
-        <div><span id="sAc" class="num">–</span><span class="small">aircraft shown</span></div>
-        <div><span id="sHit" class="num">–</span><span class="small">detecting now</span></div>
-        <div><span id="sCells" class="num">–</span><span class="small">forecast cells</span></div>
-      </section>
-      <p id="status" class="small status">Connecting…</p>
+      <div class="alt">
+        <div class="alt-head small">Altitude</div>
+        <div id="flList" class="tape" role="radiogroup" aria-label="Flight level"></div>
+      </div>
+      <div class="panel">
+        <section id="about">
+          <p class="lead" id="lead">Every airliner already measures turbulence: its vertical speed jitters when the air is rough. Horus reads that jitter from public ADS-B broadcasts and turns it into a 15-minute forecast map.</p>
+          <p class="small" id="howto">Dots are aircraft at the selected altitude; <span class="hit">orange</span> means its own data shows turbulence now. Shaded cells are the forecast chance that the next aircraft through meets turbulence. <span class="mod">^</span> marks a pilot report. Click an aircraft to follow it.</p>
+        </section>
+        <section id="replayBox" hidden>
+          <h3>Case studies</h3>
+          <div id="replayList" class="cases"></div>
+        </section>
+        <section id="focus" hidden>
+          <h3 id="fTitle">Aircraft</h3>
+          <p id="fVerdict" class="lead"></p>
+          <canvas id="spark" width="480" height="120" aria-label="Turbulence index over recent minutes"></canvas>
+          <p id="fMeta" class="small"></p>
+          <button id="fClose" class="link">Stop following</button>
+        </section>
+        <section>
+          <h3>Log</h3>
+          <ol id="log" class="log"></ol>
+        </section>
+        <section>
+          <h3>Forecast chance</h3>
+          <div id="legend" class="legend"></div>
+          <div class="row small">
+            <label><input type="checkbox" id="lyCells" checked> cells</label>
+            <label><input type="checkbox" id="lyAc" checked> aircraft</label>
+            <label><input type="checkbox" id="lyPirep" checked> reports</label>
+          </div>
+        </section>
+        <section class="stats small">
+          <span><b id="sAc">–</b> aircraft</span><span><b id="sHit">–</b> detecting</span><span><b id="sCells">–</b> forecast cells</span>
+        </section>
+        <p id="status" class="small status">Connecting…</p>
+        <p class="small fine">Live replays a real archived day (2026-01-01) at 30× speed; free live feeds are too sparse for the detector. Research prototype, not for flight decisions.</p>
+      </div>
     </aside>
   </main>
 
