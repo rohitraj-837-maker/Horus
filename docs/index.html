@@ -87,79 +87,33 @@ section, [id] { scroll-margin-top: 80px; }
 .pill:hover { background: #4aa8ff; }
 .pill:active { transform: scale(0.97); }
 .pill.big { height: 46px; padding: 0 24px; font-size: 16px; }
-.link-arrow { color: var(--accent); display: inline-flex; align-items: center; gap: 4px; }
-.link-arrow:hover { text-decoration: underline; text-underline-offset: 4px; }
 
 /* ---------- hero ---------- */
-.hero { position: relative; padding: clamp(64px, 10vw, 120px) 0 0; text-align: center; isolation: isolate; }
+
 .eyebrow { color: var(--ink-2); font-size: 15px; font-weight: 600; margin: 0 0 18px; }
 .eyebrow i { font-style: normal; color: var(--ink-3); margin: 0 6px; }
 h1 { margin: 0; font-size: clamp(64px, 13vw, 168px); line-height: 0.95; font-weight: 700; letter-spacing: -0.055em; }
 .grad { color: var(--ink-2); }
-.hero h2 {
-  margin: 16px auto 0; max-width: 940px; font-size: clamp(30px, 4.8vw, 58px); line-height: 1.06;
-  font-weight: 650; letter-spacing: -0.035em;
-}
-.lede { margin: 26px auto 0; max-width: 720px; font-size: clamp(17px, 1.6vw, 21px); line-height: 1.5; color: var(--ink-2); }
-.lede strong { color: var(--ink); font-weight: 500; }
+
 /* utility colours win over the generic "bold text is white" rules */
 .t-turb { color: var(--turb-t) !important; } .t-fc { color: var(--fc-t) !important; } .t-rep { color: var(--rep-t) !important; }
 .t-wind { color: var(--wind-t) !important; } .t-blue { color: var(--blue-t) !important; } .t-good { color: var(--good-t) !important; }
 strong.t-turb, strong.t-fc, strong.t-rep, strong.t-wind, strong.t-blue, b.t-turb, b.t-fc, b.t-rep, b.t-wind, b.t-blue { font-weight: 600; }
-.cta { margin-top: 34px; display: flex; justify-content: center; align-items: center; gap: 28px; flex-wrap: wrap; }
 
 /* ---------- live map ---------- */
-.mapstage { margin: clamp(48px, 7vw, 80px) auto 0; width: min(1240px, 100% - 32px); }
-.map {
-  position: relative; border-radius: var(--radius); overflow: hidden; aspect-ratio: 16 / 9; min-height: 340px;
-  background: radial-gradient(120% 90% at 50% 40%, #0b1018 0%, #040507 70%);
-  box-shadow: 0 0 0 1px var(--line-2), 0 40px 100px -30px rgba(0, 0, 0, 0.9);
-}
-.map canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.hud { position: absolute; left: 22px; top: 18px; text-align: left; pointer-events: none; }
-.hud .clock { font: 600 clamp(28px, 3.4vw, 44px)/1 var(--sans); letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
-.hud .date { margin-top: 6px; font-size: 13px; color: var(--ink-2); }
-.hud .counts { margin-top: 14px; display: grid; gap: 4px; font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
-.hud .counts b { color: var(--ink); font-weight: 600; }
-.legend { position: absolute; left: 22px; bottom: 64px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 12px; color: var(--ink-2); pointer-events: none; }
-.legend span { display: inline-flex; align-items: center; gap: 7px; }
+
 .sw { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 .sw.ac { width: 4px; height: 4px; background: #c8d7eb; }
 .sw.alt { width: 40px; height: 6px; border-radius: 3px; background: linear-gradient(90deg, #1f6f99, #2f94c8, #6dbfe8, #b5e2f8, #f2fbff); }
 .sw.turb { background: var(--turb); box-shadow: 0 0 0 3px rgba(208, 122, 0, 0.3); }
 .sw.fc { border-radius: 3px; background: rgba(179, 92, 232, 0.55); border: 1px solid var(--fc); }
 .sw.rep { width: 0; height: 0; border-radius: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 10px solid var(--rep); }
-.controls {
-  position: absolute; left: 14px; right: 14px; bottom: 14px; display: flex; align-items: center; gap: 12px;
-  padding: 8px 14px 8px 8px; border-radius: 980px;
-  background: rgba(20, 20, 24, 0.6); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
-  border: 1px solid var(--line);
-}
-.play { width: 32px; height: 32px; border-radius: 50%; border: 0; background: var(--accent); color: #000; display: grid; place-items: center; cursor: pointer; flex: none; }
-.play svg { width: 14px; height: 14px; }
-.scrub { flex: 1; accent-color: var(--accent); height: 4px; cursor: pointer; }
-.speed { font-size: 12px; color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums; }
-.ticker {
-  position: absolute; right: 14px; top: 14px; bottom: 70px; width: 330px; padding: 14px 16px; border-radius: 20px;
-  background: rgba(14, 14, 18, 0.55); -webkit-backdrop-filter: blur(18px) saturate(160%); backdrop-filter: blur(18px) saturate(160%);
-  border: 1px solid var(--line); text-align: left; overflow: hidden;
-}
-.ticker h4 { margin: 0 0 10px; font-size: 12px; font-weight: 600; color: var(--ink-3); letter-spacing: 0.02em; text-transform: uppercase; }
-.ticker ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-.ticker li { font-size: 13px; line-height: 1.4; color: var(--ink-2); animation: tick-in 0.5s var(--ease); }
-.ticker li b { color: var(--ink); font-weight: 600; }
-.ticker time { color: var(--ink-3); font-variant-numeric: tabular-nums; margin-right: 6px; }
+
 @keyframes tick-in { from { opacity: 0; transform: translateY(-6px); } }
-.tag { display: inline-block; font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 2px 7px; border-radius: 6px; margin-right: 6px; vertical-align: 1px; color: #000; }
-.tag.turb { background: var(--turb); }
-.tag.rep { background: var(--rep); }
-.tag.fc { background: var(--fc); }
+
 .maptip { position: absolute; z-index: 5; pointer-events: none; padding: 8px 10px; border-radius: 10px; font-size: 12.5px; line-height: 1.4; background: rgba(28, 28, 32, 0.92); border: 1px solid var(--line-2); color: var(--ink); white-space: nowrap; transform: translate(-50%, calc(-100% - 12px)); opacity: 0; transition: opacity 0.12s; }
 .maptip.on { opacity: 1; }
 .map-caption { margin: 18px auto 0; max-width: 820px; text-align: center; font-size: 14px; color: var(--ink-3); }
-.disclaimer { display: inline-flex; align-items: center; gap: 8px; margin-top: 24px; padding: 8px 16px; border-radius: 18px; border: 1px solid var(--line-2); color: var(--ink-2); font-size: 13px; text-align: left; }
-.disclaimer::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--rep); }
-.ticker-mobile { display: none; }
 
 /* ---------- section heads ---------- */
 .section { padding: clamp(96px, 12vw, 160px) 0 0; }
@@ -167,7 +121,6 @@ strong.t-turb, strong.t-fc, strong.t-rep, strong.t-wind, strong.t-blue, b.t-turb
 .k-wind { color: #5bbcec; } .k-fc { color: #c98cf0; } .k-turb { color: var(--turb-hi); } .k-rep { color: #ff8fb3; } .k-blue { color: var(--accent); }
 .section h3 { margin: 0; max-width: 860px; font-size: clamp(40px, 6vw, 72px); line-height: 1.02; font-weight: 700; letter-spacing: -0.045em; }
 .section .sub { margin: 20px 0 0; max-width: 700px; font-size: clamp(17px, 1.5vw, 21px); color: var(--ink-2); }
-.panel { border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); }
 
 /* ---------- how it works ---------- */
 .how { margin-top: 40px; display: grid; grid-template-columns: 1.35fr 1fr; gap: 40px; align-items: stretch; }
@@ -185,12 +138,10 @@ strong.t-turb, strong.t-fc, strong.t-rep, strong.t-wind, strong.t-blue, b.t-turb
 .thr-reset { border: 0; background: none; color: var(--accent); font: inherit; cursor: pointer; padding: 0; }
 .thr-reset:hover { text-decoration: underline; }
 .chart-card { padding: 24px 24px 18px; position: relative; }
-.chart-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+
 .chart-title { margin: 0; font-size: 15px; font-weight: 600; }
 .chart-sub { margin: 4px 0 0; font-size: 13px; color: var(--ink-2); }
-.seg { display: inline-flex; padding: 3px; border-radius: 980px; background: var(--surface-2); border: 1px solid var(--line); }
-.seg button { border: 0; background: transparent; color: var(--ink-2); font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 980px; cursor: pointer; transition: background 0.25s, color 0.25s; }
-.seg button[aria-pressed="true"] { background: var(--surface-3); color: var(--ink); box-shadow: 0 1px 0 rgba(255,255,255,0.06) inset; }
+
 svg.chart { width: 100%; height: auto; display: block; margin-top: 12px; overflow: visible; }
 svg.chart text { font: 11px var(--sans); fill: var(--ink-3); letter-spacing: 0; }
 svg.chart .gridl { stroke: rgba(255, 255, 255, 0.06); }
@@ -203,56 +154,23 @@ svg.chart .ptitle { fill: var(--ink-2); font-weight: 600; font-size: 11.5px; }
 .tip { position: absolute; z-index: 6; pointer-events: none; padding: 8px 10px; border-radius: 10px; font-size: 12.5px; line-height: 1.45; background: rgba(28, 28, 32, 0.95); border: 1px solid var(--line-2); color: var(--ink); white-space: nowrap; opacity: 0; transition: opacity 0.12s; }
 .tip.on { opacity: 1; }
 .steps { display: block; counter-reset: s; }
-.step { padding: 16vh 0 16vh 60px; position: relative; opacity: 0.32; transition: opacity 0.45s var(--ease); }
+.step { padding: 16vh 0 16vh 48px; position: relative; opacity: 0.32; transition: opacity 0.45s var(--ease); }
 .step.active { opacity: 1; }
 .step:first-child { padding-top: 6vh; }
-.step:first-child::before { top: 6vh; }
+.step:first-child::before { top: calc(6vh + 6px); }
 .step:last-child { padding-bottom: 28vh; }
 .step .try { margin-top: 14px; font-size: 14px; color: var(--accent); }
 .step::before {
-  counter-increment: s; content: counter(s); position: absolute; left: 0; top: 16vh; width: 32px; height: 32px; border-radius: 10px;
-  display: grid; place-items: center; font-size: 14px; font-weight: 700; color: #000; background: var(--c, var(--wind));
+  counter-increment: s; content: counter(s, decimal-leading-zero); position: absolute; left: 0; top: calc(16vh + 6px);
+  font: 600 13px/1 var(--mono); color: color-mix(in srgb, var(--c, var(--wind)) 60%, #ffffff); letter-spacing: 0.04em;
 }
 .step h5 { margin: 0 0 8px; font-size: 22px; font-weight: 650; letter-spacing: -0.02em; color: color-mix(in srgb, var(--c) 55%, #ffffff); }
 .step p { margin: 0; font-size: 16px; color: var(--ink-2); line-height: 1.55; max-width: 44ch; }
 
 /* ---------- bento ---------- */
-.bento { margin-top: 56px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
-.card {
-  position: relative; grid-column: span 2; padding: 30px; border-radius: var(--radius);
-  background: var(--surface); border: 1px solid var(--line); overflow: hidden; isolation: isolate;
-  transition: border-color 0.3s var(--ease), transform 0.4s var(--ease);
-}
-.card:hover { border-color: var(--line-2); transform: translateY(-2px); }
-.card.w3 { grid-column: span 3; } .card.w4 { grid-column: span 4; }
-.card::after { content: none; }
-.icon { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; margin-bottom: 18px; background: var(--surface-2); border: 1px solid var(--line); }
-.icon svg { width: 22px; height: 22px; }
-.card .label { font-size: 14px; font-weight: 600; color: var(--ink-2); margin: 0 0 14px; }
-.card .figure { margin: 0; font-size: clamp(42px, 5vw, 64px); line-height: 1; font-weight: 700; letter-spacing: -0.05em; }
-.card .figure small { font-size: 0.42em; letter-spacing: -0.02em; font-weight: 600; color: var(--ink-2); margin-left: 4px; }
-.card p.body { margin: 14px 0 0; color: var(--ink-2); font-size: 15.5px; line-height: 1.5; max-width: 48ch; }
-.card p.body strong { color: var(--ink); font-weight: 500; }
-.card .label { color: color-mix(in srgb, var(--fig, #a1a1a6) 70%, #ffffff); }
-.card .figure { color: color-mix(in srgb, var(--fig, #ffffff) 55%, #ffffff); }
-.chip { display: inline-flex; align-items: center; gap: 10px; margin-top: 20px; padding: 10px 14px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line); font-family: var(--mono); font-size: 14px; }
-.chip .prompt { color: var(--accent); }
-.hexes { position: absolute; right: -18px; bottom: -22px; width: 190px; z-index: -1; }
-.hexes path { fill: none; stroke: rgba(255, 255, 255, 0.09); stroke-width: 1.2; }
-.hexes path.on { stroke: var(--fc); fill: rgba(179, 92, 232, 0.18); }
-.hexes path.on2 { stroke: var(--fc); fill: rgba(179, 92, 232, 0.42); }
-.tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
-.tagline { font-size: 13px; color: var(--ink-2); padding: 6px 12px; border-radius: 980px; border: 1px solid var(--line-2); }
 
 /* ---------- results ---------- */
-.stats { margin-top: 56px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-.stat { padding: 26px; border-radius: var(--radius-sm); background: var(--surface); border: 1px solid var(--line); position: relative; overflow: hidden; }
 
-.stat .num { font-size: clamp(40px, 4.4vw, 56px); font-weight: 700; letter-spacing: -0.05em; line-height: 1; font-variant-numeric: tabular-nums; }
-.stat .num small { font-size: 0.42em; color: var(--ink-2); font-weight: 600; letter-spacing: -0.02em; margin-left: 3px; }
-.stat .what { margin: 12px 0 0; font-size: 15px; font-weight: 600; }
-.stat .ctx { margin: 6px 0 0; font-size: 14px; color: var(--ink-2); line-height: 1.45; }
-.charts { margin-top: 16px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .bars { margin-top: 18px; display: grid; gap: 12px; position: relative; }
 .bar-row { display: grid; grid-template-columns: 112px 1fr 44px; gap: 10px; align-items: center; font-size: 13px; cursor: default; }
 .bar-name { color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -267,20 +185,6 @@ svg.chart .ptitle { fill: var(--ink-2); font-weight: 600; font-size: 11.5px; }
 .bars-wrap { position: relative; padding-top: 30px; }
 .ref-layer { position: absolute; left: 122px; right: 54px; top: 30px; bottom: 0; pointer-events: none; }
 
-.warn {
-  margin-top: 16px; display: grid; grid-template-columns: auto 1fr; gap: 20px 24px; padding: clamp(28px, 4vw, 44px);
-  border-radius: var(--radius); background: #f5f5f7; color: #1d1d1f; position: relative; overflow: hidden;
-}
-
-.warn svg { width: 36px; height: 36px; margin-top: 4px; }
-.warn h4 { margin: 0 0 10px; font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
-.warn .say { margin: 0; font-size: clamp(21px, 2.4vw, 30px); line-height: 1.25; font-weight: 600; letter-spacing: -0.025em; }
-.warn .nums { grid-column: 2; display: flex; flex-wrap: wrap; gap: 12px 40px; padding-top: 18px; border-top: 1px solid rgba(0, 0, 0, 0.12); }
-.warn .nums div { font-size: 15px; color: #424245; max-width: 32ch; }
-.warn .nums b { display: block; font-size: 34px; letter-spacing: -0.04em; color: #1d1d1f; line-height: 1.1; }
-.warn .why { grid-column: 2; margin: 0; font-size: 15px; color: #424245; max-width: 80ch; }
-.rtabs { margin-top: 48px; }
-.rt-seg { margin: 0 auto; display: flex; width: max-content; max-width: 100%; overflow-x: auto; }
 .rpanel { display: none; margin-top: 22px; grid-template-columns: 0.85fr 1.4fr; gap: 18px; align-items: stretch; }
 .rpanel.on { display: grid; animation: panel-in 0.55s var(--ease); }
 @keyframes panel-in { from { opacity: 0; transform: translateY(14px); } }
@@ -288,46 +192,23 @@ svg.chart .ptitle { fill: var(--ink-2); font-weight: 600; font-size: 11.5px; }
 .rbig .num { color: color-mix(in srgb, var(--c) 60%, #ffffff); font-size: clamp(56px, 6vw, 84px); font-weight: 700; letter-spacing: -0.05em; line-height: 1; font-variant-numeric: tabular-nums; }
 .rbig .num small { font-size: 0.4em; color: var(--ink-2); font-weight: 600; letter-spacing: -0.02em; margin-left: 4px; }
 .rbig .what { margin: 14px 0 0; font-size: 17px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-.rbig .what::before { content: ""; width: 10px; height: 10px; border-radius: 3px; background: var(--c); }
-.rbig .ctx { margin: 8px 0 0; font-size: 15px; color: var(--ink-2); line-height: 1.5; }
+
 .budget { margin-top: 26px; display: grid; gap: 22px; }
 .bud-row { display: grid; gap: 8px; font-size: 14px; color: var(--ink-2); }
 .bud-row b { color: var(--ink); }
 .bud-track { position: relative; height: 12px; border-radius: 6px; background: var(--surface-2); overflow: hidden; }
 .bud-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0; min-width: 3px; border-radius: 6px; background: var(--wind); transition: width 1.1s var(--ease); }
-.limits { margin-top: 16px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; align-items: start; }
-.limit { border-radius: var(--radius-sm); border: 1px solid var(--line); background: var(--surface); transition: border-color 0.25s; }
-.limit:hover, .limit[open] { border-color: var(--line-2); }
-.limit summary { list-style: none; cursor: pointer; padding: 18px 22px; font-size: 16px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-.limit summary::-webkit-details-marker { display: none; }
-.limit summary::after { content: "+"; font-size: 20px; font-weight: 400; color: var(--ink-2); transition: transform 0.3s var(--ease); }
-.limit[open] summary::after { transform: rotate(45deg); }
-.limit[open] p { animation: panel-in 0.4s var(--ease); }
-
-.limit p { margin: 0; padding: 0 22px 18px; font-size: 14.5px; color: var(--ink-2); line-height: 1.55; }
 
 /* ---------- cases ---------- */
 .cases { margin-top: 56px; padding: 26px; position: relative; }
-.case-meta { margin: 14px 0 0; display: flex; flex-wrap: wrap; gap: 10px 28px; font-size: 14px; color: var(--ink-2); }
-.case-meta b { color: var(--ink); font-weight: 600; }
-.case-note { margin: 14px 0 0; font-size: 15px; color: var(--ink-2); max-width: 80ch; }
-.case-note b { color: var(--ink); font-weight: 600; }
-.case-note b.hit { color: var(--good-t); } .case-note b.miss { color: var(--rep-t); } .case-note b.late { color: var(--turb-t); }
-.case-ctrl { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
 .case-legend { margin: 6px 0 0; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12.5px; color: var(--ink-2); }
 .case-legend span { display: inline-flex; align-items: center; gap: 6px; }
 
 /* ---------- terminal + run ---------- */
-.term { margin: 56px 0 0; border-radius: 14px; overflow: hidden; background: var(--term);
-  box-shadow: 0 0 0 1px rgba(255,255,255,0.10), inset 0 1px 0 rgba(255,255,255,0.06), 0 30px 60px -12px rgba(0,0,0,0.9); }
-.term-bar { position: relative; display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; background: linear-gradient(#1f2024, #18191c); border-bottom: 1px solid rgba(0,0,0,0.6); }
-.term-dot { width: 12px; height: 12px; border-radius: 50%; }
-.term-dot:nth-child(1) { background: #ff5f57; } .term-dot:nth-child(2) { background: #febc2e; } .term-dot:nth-child(3) { background: #28c840; }
-.term-title { position: absolute; left: 50%; transform: translateX(-50%); font-size: 13px; color: var(--ink-3); white-space: nowrap; font-weight: 500; }
-.term a { display: block; cursor: zoom-in; }
-.term img { width: 100%; height: auto; aspect-ratio: 1180 / 582; background: var(--term); }
+
 .run { margin-top: 48px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); overflow: hidden; }
-.run-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px 14px 24px; border-bottom: 1px solid var(--line); font-size: 13px; color: var(--ink-3); }
+
 .copy { font: 600 13px var(--sans); color: var(--accent); background: var(--accent-soft); border: 0; border-radius: 980px; padding: 6px 14px; cursor: pointer; }
 .run pre { margin: 0; padding: 22px 24px 26px; overflow-x: auto; font: 15px/1.9 var(--mono); }
 .run pre .c { color: var(--ink-3); } .run pre .p { color: var(--accent); user-select: none; }
@@ -343,12 +224,11 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
 /* ---------- motion: opacity + transform only ---------- */
 .js .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.9s var(--ease), transform 0.9s var(--ease); transition-delay: var(--d, 0ms); }
 .js .reveal.in { opacity: 1; transform: none; }
-.js .mapstage.reveal { transform: translateY(40px) scale(0.97); }
-.js .mapstage.reveal.in { transform: none; }
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .hero::before { animation: none; }
-  .js .reveal, .js .mapstage.reveal { opacity: 1; transform: none; transition: none; }
+
+  .js .reveal { opacity: 1; transform: none; transition: none; }
   .bar-fill { transition: none; }
 }
 
@@ -416,11 +296,11 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
 @keyframes chip-in { from { opacity: 0; transform: translateY(8px) scale(0.96); } }
 .tw { animation: twinkle 3.6s ease-in-out infinite; }
 @keyframes twinkle { 50% { opacity: 0.06; } }
-.breathe { transform-box: fill-box; transform-origin: center; animation: breathe 2.6s ease-in-out infinite; }
+
 @keyframes breathe { 50% { transform: scale(1.07); } }
 .illus .short { display: none; }
 #s-stars .tw { animation: twinkle 4.2s ease-in-out infinite; }
-.illus { color: #fff; background: rgba(3, 14, 42, 0.72); padding: 4px 10px; border-radius: 980px; }
+.illus { color: rgba(255, 255, 255, 0.62); }
 .scroll-hint { color: #fff; text-shadow: 0 1px 10px rgba(3, 14, 42, 0.7); }
 .cap.intro .tagline-big.grad { color: #e6eefb; }
 .cap p { color: #eaf0fa; }
@@ -436,12 +316,12 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
 .scene.compact .lw { display: none; }
 .illus { position: absolute; z-index: 2; right: 22px; bottom: 16px; font-size: 12px; color: var(--ink-3); }
 .cap .pill { margin-top: 22px; }
-.live-head h2 { margin: 0 auto; font-size: clamp(40px, 6vw, 72px); line-height: 1.02; font-weight: 700; letter-spacing: -0.045em; }
+
 .still *, .still *::before { transition: none !important; }
 .still .facts > span { animation: none !important; }
-.still .rpanel.on, .still .limit[open] p { animation: none !important; }
+.still .rpanel.on { animation: none !important; }
 @media (prefers-reduced-motion: reduce) {
-  .waves path, .wind-arrow, .ring, .scroll-hint svg, .beacon, .strobe, .tw, #s-stars .tw, .breathe, .cap.on .facts > span { animation: none; }
+  .waves path, .wind-arrow, .ring, .scroll-hint svg, .beacon, .strobe, .tw, #s-stars .tw, .cap.on .facts > span { animation: none; }
 }
 @media (max-width: 720px) {
   .cap { top: 9vh; }
@@ -456,45 +336,147 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
   .scroll-hint { bottom: 68px; }
 }
 
-/* ---------- responsive ---------- */
-@media (max-width: 1080px) {
-  .ticker { display: none; }
-  .ticker-mobile { display: block; margin-top: 16px; padding: 16px 18px; }
-  .ticker-mobile h4 { margin: 0 0 10px; font-size: 12px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.02em; }
-  .ticker-mobile ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: 13px; color: var(--ink-2); }
-  .ticker-mobile li b { color: var(--ink); }
-  .ticker-mobile time { color: var(--ink-3); margin-right: 6px; }
-  .how { grid-template-columns: 1fr; gap: 16px; }
-  .how-visual > .chart-card { position: static; }
-  .step, .step:first-child, .step:last-child { padding: 16px 0 16px 52px; opacity: 1; }
-  .step::before, .step:first-child::before { top: 16px; }
-  .rpanel { grid-template-columns: 1fr; }
-  .charts { grid-template-columns: 1fr 1fr; }
-  .bento { grid-template-columns: repeat(2, 1fr); }
-  .card, .card.w3 { grid-column: span 1; } .card.w4 { grid-column: span 2; }
-  .card.hex-card { padding-bottom: 150px; }
-  .stats { grid-template-columns: repeat(2, 1fr); }
-  .limits { grid-template-columns: repeat(2, 1fr); }
+/* ================= one night sky, scroll-driven scenes: no cards, pills or tabs ================= */
+body { background: #01030a; }
+.sky { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; }
+.pill, .pill.big { display: inline-flex; align-items: center; gap: 6px; height: auto; padding: 0 0 3px; border-radius: 0; background: none; color: var(--blue-t); font-weight: 600; border-bottom: 1.5px solid rgba(116, 184, 255, 0.45); }
+.pill:hover { background: none; border-bottom-color: var(--blue-t); }
+.pill.big { font-size: 17px; }
+.nav .pill { color: var(--ink); border-bottom-color: rgba(255, 255, 255, 0.35); }
+.skip { background: none !important; border: 0 !important; padding: 0 !important; height: auto !important; color: var(--ink-2) !important; text-decoration: underline; text-underline-offset: 4px; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+.copy { margin-top: 18px; padding: 0 0 3px; border-radius: 0; background: none; color: var(--blue-t); border-bottom: 1.5px solid rgba(116, 184, 255, 0.45); }
+.copy:hover { background: none; }
+.scroll-hint svg { display: none; }
+.scene { position: relative; }
+.scene > .pin { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
+.scap { position: absolute; opacity: 0; transform: translateY(14px); transition: opacity 0.3s ease, transform 0.5s var(--ease); pointer-events: none; }
+.scap.on { opacity: 1; transform: none; transition-delay: 0.15s; pointer-events: auto; }
+.scap h2, .scap h4 { margin: 0; font-size: clamp(28px, 3.2vw, 46px); line-height: 1.06; font-weight: 700; letter-spacing: -0.035em; text-wrap: balance; }
+.scap p { margin: 14px 0 0; font-size: 17px; line-height: 1.55; color: var(--ink-2); text-wrap: pretty; }
+.scap p b { color: var(--ink); }
+
+/* live map: the whole screen is the map; scrolling moves through the hour */
+#live { height: 480vh; }
+.map-area { position: absolute; left: 34%; right: 0; top: 56px; bottom: 0; }
+.map-area canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.map-side { position: absolute; left: max(5vw, 20px); top: calc(56px + 7vh); bottom: 5vh; width: min(29vw, 440px); display: flex; flex-direction: column; gap: 24px; }
+.map-caps { position: relative; flex: 1; }
+.map-caps .scap { left: 0; right: 0; top: 0; }
+.map-hud .clock { font: 600 clamp(34px, 3.4vw, 52px)/1 var(--sans); letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
+.map-hud .counts { margin-top: 12px; display: grid; gap: 4px; font-size: 13.5px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.map-hud .counts b { font-weight: 650; color: var(--ink); }
+.map-feed { list-style: none; margin: 14px 0 0; padding: 12px 0 0; border-top: 1px solid var(--line); display: grid; gap: 6px; font: 12px/1.45 var(--mono); color: var(--ink-2); min-height: 6.8em; }
+.map-feed time { color: var(--ink-3); margin-right: 6px; }
+.map-legend { position: absolute; right: 24px; bottom: 22px; display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 12px; color: var(--ink-2); }
+.map-legend span { display: inline-flex; align-items: center; gap: 7px; }
+
+/* how it works: the chart floats on the sky */
+#how .chart-card, .rvis .chart-card { padding: 0; background: none; border: 0; }
+
+/* architecture: a pipeline that lights stage by stage */
+#architecture { height: 560vh; }
+.pipe-pin { display: flex; flex-direction: column; justify-content: center; }
+.pipe-head { text-align: center; }
+.pipe-head h3 { margin: 0 auto; max-width: 900px; font-size: clamp(34px, 4.6vw, 60px); line-height: 1.04; font-weight: 700; letter-spacing: -0.045em; }
+.pipe { position: relative; width: min(1120px, calc(100% - 32px)); margin: 8vh auto 0; display: grid; grid-template-columns: repeat(7, 1fr); }
+.pipe-line { position: absolute; left: calc(100% / 14); right: calc(100% / 14); top: 9px; height: 2px; background: rgba(255, 255, 255, 0.12); }
+.pipe-fill { position: absolute; inset: 0; background: rgba(245, 245, 247, 0.6); transform-origin: 0 50%; transform: scaleX(0); transition: transform 0.6s var(--ease); }
+.pipe-pulse { position: absolute; top: -3px; left: 0; width: 8px; height: 8px; border-radius: 50%; background: #fff; animation: flowx 3.2s linear infinite; }
+@keyframes flowx { 0% { left: 0; opacity: 0; } 8% { opacity: 1; } 92% { opacity: 1; } 100% { left: calc(100% - 8px); opacity: 0; } }
+.node { position: relative; text-align: center; padding: 0 6px; }
+.node i { display: block; width: 20px; height: 20px; margin: 0 auto 16px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.28); background: #01030a; transition: background 0.35s, border-color 0.35s, transform 0.35s var(--ease); }
+.node.done i { border-color: color-mix(in srgb, var(--c) 70%, #fff); background: color-mix(in srgb, var(--c) 35%, #01030a); }
+.node.on i { border-color: var(--c); background: var(--c); transform: scale(1.35); }
+.node b { display: block; font-size: 14.5px; font-weight: 600; color: var(--ink-3); transition: color 0.3s; }
+.node > span { display: block; margin-top: 4px; font: 12px var(--mono); color: var(--ink-3); transition: color 0.3s; }
+.node.on b, .node.done b { color: var(--ink); }
+.node.on > span { color: color-mix(in srgb, var(--c) 60%, #fff); }
+.pipe-detail { position: relative; margin-top: 8vh; min-height: 28vh; }
+.pipe-detail .scap { left: 16px; right: 16px; text-align: center; }
+.pipe-detail .scap p { max-width: 760px; margin-left: auto; margin-right: auto; font-size: 18px; }
+
+/* results: one pinned visual, steps scroll beside it */
+.rvis { position: sticky; top: 96px; }
+.rvis .rpanel, .rvis .rpanel.on { display: none; margin: 0; }
+.rvis .rpanel.on { display: block; animation: panel-in 0.5s var(--ease); }
+.rvis .rbig { background: none; border: 0; padding: 0 0 22px; border-radius: 0; }
+.statement { margin-top: 14vh; max-width: 980px; }
+.statement .say { margin: 0; font-size: clamp(26px, 3.4vw, 44px); line-height: 1.15; font-weight: 650; letter-spacing: -0.03em; text-wrap: balance; }
+.statement .nums { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 18px 64px; }
+.statement .nums div { font-size: 15px; color: var(--ink-2); max-width: 30ch; }
+.statement .nums b { display: block; font-size: clamp(46px, 5vw, 66px); letter-spacing: -0.04em; line-height: 1.05; }
+.statement .why { margin: 24px 0 0; max-width: 72ch; color: var(--ink-2); font-size: 16px; }
+.limits2 { margin: 9vh 0 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 40px; }
+.limits2 > div { padding: 18px 0 20px; border-top: 1px solid var(--line-2); }
+.limits2 dt { font-weight: 650; font-size: 16px; }
+.limits2 dd { margin: 6px 0 0; color: var(--ink-2); font-size: 14.5px; line-height: 1.55; }
+
+/* case studies: one scene each */
+.cscene { height: 260vh; }
+.cpin { display: flex; align-items: center; }
+.cpin .wrap { width: min(980px, calc(100% - 32px)); position: relative; }
+.ctitle { margin: 6px 0 0; font-size: clamp(26px, 3vw, 40px); letter-spacing: -0.03em; line-height: 1.1; }
+.cmeta { margin: 10px 0 0; color: var(--ink-2); font-size: 14.5px; display: flex; flex-wrap: wrap; gap: 6px 22px; }
+.cmeta b { color: var(--ink); }
+.cpin svg.chart { margin-top: 8px; }
+.cnote { margin: 10px 0 0; font-size: 17px; color: var(--ink-2); min-height: 3.2em; }
+.cnote b { color: var(--ink); }
+.cnote b.hit { color: var(--good-t); } .cnote b.miss { color: var(--rep-t); } .cnote b.late { color: var(--turb-t); }
+
+/* the text output and the commands */
+#output .map-caption { text-align: left; margin: 16px 0 0; }
+.sub code, .scap code { white-space: nowrap; }
+.gif-plain { display: block; margin-top: 32px; border: 1px solid var(--line-2); border-radius: 4px; overflow: hidden; }
+.gif-plain img { width: 100%; height: auto; aspect-ratio: 1180 / 582; background: #0a0c0f; }
+.runcode { margin: 30px 0 0; padding: 0; font: 16px/2 var(--mono); overflow-x: auto; }
+.runcode .c { color: var(--ink-3); } .runcode .p { color: var(--blue-t); user-select: none; }
+
+@media (max-width: 720px) {
+  .rvis { position: static; }
+  .rvis .rpanel { display: block !important; margin-bottom: 48px; animation: none; }
+  .rgrid .steps { display: none; }
 }
+@media (max-width: 900px) {
+  .map-area { left: 0; top: 50%; }
+  .map-side { width: auto; right: 20px; top: calc(56px + 3vh); bottom: 50%; gap: 8px; }
+  .map-hud .counts, .map-feed { display: none; }
+  .map-hud .clock { font-size: 26px; }
+  .map-legend { left: 16px; right: 16px; bottom: 12px; gap: 6px 12px; font-size: 11px; }
+  .scap h2, .scap h4 { font-size: 24px; }
+  .scap p { font-size: 15px; }
+  .node { position: static; }
+  .node b, .node > span { visibility: hidden; }
+  .node.on b, .node.on > span { visibility: visible; position: absolute; left: 0; right: 0; text-align: center; }
+  .node.on b { top: 38px; } .node.on > span { top: 60px; }
+  .pipe-detail .scap p { font-size: 15px; }
+  .limits2 { grid-template-columns: 1fr; }
+}
+
+/* ---------- responsive ---------- */
 @media (max-width: 720px) {
   .nav-links { display: none; }
-  .map { aspect-ratio: 4 / 3.4; }
-  .hud .counts { display: none; }
-  .legend { bottom: 60px; left: 14px; gap: 6px 12px; }
-  .speed { display: none; }
-  .bento, .stats, .limits, .charts { grid-template-columns: 1fr; }
-  .card, .card.w3, .card.w4 { grid-column: auto; }
-  .card { padding: 26px; }
-  .warn { grid-template-columns: 1fr; }
-  .warn .nums, .warn .why { grid-column: auto; }
-  .term-title { display: none; }
+  /* how it works: the chart pins under the nav, the steps scroll beneath it */
+  .how { display: block; }
+  #how .how-visual { position: sticky; top: 56px; z-index: 2; background: #01030a; padding: 10px 0 6px; box-shadow: 0 18px 18px -6px #01030a; }
+  #how .how-visual > .chart-card { position: static; }
+  #how .chart-sub, #thr-read { display: none; }
+  .step, .step:first-child { padding: 26vh 0 26vh 40px; }
+  .step:last-child { padding-bottom: 40vh; }
+  .step::before, .step:first-child::before { top: calc(26vh + 6px); }
+  .rpanel { grid-template-columns: 1fr; }
   .bar-row { grid-template-columns: 96px 1fr 40px; }
   .ref-layer { left: 106px; right: 50px; }
+  /* case charts are drawn 760 wide: larger type so it reads at phone width */
+  .runcode { font-size: 14px; line-height: 1.6; white-space: pre-wrap; }
+  .runcode .c { display: block; }
+  .cpin svg.chart { overflow: visible; }
+  .cpin svg.chart text, .cpin svg.chart .ptitle { font-size: 21px; }
 }
 </style>
 </head>
 <body>
 
+<canvas class="sky" id="sky" aria-hidden="true"></canvas>
 <nav class="nav" id="nav">
   <div class="wrap">
     <a class="brand" href="#top" aria-label="Horus, back to top">
@@ -647,170 +629,103 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
     </div>
   </section>
 
-  <!-- ===================== LIVE MAP ===================== -->
-  <section class="hero" id="live">
-    <div class="wrap live-head">
-      <p class="eyebrow reveal">The real thing</p>
-      <h2 class="reveal" style="--d:60ms">An hour of <span class="t-wind">real US traffic</span>.</h2>
-      <p class="lede reveal" style="--d:120ms">
-        Every airliner broadcasts its vertical rate about once a second. Horus reads it from
-        <strong class="t-wind">public ADS-B data</strong> (the adsb.lol archive and OpenSky), scales it by what
-        <strong class="t-turb">each aircraft type</strong> normally shows in smooth air, <strong class="t-fc">forecasts</strong> the next
-        15 minutes on a 3D grid, and checks itself against <strong class="t-rep">pilot reports</strong> it never sees.
-      </p>
-      <div class="cta reveal" style="--d:180ms">
-        <a class="pill big" href="#how">How it works</a>
-        <a class="link-arrow" data-repo-path="" href="#">View on GitHub <span aria-hidden="true">›</span></a>
-      </div>
-    </div>
-
-    <div class="mapstage reveal" style="--d:240ms">
-      <div class="map" id="map" role="img" aria-label="Animated map of the continental US. Dots are real aircraft above 20,000 ft on 1 January 2026 between 15:00 and 16:00 UTC. Amber pulses are turbulence detections, purple hexagons are forecast cells, red triangles are pilot reports. The event list beside it describes each event in words.">
+  <!-- ===================== LIVE MAP: scrolling moves through the real hour ===================== -->
+  <section class="scene" id="live" aria-label="An hour of real US traffic">
+    <div class="pin">
+      <div class="map-area" id="map" role="img" aria-label="Map of the continental US: real aircraft above 20,000 ft on 1 January 2026, 15:00 to 16:00 UTC, with turbulence detections, forecast cells and pilot reports. The text beside it describes each kind of mark.">
         <canvas></canvas>
-        <div class="hud">
-          <div class="clock" id="clock">15:00Z</div>
-          <div class="date">1 January 2026 · a test day the models never saw</div>
-          <div class="counts">
-            <span><b id="c-ac">0</b> aircraft above FL200</span>
-            <span><b id="c-det">0</b> turbulence detections so far</span>
-            <span><b id="c-fc">0</b> forecast cells above 5× normal</span>
-            <span><b id="c-rep">0</b> pilot reports checked</span>
-          </div>
-        </div>
-        <div class="legend">
-          <span><i class="sw alt"></i>aircraft by altitude, FL200 → FL450</span>
-          <span><i class="sw turb"></i>turbulence detected</span>
-          <span><i class="sw fc"></i>forecast cell</span>
-          <span><i class="sw rep"></i>pilot report</span>
-        </div>
-        <aside class="ticker" aria-live="off">
-          <h4>What Horus is saying</h4>
-          <ol id="ticker"></ol>
-        </aside>
-        <div class="controls">
-          <button class="play" id="play" type="button" aria-label="Pause">
-            <svg viewBox="0 0 14 14" aria-hidden="true"><path id="play-icon" d="M3 2h3v10H3zM8 2h3v10H8z" fill="currentColor"/></svg>
-          </button>
-          <input class="scrub" id="scrub" type="range" min="0" max="3600" step="10" value="0" aria-label="Time in the replayed hour">
-          <span class="speed">90× real time</span>
-        </div>
         <div class="maptip" id="maptip"></div>
       </div>
-      <div class="panel ticker-mobile"><h4>What Horus is saying</h4><ol id="ticker-m"></ol></div>
-      <p class="map-caption">
-        Real data, not a mock-up: every dot is an aircraft that was above FL200, coloured by its altitude, over the US on
-        1 January 2026, 15:00–16:00 UTC, replayed through the same code as the live loop.
-        Detections appear at the minute they happened; hover a pulse or a triangle for details.
-      </p>
-      <div style="text-align:center"><span class="disclaimer">Research prototype. Not for flight decisions or any operational use.</span></div>
+      <div class="map-side">
+        <div class="map-caps">
+          <div class="scap on" data-from="0">
+            <p class="kicker k-wind">The real thing</p>
+            <h2>An hour of <span class="t-wind">real US traffic</span>.</h2>
+            <p>1 January 2026, 15:00 to 16:00 UTC, a test day the models never saw, replayed through the same code as the live loop. <b>Scroll to move through the hour.</b></p>
+          </div>
+          <div class="scap" data-from="0.16"><h2>Every dot is an <span class="t-wind">aircraft</span> above FL200.</h2><p>Coloured by altitude, from deep teal at FL200 to white at FL450. About <b class="t-wind" data-fill="ac-peak2">2,400</b> are in the air at once.</p></div>
+          <div class="scap" data-from="0.34"><h2>Amber: an aircraft's own data <span class="t-turb">turned rough</span>.</h2><p>Each pulse is a minute whose index crossed the threshold, at the aircraft's real position.</p></div>
+          <div class="scap" data-from="0.52"><h2>Purple: the <span class="t-fc">forecast</span> it lights.</h2><p>The cell's odds jump, then fade and drift with the GFS wind over the next minutes.</p></div>
+          <div class="scap" data-from="0.7"><h2>Rose: a <span class="t-rep">pilot report</span>, checked.</h2><p>Never fed in. Each one is compared with what Horus had seen nearby in the minutes before. Hover any mark for its details.</p></div>
+          <div class="scap" data-from="0.88"><h2>The hour, <span class="t-fc">in numbers</span>.</h2><p id="map-sum"></p></div>
+        </div>
+        <div class="map-hud">
+          <div class="clock" id="clock">15:00Z</div>
+          <div class="counts">
+            <span><b id="c-ac">0</b> aircraft above FL200</span>
+            <span><b id="c-det" class="t-turb">0</b> turbulence detections</span>
+            <span><b id="c-fc" class="t-fc">0</b> forecast cells above 5× normal</span>
+            <span><b id="c-rep" class="t-rep">0</b> pilot reports checked</span>
+          </div>
+          <ol class="map-feed" id="map-feed" aria-live="off"></ol>
+        </div>
+      </div>
+      <div class="map-legend" aria-hidden="true">
+        <span><i class="sw alt"></i>aircraft by altitude</span>
+        <span><i class="sw turb"></i>turbulence</span>
+        <span><i class="sw fc"></i>forecast cell</span>
+        <span><i class="sw rep"></i>pilot report</span>
+      </div>
     </div>
   </section>
 
-  <!-- ===================== HOW IT WORKS ===================== -->
+  <!-- ===================== HOW IT WORKS: the chart stays, the steps scroll ===================== -->
   <section class="section" id="how">
     <div class="wrap">
       <p class="kicker k-wind reveal">How it works</p>
       <h3 class="reveal" style="--d:60ms">From a <span class="t-turb">jittery number</span> to a <span class="t-fc">forecast</span>.</h3>
-      <p class="sub reveal" style="--d:120ms">
-        The chart is real: two Boeing jets of the same type at a similar level, the same half hour.
-        One flew through rough air. Switch between them.
-      </p>
+      <p class="sub reveal" style="--d:120ms">The chart is real: two Boeing 737-800s at a similar level in the same half hour. One flew through rough air. Scroll, and the steps beside it walk through what Horus does.</p>
       <div class="how">
-        <div class="how-visual"><div class="panel chart-card reveal" id="signal">
-          <div class="chart-head">
-            <div>
-              <p class="chart-title">Vertical rate, then the per-minute index</p>
-              <p class="chart-sub" id="sig-sub">ft/min as broadcast · index = roughness ÷ the type's smooth-air scale</p>
-            </div>
-            <div class="seg" role="group" aria-label="Choose aircraft">
-              <button type="button" data-sig="turbulent" aria-pressed="true">Through turbulence</button>
-              <button type="button" data-sig="smooth" aria-pressed="false">Smooth air</button>
-            </div>
-          </div>
+        <div class="how-visual"><div class="chart-card" id="signal">
+          <p class="chart-title">Vertical rate, then the per-minute index</p>
+          <p class="chart-sub" id="sig-sub">ft/min as broadcast · index = roughness ÷ the type's smooth-air scale</p>
           <svg class="chart" id="sig-svg" viewBox="0 0 760 380" role="img" aria-label="Two panels: vertical rate over 30 minutes, and per-minute index bars against the detection threshold."></svg>
           <p class="chart-foot" id="sig-foot"></p>
           <p class="chart-foot" id="thr-read"></p>
           <div class="tip" id="sig-tip"></div>
         </div></div>
         <div class="steps">
-          <div class="step" data-step="1" style="--c:var(--wind)"><h5>Read the broadcast</h5><p>Vertical rate, altitude and position from public ADS-B. Rounded to 64 ft/min, and the archive only stores changes of 200 ft/min or more.</p></div>
-          <div class="step" data-step="2" style="--c:#5bbcec"><h5>Keep level flight</h5><p>Climbs and descents are cut out. Over 120 s windows: above FL200, within 300 ft, median rate under 200 ft/min. The shaded minutes on the chart are the level ones Horus scores.</p></div>
-          <div class="step" data-step="3" style="--c:var(--fc)"><h5>Measure what's left</h5><p>Remove the slow trend, correct the rounding noise (Sheppard), and divide by what this aircraft type shows in smooth air. That gives one index bar per minute.</p></div>
-          <div class="step" data-step="4" style="--c:var(--turb)"><h5>Alarm, forecast, check</h5><p>An index at or above the threshold is a detection. It lights its ~45 km cell; the odds fade with a fitted half-life and drift with GFS winds. Pilot reports score it.</p><p class="try">Try it: drag the threshold line on the chart up or down.</p></div>
+          <div class="step" data-step="1" data-plane="turbulent" style="--c:var(--wind)"><h5>Read the broadcast</h5><p>Vertical rate, altitude and position from public ADS-B. Rounded to 64 ft/min, and the archive only stores changes of 200 ft/min or more.</p></div>
+          <div class="step" data-step="2" data-plane="turbulent" style="--c:#5bbcec"><h5>Keep level flight</h5><p>Climbs and descents are cut out. Over 120 s windows: above FL200, within 300 ft, median rate under 200 ft/min. The shaded minutes on the chart are the level ones Horus scores.</p></div>
+          <div class="step" data-step="3" data-plane="turbulent" style="--c:var(--fc)"><h5>Measure what's left</h5><p>Remove the slow trend, correct the rounding noise (Sheppard), and divide by what this aircraft type shows in smooth air. That gives one index bar per minute.</p></div>
+          <div class="step" data-step="4" data-plane="turbulent" style="--c:var(--turb)"><h5>Alarm, forecast, check</h5><p>An index at or above the threshold is a detection. It lights its ~45 km cell; the odds fade with a fitted half-life and drift with GFS winds. Pilot reports score it.</p><p class="try">Try it: drag the threshold line on the chart up or down.</p></div>
+          <div class="step" data-step="4" data-plane="smooth" style="--c:#82cff2"><h5>Same type, smooth air</h5><p>Another 737-800, a little higher, in the same half hour. Same code, same threshold: its index never comes close, so Horus stays quiet. That is what dividing by the type's smooth-air scale buys.</p></div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ===================== ARCHITECTURE ===================== -->
-  <section class="section" id="architecture">
-    <div class="wrap">
-      <p class="kicker k-blue reveal">The architecture</p>
-      <h3 class="reveal" style="--d:60ms">A sensor network made of <span class="t-wind">airliners</span>.</h3>
-      <p class="sub reveal" style="--d:120ms">One pure core runs both the offline benchmark and the live loop. Everything else feeds it or measures it.</p>
-
-      <div class="bento">
-        <article class="card w4 reveal" style="--glow:rgba(42,159,214,0.16)">
-          <div class="icon" style="--ic:rgba(42,159,214,0.18)"><svg viewBox="0 0 24 24" fill="none" stroke="#5bbcec" stroke-width="2" stroke-linecap="round"><path d="M4 7c0-1.7 3.6-3 8-3s8 1.3 8 3-3.6 3-8 3-8-1.3-8-3z"/><path d="M4 7v10c0 1.7 3.6 3 8 3s8-1.3 8-3V7"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg></div>
-          <p class="label" style="--fig:var(--wind)">Data ingestion</p>
-          <p class="figure" style="--fig:var(--wind)">3.5<small>GB</small></p>
-          <p class="body">streamed per archive day and <strong class="t-wind">never written to disk</strong>. Only continental-US traffic at FL180 and above is kept (about 220 MB a day), as typed, unit-checked Parquet.</p>
-          <span class="chip"><span class="prompt">$</span> make up</span>
-          <p class="body" style="margin-top:12px">One command installs the locked environment and fetches only what is missing: the archive day, pilot reports, aircraft types and GFS winds.</p>
-        </article>
-
-        <article class="card hex-card reveal" style="--d:80ms;--glow:rgba(179,92,232,0.16)">
-          <div class="icon" style="--ic:rgba(179,92,232,0.2)"><svg viewBox="0 0 24 24" fill="none" stroke="#c98cf0" stroke-width="2"><path d="M12 2.5l8.2 4.75v9.5L12 21.5l-8.2-4.75v-9.5z"/></svg></div>
-          <p class="label" style="--fig:var(--fc)">Spatial mapping</p>
-          <p class="figure" style="--fig:var(--fc)">~45<small>km</small></p>
-          <p class="body">hexagonal forecast cells, 2,000 ft deep: <span data-metric="grid_cells">8,388</span> cells × <span data-metric="fl_bins">13</span> flight levels over the continental US.</p>
-          <svg class="hexes" viewBox="0 0 190 170" aria-hidden="true">
-            <path d="M47 10l26 15v30l-26 15-26-15V25z"/><path d="M99 10l26 15v30l-26 15-26-15V25z"/><path d="M151 10l26 15v30l-26 15-26-15V25z"/>
-            <path class="on" d="M73 55l26 15v30l-26 15-26-15V70z"/><path class="on2" d="M125 55l26 15v30l-26 15-26-15V70z"/><path d="M177 55l26 15v30l-26 15-26-15V70z"/>
-            <path d="M47 100l26 15v30l-26 15-26-15v-30z"/><path class="on" d="M99 100l26 15v30l-26 15-26-15v-30z"/><path d="M151 100l26 15v30l-26 15-26-15v-30z"/>
-          </svg>
-        </article>
-
-        <article class="card reveal" style="--glow:rgba(208,122,0,0.14)">
-          <div class="icon" style="--ic:rgba(208,122,0,0.2)"><svg viewBox="0 0 24 24" fill="none" stroke="#ffad3b" stroke-width="2" stroke-linecap="round"><path d="M2 12h3l2-5 3 10 3-12 3 9 2-2h4"/></svg></div>
-          <p class="label" style="--fig:var(--turb)">Detection</p>
-          <p class="figure" style="--fig:var(--turb)">σ<small>/ type</small></p>
-          <p class="body">Level flight only. Trend removed, ADS-B's 64 ft/min rounding corrected, divided by the <strong class="t-turb">aircraft type's</strong> smooth-air scale.</p>
-        </article>
-
-        <article class="card reveal" style="--d:80ms;--glow:rgba(42,159,214,0.14)">
-          <div class="icon" style="--ic:rgba(42,159,214,0.18)"><svg viewBox="0 0 24 24" fill="none" stroke="#5bbcec" stroke-width="2" stroke-linecap="round"><path d="M3 8h11a3 3 0 1 0-3-3"/><path d="M3 12h15a3 3 0 1 1-3 3"/><path d="M3 16h7"/></svg></div>
-          <p class="label" style="--fig:var(--wind)">Forecast</p>
-          <!-- auto-generated metric (scripts/readme_numbers.py): cruise-band half-life -->
-          <p class="figure" style="--fig:var(--wind)"><span data-metric="t_half_mid">50.3</span><small>min</small></p>
-          <p class="body">half-life of a detection at cruise, fitted from data (<span data-metric="t_half_low">11.6</span> min lower down). The odds drift with GFS upper winds.</p>
-        </article>
-
-        <article class="card reveal" style="--d:160ms;--glow:rgba(41,151,255,0.14)">
-          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="#2997ff" stroke-width="2" stroke-linecap="round"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg></div>
-          <p class="label" style="--fig:var(--accent)">Efficiency</p>
-          <!-- auto-generated metric (scripts/readme_numbers.py): grid update p95 -->
-          <p class="figure" style="--fig:var(--accent)"><span data-metric="grid_p95_ms">32.3</span><small>ms</small></p>
-          <p class="body">to update the whole grid for <strong class="t-blue">10,000 aircraft</strong> (p95) on an 8 GB M1. Python and NumPy, a <code>uv</code> lockfile, no Docker.</p>
-        </article>
-
-        <article class="card w3 reveal" style="--glow:rgba(179,92,232,0.12)">
-          <p class="label" style="--fig:var(--fc)">Offline equals live</p>
-          <p class="figure" style="font-size:clamp(34px,4vw,50px);--fig:var(--fc)">Bit-identical.</p>
-          <p class="body">A test replays a recorded half hour of real traffic through both the live loop and the offline pipeline, and requires the same grid, to the last bit.</p>
-        </article>
-
-        <article class="card w3 reveal" style="--d:80ms;--glow:rgba(255,69,58,0.10)">
-          <p class="label" style="--fig:var(--rep)">Engineering rigour</p>
-          <p class="figure" style="font-size:clamp(34px,4vw,50px);--fig:var(--rep)">Nothing leaks.</p>
-          <p class="body">Fitted on December, scored on January. A leakage test fails if a test date reaches any fitted artefact, and every modelling choice has a benchmark row.</p>
-          <div class="tags"><span class="tagline">time split</span><span class="tagline">leakage test</span><span class="tagline">recorded real fixtures</span><span class="tagline">CI</span></div>
-        </article>
+  <!-- ===================== ARCHITECTURE: a pipeline that lights up as you scroll ===================== -->
+  <section class="scene" id="architecture" aria-label="The architecture">
+    <div class="pin pipe-pin">
+      <div class="wrap pipe-head">
+        <p class="kicker k-blue">The architecture</p>
+        <h3>A sensor network made of <span class="t-wind">airliners</span>.</h3>
+      </div>
+      <div class="pipe" id="pipe">
+        <div class="pipe-line"><div class="pipe-fill" id="pipe-fill"></div><i class="pipe-pulse"></i></div>
+        <div class="node" style="--c:var(--wind)"><i></i><b>ADS-B archive</b><span>3.5 GB a day</span></div>
+        <div class="node" style="--c:var(--wind)"><i></i><b>Hold and gate</b><span>±10,000 ft/min</span></div>
+        <div class="node" style="--c:var(--wind)"><i></i><b>Level flight</b><span>120 s windows</span></div>
+        <div class="node" style="--c:var(--turb)"><i></i><b>Residual σ</b><span>64 ft/min fixed</span></div>
+        <div class="node" style="--c:var(--turb)"><i></i><b>Per-type index</b><span>≥ 1.0× alarms</span></div>
+        <div class="node" style="--c:var(--fc)"><i></i><b>Forecast grid</b><span><span data-metric="grid_cells">8,388</span> cells</span></div>
+        <div class="node" style="--c:var(--rep)"><i></i><b>Check</b><span>PIREPs score it</span></div>
+      </div>
+      <div class="wrap pipe-detail">
+        <div class="scap on"><h4>One day of <span class="t-wind">public ADS-B</span>, streamed.</h4><p>Each archive day, about 3.5 GB, is streamed and never written to disk. Only continental-US traffic at FL180 and above is kept, about 220 MB, as typed, unit-checked Parquet. <code>make up</code> fetches what is missing.</p></div>
+        <div class="scap"><h4>Rebuild the signal, <span class="t-wind">drop the impossible</span>.</h4><p>The archive stores a new vertical rate only when it moves 200 ft/min, so Horus rebuilds a held one-second series, and gates out values beyond ±10,000 ft/min, such as the field-maximum glitch code.</p></div>
+        <div class="scap"><h4>Keep <span class="t-wind">level flight</span>.</h4><p>Climbs and descents are cut: 120 s windows above FL200, within 300 ft, median rate under 200 ft/min.</p></div>
+        <div class="scap"><h4>Measure <span class="t-turb">the jitter</span>.</h4><p>Remove the slow trend, correct ADS-B's 64 ft/min rounding (Sheppard), and what is left is the roughness, in ft/min.</p></div>
+        <div class="scap"><h4>Put every type <span class="t-turb">on one scale</span>.</h4><p>Divide by what that aircraft type shows in smooth air, so a business jet and a widebody compare. At 1.0× and above, it is a detection.</p></div>
+        <div class="scap"><h4><span class="t-fc">Light the grid</span>.</h4><p>Each detection raises the odds in its ~45 km cell, one of <span data-metric="grid_cells">8,388</span> cells × <span data-metric="fl_bins">13</span> levels. The odds fade with a fitted half-life (<span data-metric="t_half_mid">50.3</span> min at cruise) and drift with GFS winds.</p></div>
+        <div class="scap"><h4>Check against <span class="t-rep">pilots</span>.</h4><p>Pilot reports never go in. They only score Horus, on January days the models never saw: detector PR-AUC <span data-metric="b3_pr_auc">0.566</span> against <span data-metric="pr_baseline">0.290</span> for random scores.</p></div>
+        <div class="scap"><h4>One core, <span class="t-blue">offline and live</span>.</h4><p>The same pure functions run the benchmark and the live loop, and a test requires bit-identical results. Time-split and leakage-tested, <span data-metric="grid_p95_ms">32.3</span> ms per grid update for 10,000 aircraft, built with uv, no Docker.</p></div>
       </div>
     </div>
   </section>
 
-  <!-- ===================== RESULTS ===================== -->
+  <!-- ===================== RESULTS: steps scroll beside one pinned visual ===================== -->
   <section class="section" id="results">
     <div class="wrap">
       <p class="kicker k-fc reveal">Metrics</p>
@@ -820,172 +735,128 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
         <span data-metric="test_range">2026-01-01 → 2026-01-15</span>. Every number on this page is
         generated from the project's <code>reports/</code>, the same tables the README and CI check.
       </p>
-
       <!-- Metric hooks: each data-metric element is rewritten from reports/ by
-           scripts/readme_numbers.py (make readme); --check fails CI if they drift.
-           Charts read their bar lengths from these same numbers. -->
-      <div class="rtabs reveal">
-        <div class="seg rt-seg" role="tablist" aria-label="Results">
-          <button type="button" role="tab" data-rt="det" aria-selected="true" aria-pressed="true">Detector</button>
-          <button type="button" role="tab" data-rt="fc" aria-selected="false" aria-pressed="false">Forecast</button>
-          <button type="button" role="tab" data-rt="fade" aria-selected="false" aria-pressed="false">Fading</button>
-          <button type="button" role="tab" data-rt="speed" aria-selected="false" aria-pressed="false">Speed</button>
-        </div>
-
-        <div class="rpanel on" data-rt="det" role="tabpanel">
-          <div class="rbig" style="--c:var(--turb)">
-            <div class="num count" data-metric="b3_pr_auc">0.566</div>
-            <p class="what">Detector PR-AUC</p>
-            <p class="ctx">Ranking <span data-metric="n_pos">1,788</span> pilot-reported turbulence windows against <span data-metric="n_neg">4,388</span> quiet ones. Random scores get <span data-metric="pr_baseline">0.290</span>; every step below adds one idea.</p>
-          </div>
-          <div class="panel chart-card">
-            <p class="chart-title">Detector, PR-AUC by method</p>
-            <p class="chart-sub">B3 is what Horus runs. Hover a bar for what it adds.</p>
-            <div class="bars-wrap">
-              <div class="bars" data-max="0.7" style="--c:var(--turb)">
-                <div class="bar-row" data-tip="B0 · RMS vertical acceleration"><span class="bar-name"><b>B0</b>acceleration</span><div class="bar-track"><div class="bar-fill"></div></div><span class="bar-val" data-metric="b0_pr_auc">0.479</span></div>
-                <div class="bar-row" data-tip="B1 · B0 minus ADS-B rounding noise"><span class="bar-name"><b>B1</b>– rounding</span><div class="bar-track"><div class="bar-fill"></div></div><span class="bar-val" data-metric="b1_pr_auc">0.479</span></div>
-                <div class="bar-row" data-tip="B2 · level segments + residual σ (Sheppard)"><span class="bar-name"><b>B2</b>+ level σ</span><div class="bar-track"><div class="bar-fill"></div></div><span class="bar-val" data-metric="b2_pr_auc">0.509</span></div>
-                <div class="bar-row hl" data-tip="B3 · B2 ÷ per-type smooth-air scale"><span class="bar-name"><b>B3</b>÷ type</span><div class="bar-track"><div class="bar-fill"></div></div><span class="bar-val" data-metric="b3_pr_auc">0.566</span></div>
+           scripts/readme_numbers.py (make readme); --check fails CI if they drift. -->
+      <div class="how rgrid">
+        <div class="how-visual"><div class="rvis">
+          <div class="rpanel on" data-rt="det">
+            <div class="rbig" style="--c:var(--turb)"><div class="num count" data-metric="b3_pr_auc">0.566</div><p class="what">Detector PR-AUC</p></div>
+            <div class="chart-card">
+              <p class="chart-title">Detector, PR-AUC by method</p>
+              <p class="chart-sub">B3 is what Horus runs. Hover a bar for what it adds.</p>
+              <div class="bars-wrap">
+                <div class="bars" data-max="0.7" style="--c:var(--turb)">
+                  <div class="bar-row" data-tip="B0 · RMS vertical acceleration"><span class="bar-name"><b>B0</b>acceleration</span><div class="bar-track"><div class="bar-fill"></div></div><span class="bar-val" data-metric="b0_pr_auc">0.479</span></div>
+                  <div class="bar-row" data-tip="B1 · B0 minus ADS-B rounding noise"><span class="bar-name"><b>B1</b>– rounding</span><div class="bar-track"><div class="bar-fill"></div></div><span class="bar-val" data-metric="b1_pr_auc">0.479</span></div>
+                  <div class="bar-row" data-tip="B2 · level segments + residual σ (Sheppard)"><span class="bar-name"><b>B2</b>+ level σ</span><div class="bar-track"><div class="bar-fill"></div></div><span class="bar-val" data-metric="b2_pr_auc">0.509</span></div>
+                  <div class="bar-row hl" data-tip="B3 · B2 ÷ per-type smooth-air scale"><span class="bar-name"><b>B3</b>÷ type</span><div class="bar-track"><div class="bar-fill"></div></div><span class="bar-val" data-metric="b3_pr_auc">0.566</span></div>
+                </div>
+                <div class="ref-layer"><div class="ref" data-ref-metric="pr_baseline"><span>random <span data-metric="pr_baseline">0.290</span></span></div></div>
               </div>
-              <div class="ref-layer"><div class="ref" data-ref-metric="pr_baseline"><span>random <span data-metric="pr_baseline">0.290</span></span></div></div>
             </div>
           </div>
-        </div>
-
-        <div class="rpanel" data-rt="fc" role="tabpanel">
-          <div class="rbig" style="--c:var(--fc)">
-            <div class="num count" data-metric="n2_roc">0.676</div>
-            <p class="what">Forecast ROC-AUC, 15 min ahead</p>
-            <p class="ctx">How well the grid ranks where the next detection will be. Climatology scores <span data-metric="clim_roc">0.500</span>; moving the odds with the GFS wind is the step that works.</p>
-          </div>
-          <div class="panel chart-card">
-            <p class="chart-title">Forecast, ROC-AUC by model</p>
-            <p class="chart-sub">N2 is what Horus runs; N3 (negative evidence) made it worse.</p>
-            <div class="bars-wrap">
-              <div class="bars" data-max="0.8" style="--c:var(--fc)">
-                <div class="bar-row" data-tip="CLIM · climatology (base rate)"><span class="bar-name"><b>CLIM</b>base rate</span><div class="bar-track"><div class="bar-fill"></div></div><span class="bar-val" data-metric="clim_roc">0.500</span></div>
-                <div class="bar-row" data-tip="N0 · persistence, no decay"><span class="bar-name"><b>N0</b>persist</span><div class="bar-track"><div class="bar-fill"></div></div><span class="bar-val" data-metric="n0_roc">0.511</span></div>
-                <div class="bar-row" data-tip="N1 · log-odds + fitted decay"><span class="bar-name"><b>N1</b>+ decay</span><div class="bar-track"><div class="bar-fill"></div></div><span class="bar-val" data-metric="n1_roc">0.528</span></div>
-                <div class="bar-row hl" data-tip="N2 · N1 + GFS wind advection"><span class="bar-name"><b>N2</b>+ wind</span><div class="bar-track"><div class="bar-fill"></div></div><span class="bar-val" data-metric="n2_roc">0.676</span></div>
-                <div class="bar-row" data-tip="N3 · N2 + negative evidence (hurts)"><span class="bar-name"><b>N3</b>+ smooth</span><div class="bar-track"><div class="bar-fill"></div></div><span class="bar-val" data-metric="n3_roc">0.471</span></div>
+          <div class="rpanel" data-rt="fc">
+            <div class="rbig" style="--c:var(--fc)"><div class="num count" data-metric="n2_roc">0.676</div><p class="what">Forecast ROC-AUC, 15 min ahead</p></div>
+            <div class="chart-card">
+              <p class="chart-title">Forecast, ROC-AUC by model</p>
+              <p class="chart-sub">N2 is what Horus runs; N3 (negative evidence) made it worse.</p>
+              <div class="bars-wrap">
+                <div class="bars" data-max="0.8" style="--c:var(--fc)">
+                  <div class="bar-row" data-tip="CLIM · climatology (base rate)"><span class="bar-name"><b>CLIM</b>base rate</span><div class="bar-track"><div class="bar-fill"></div></div><span class="bar-val" data-metric="clim_roc">0.500</span></div>
+                  <div class="bar-row" data-tip="N0 · persistence, no decay"><span class="bar-name"><b>N0</b>persist</span><div class="bar-track"><div class="bar-fill"></div></div><span class="bar-val" data-metric="n0_roc">0.511</span></div>
+                  <div class="bar-row" data-tip="N1 · log-odds + fitted decay"><span class="bar-name"><b>N1</b>+ decay</span><div class="bar-track"><div class="bar-fill"></div></div><span class="bar-val" data-metric="n1_roc">0.528</span></div>
+                  <div class="bar-row hl" data-tip="N2 · N1 + GFS wind advection"><span class="bar-name"><b>N2</b>+ wind</span><div class="bar-track"><div class="bar-fill"></div></div><span class="bar-val" data-metric="n2_roc">0.676</span></div>
+                  <div class="bar-row" data-tip="N3 · N2 + negative evidence (hurts)"><span class="bar-name"><b>N3</b>+ smooth</span><div class="bar-track"><div class="bar-fill"></div></div><span class="bar-val" data-metric="n3_roc">0.471</span></div>
+                </div>
+                <div class="ref-layer"><div class="ref" data-ref-value="0.5" data-max="0.8"><span>chance 0.5</span></div></div>
               </div>
-              <div class="ref-layer"><div class="ref" data-ref-value="0.5" data-max="0.8"><span>chance 0.5</span></div></div>
             </div>
           </div>
-        </div>
-
-        <div class="rpanel" data-rt="fade" role="tabpanel">
-          <div class="rbig" style="--c:#6dbfe8">
-            <div class="num"><span class="count" data-metric="t_half_mid">50.3</span><small>min</small></div>
-            <p class="what">Half-life at cruise</p>
-            <p class="ctx">How long one detection keeps predicting the next aircraft's, fitted on December data. Lower down it fades faster: <span data-metric="t_half_low">11.6</span> min at FL200–290.</p>
-          </div>
-          <div class="panel chart-card" id="decay">
-            <p class="chart-title">How fast a detection fades</p>
-            <p class="chart-sub">Share of its extra odds left, by altitude band. Line style marks the band.</p>
-            <svg class="chart" id="decay-svg" viewBox="0 0 360 230" role="img" aria-label="Exponential decay curves for three flight-level bands."></svg>
-            <div class="tip" id="decay-tip"></div>
-            <span hidden data-metric="t_half_high">49.9</span>
-          </div>
-        </div>
-
-        <div class="rpanel" data-rt="speed" role="tabpanel">
-          <div class="rbig" style="--c:var(--wind)">
-            <div class="num"><span class="count" data-metric="live_p95_s">2.9</span><small>s</small></div>
-            <p class="what">Live latency, p95</p>
-            <p class="ctx">From a snapshot arriving to the updated map, with about <span data-metric="aircraft_live">2,462</span> aircraft per snapshot, on an 8 GB M1.</p>
-          </div>
-          <div class="panel chart-card">
-            <p class="chart-title">Share of the budget used</p>
-            <p class="chart-sub">p95 timings from reports/perf.md against the spec's budgets.</p>
-            <div class="budget">
-              <div class="bud-row"><span>Live update, snapshot → map: <b data-metric="live_p95_s">2.9</b> s of a 10 s budget</span><div class="bud-track"><div class="bud-fill" data-bud="live_p95_s" data-of="10"></div></div></div>
-              <div class="bud-row"><span>Grid update for 10,000 aircraft: <b data-metric="grid_p95_ms">32.3</b> ms of a 2,000 ms budget</span><div class="bud-track"><div class="bud-fill" data-bud="grid_p95_ms" data-of="2000"></div></div></div>
+          <div class="rpanel" data-rt="fade">
+            <div class="rbig" style="--c:#6dbfe8"><div class="num"><span class="count" data-metric="t_half_mid">50.3</span><small>min</small></div><p class="what">Half-life at cruise</p></div>
+            <div class="chart-card" id="decay">
+              <p class="chart-title">How fast a detection fades</p>
+              <p class="chart-sub">Share of its extra odds left, by altitude band. Line style marks the band.</p>
+              <svg class="chart" id="decay-svg" viewBox="0 0 360 230" role="img" aria-label="Exponential decay curves for three flight-level bands."></svg>
+              <div class="tip" id="decay-tip"></div>
+              <span hidden data-metric="t_half_low">11.6</span><span hidden data-metric="t_half_high">49.9</span>
             </div>
           </div>
+          <div class="rpanel" data-rt="speed">
+            <div class="rbig" style="--c:var(--wind)"><div class="num"><span class="count" data-metric="live_p95_s">2.9</span><small>s</small></div><p class="what">Live latency, p95</p></div>
+            <div class="chart-card">
+              <p class="chart-title">Share of the budget used</p>
+              <p class="chart-sub">p95 timings from reports/perf.md against the spec's budgets.</p>
+              <div class="budget">
+                <div class="bud-row"><span>Live update, snapshot → map: <b data-metric="live_p95_s">2.9</b> s of a 10 s budget</span><div class="bud-track"><div class="bud-fill" data-bud="live_p95_s" data-of="10"></div></div></div>
+                <div class="bud-row"><span>Grid update for 10,000 aircraft: <b data-metric="grid_p95_ms">32.3</b> ms of a 2,000 ms budget</span><div class="bud-track"><div class="bud-fill" data-bud="grid_p95_ms" data-of="2000"></div></div></div>
+              </div>
+            </div>
+          </div>
+        </div></div>
+        <div class="steps">
+          <div class="step" data-rt="det" style="--c:var(--turb)"><h5>Detector</h5><p>Ranking <span data-metric="n_pos">1,788</span> pilot-reported turbulence windows against <span data-metric="n_neg">4,388</span> quiet ones. Random scores get <span data-metric="pr_baseline">0.290</span>; each method adds one idea, and B3, the per-type index, is what Horus runs.</p></div>
+          <div class="step" data-rt="fc" style="--c:var(--fc)"><h5>Forecast</h5><p>How well the grid ranks where the next detection will be, 15 minutes ahead. Climatology scores <span data-metric="clim_roc">0.500</span>; moving the odds with the wind (N2) is the step that works, and negative evidence (N3) made it worse.</p></div>
+          <div class="step" data-rt="fade" style="--c:#6dbfe8"><h5>Fading</h5><p>One detection keeps predicting the next aircraft's for about <span data-metric="t_half_mid">50.3</span> minutes at cruise, and <span data-metric="t_half_low">11.6</span> minutes lower down, fitted on December data by altitude band.</p></div>
+          <div class="step" data-rt="speed" style="--c:var(--wind)"><h5>Speed</h5><p>From a snapshot arriving to the updated map takes <span data-metric="live_p95_s">2.9</span> s at p95 for about <span data-metric="aircraft_live">2,462</span> aircraft, well inside the 10 s budget; a full grid update takes <span data-metric="grid_p95_ms">32.3</span> ms.</p></div>
         </div>
       </div>
 
-      <div class="warn reveal" id="limits" role="note" aria-labelledby="warn-title">
-        <svg viewBox="0 0 36 36" aria-hidden="true"><path d="M18 3L34 31H2z" fill="#1d1d1f"/><rect x="16.4" y="12" width="3.2" height="10" rx="1.6" fill="#f5f5f7"/><circle cx="18" cy="26.2" r="1.9" fill="#f5f5f7"/></svg>
-        <div>
-          <h4 id="warn-title">Limitation</h4>
-          <p class="say">At a strict false-alarm setting, the engine isolates high-confidence turbulence but currently captures a low overall percentage of reported events.</p>
-        </div>
+      <div class="statement reveal" id="limits">
+        <p class="kicker k-rep">The honest part</p>
+        <p class="say">At a strict false-alarm setting, the engine isolates high-confidence turbulence but currently captures a low overall percentage of reported events.</p>
         <div class="nums">
           <!-- auto-generated metrics: recall of B3 at two alarm rates -->
-          <div><b data-metric="recall_1fa">0.2%</b>of reported turbulence caught at 1 false alarm per 1,000 flight-hours</div>
-          <div><b data-metric="recall_10fa">5.7%</b>at 10 false alarms per 1,000 flight-hours</div>
+          <div><b class="t-turb" data-metric="recall_1fa">0.2%</b>of reported turbulence caught at 1 false alarm per 1,000 flight-hours</div>
+          <div><b class="t-turb" data-metric="recall_10fa">5.7%</b>at 10 false alarms per 1,000 flight-hours</div>
         </div>
         <p class="why">Why: most turbulence never gets a pilot report, so every "false alarm" may be real but unreported, and the public archive drops the small jitter that light chop leaves in the data.</p>
       </div>
-
-      <div class="limits">
-        <details class="limit reveal"><summary>Weak labels</summary><p>Pilot reports are sparse, late and roughly placed, and most turbulence is never reported, so false-alarm rates are upper bounds.</p></details>
-        <details class="limit reveal" style="--d:60ms"><summary>Coarse public data</summary><p>The archive stores a new vertical rate only when it moves 200 ft/min or more (plus a ~20 s heartbeat). Smaller jitter is lost.</p></details>
-        <details class="limit reveal" style="--d:120ms"><summary>Replay, not live</summary><p>Free live feeds give about one point per aircraft every 90 s, too sparse to detect, so the live loop runs on an archived day.</p></details>
-        <details class="limit reveal"><summary>One winter, one region</summary><p>44 days of data, continental US, FL200 to FL460.</p></details>
-        <details class="limit reveal" style="--d:60ms"><summary>Roughness, not EDR</summary><p>Measured in ft/min per aircraft type; not calibrated to eddy dissipation rate, the aviation standard.</p></details>
-        <details class="limit reveal" style="--d:120ms"><summary>Negative evidence hurt</summary><p>Lowering the odds after smooth passes made the forecast worse (ROC-AUC <span data-metric="n3_roc">0.471</span>), so it stays off.</p></details>
-      </div>
+      <dl class="limits2">
+        <div class="reveal"><dt>Weak labels</dt><dd>Pilot reports are sparse, late and roughly placed, and most turbulence is never reported, so false-alarm rates are upper bounds.</dd></div>
+        <div class="reveal" style="--d:60ms"><dt>Coarse public data</dt><dd>The archive stores a new vertical rate only when it moves 200 ft/min or more (plus a ~20 s heartbeat). Smaller jitter is lost.</dd></div>
+        <div class="reveal" style="--d:120ms"><dt>Replay, not live</dt><dd>Free live feeds give about one point per aircraft every 90 s, too sparse to detect, so the live loop runs on an archived day.</dd></div>
+        <div class="reveal"><dt>One winter, one region</dt><dd>44 days of data, continental US, FL200 to FL460.</dd></div>
+        <div class="reveal" style="--d:60ms"><dt>Roughness, not EDR</dt><dd>Measured in ft/min per aircraft type; not calibrated to eddy dissipation rate, the aviation standard.</dd></div>
+        <div class="reveal" style="--d:120ms"><dt>Negative evidence hurt</dt><dd>Lowering the odds after smooth passes made the forecast worse (ROC-AUC <span data-metric="n3_roc">0.471</span>), so it stays off.</dd></div>
+      </dl>
     </div>
   </section>
 
-  <!-- ===================== CASE STUDIES ===================== -->
+  <!-- ===================== CASE STUDIES: one scene each; scrolling sweeps the hour ===================== -->
   <section class="section" id="cases">
     <div class="wrap">
       <p class="kicker k-rep reveal">Case studies</p>
       <h3 class="reveal" style="--d:60ms">Three <span class="t-rep">real reports</span>, minute by minute.</h3>
-      <p class="sub reveal" style="--d:120ms">
-        The clearest detection on three test days, chosen by score, not by hand. One of them is a miss,
-        and it stays in.
-      </p>
-      <div class="panel cases reveal" style="--d:180ms">
-        <div class="chart-head">
-          <div>
-            <p class="chart-title" id="case-title">Case</p>
-            <div class="case-legend">
-              <span><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="5" fill="#d07a00"/></svg>aircraft-minute in turbulence (size = strength)</span>
-              <span><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" fill="#d07a00" stroke="#f5f5f7" stroke-width="2"/></svg>inside the match window</span>
-              <span><svg width="14" height="10" aria-hidden="true"><rect x="1" y="1" width="12" height="8" rx="2" fill="#b35ce8"/></svg>forecast lit</span>
-              <span><svg width="12" height="12" aria-hidden="true"><path d="M1 1h10L6 11z" fill="#e0507f"/></svg>pilot report</span>
-            </div>
-          </div>
-          <div class="case-ctrl">
-            <div class="seg" role="group" aria-label="Choose case" id="case-tabs"></div>
-            <button class="pill" type="button" id="case-play">▶ Play the hour</button>
-          </div>
-        </div>
-        <svg class="chart" id="case-svg" viewBox="0 0 760 330" role="img" aria-label="Timeline from 30 minutes before to 30 minutes after a pilot report: detections by distance from the report, and minutes when the forecast was lit."></svg>
-        <div class="case-meta" id="case-meta"></div>
-        <p class="case-note" id="case-note"></p>
-        <div class="tip" id="case-tip"></div>
-      </div>
+      <p class="sub reveal" style="--d:120ms">The clearest detection on three test days, chosen by score, not by hand. One of them is a miss, and it stays in. Scroll through each: time runs from 30 minutes before the report to 30 after.</p>
+    </div>
+  </section>
+  <section class="scene cscene" id="case-1" data-case="0" aria-label="Case study 1"><div class="pin cpin"><div class="wrap"><p class="kicker k-rep ckick"></p><h4 class="ctitle"></h4><p class="cmeta"></p><div class="case-legend"></div><svg class="chart csvg" viewBox="0 0 760 330" role="img" aria-label="Timeline of detections around a pilot report"></svg><p class="cnote"></p><div class="tip"></div></div></div></section>
+  <section class="scene cscene" id="case-2" data-case="1" aria-label="Case study 2"><div class="pin cpin"><div class="wrap"><p class="kicker k-rep ckick"></p><h4 class="ctitle"></h4><p class="cmeta"></p><div class="case-legend"></div><svg class="chart csvg" viewBox="0 0 760 330" role="img" aria-label="Timeline of detections around a pilot report"></svg><p class="cnote"></p><div class="tip"></div></div></div></section>
+  <section class="scene cscene" id="case-3" data-case="2" aria-label="Case study 3"><div class="pin cpin"><div class="wrap"><p class="kicker k-rep ckick"></p><h4 class="ctitle"></h4><p class="cmeta"></p><div class="case-legend"></div><svg class="chart csvg" viewBox="0 0 760 330" role="img" aria-label="Timeline of detections around a pilot report"></svg><p class="cnote"></p><div class="tip"></div></div></div></section>
 
-      <figure class="term reveal">
-        <div class="term-bar" aria-hidden="true"><span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span><span class="term-title">horus — make watch</span></div>
-        <a href="img/horus-watch.gif" aria-label="Open the recording full size">
-          <img src="img/horus-watch.gif" width="1180" height="582" loading="lazy" decoding="async"
-               alt="Terminal recording of make watch: amber TURBULENCE lines name an aircraft, its flight level and strength; FORECAST lines follow for the same area; PILOT REPORT lines show what Horus saw near each real report.">
-        </a>
-      </figure>
-      <p class="map-caption">The same hour as the map, as the terminal prints it. <a class="link-arrow" style="font-size:inherit" href="watch-sample.txt">Full text</a> · <a class="link-arrow" style="font-size:inherit" href="cases-sample.txt">case studies as text</a></p>
+  <!-- ===================== THE TEXT OUTPUT + RUN IT ===================== -->
+  <section class="section" id="output">
+    <div class="wrap">
+      <p class="kicker k-turb reveal">Or read it as text</p>
+      <h3 class="reveal" style="--d:60ms">The same hour, as <span class="t-turb">Horus prints it</span>.</h3>
+      <a class="gif-plain reveal" href="img/horus-watch.gif" aria-label="Open the recording full size">
+        <img src="img/horus-watch.gif" width="1180" height="582" loading="lazy" decoding="async"
+             alt="Recording of make watch: amber TURBULENCE lines name an aircraft, its flight level and strength; FORECAST lines follow for the same area; PILOT REPORT lines show what Horus saw near each real report.">
+      </a>
+      <p class="map-caption"><a class="pill" href="watch-sample.txt">Full text</a> &nbsp;·&nbsp; <a class="pill" href="cases-sample.txt">The case studies as text</a></p>
     </div>
   </section>
 
-  <!-- ===================== RUN IT ===================== -->
   <section class="section" id="run">
     <div class="wrap">
       <p class="kicker k-turb reveal">Run it</p>
       <h3 class="reveal" style="--d:60ms">Three <span class="t-blue">commands</span>.</h3>
-      <p class="sub reveal" style="--d:120ms">macOS or Linux with <a class="link-arrow" style="font-size:inherit" href="https://docs.astral.sh/uv/">uv</a>. Public data only, no account or API key. The first <code>make up</code> streams about 3.5 GB.</p>
-      <div class="run reveal" style="--d:180ms">
-        <div class="run-head"><span>Terminal</span><button class="copy" type="button" data-copy="make up&#10;make watch&#10;make cases">Copy</button></div>
-<pre><span class="p">$ </span>make up      <span class="c"># environment + the demo day's data</span>
+      <p class="sub reveal" style="--d:120ms">macOS or Linux with <a class="pill" style="font-size:inherit" href="https://docs.astral.sh/uv/">uv</a>. Public data only, no account or API key. The first <code>make up</code> streams about 3.5 GB.</p>
+<pre class="runcode reveal"><span class="p">$ </span>make up      <span class="c"># environment + the demo day's data</span>
 <span class="p">$ </span>make watch   <span class="c"># live text stream: an archived afternoon at 30x</span>
 <span class="p">$ </span>make cases   <span class="c"># three case studies, minute by minute</span></pre>
-      </div>
+      <button class="copy" type="button" data-copy="make up&#10;make watch&#10;make cases">Copy the commands</button>
     </div>
   </section>
 </main>
@@ -1024,6 +895,7 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const NS = "http://www.w3.org/2000/svg";
   document.documentElement.classList.add("js");
+  const fill = (k, v) => $$(`[data-fill="${k}"]`).forEach((n) => (n.textContent = v));
   const metric = (k) => parseFloat(($(`[data-metric="${k}"]`)?.textContent || "").replace(/[^\d.\-]/g, ""));
   const hhmm = (s) => new Date(s * 1000).toISOString().slice(11, 16) + "Z";
   const el = (tag, attrs = {}, parent) => {
@@ -1102,28 +974,80 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
     }
   });
 
-  // ---------- results tabs: each tab replays its numbers and charts ----------
-  (function resultTabs() {
-    const tabs = $$("[data-rt]").filter((b) => b.tagName === "BUTTON"), panels = $$(".rpanel");
+  // ---------- scroll scenes: a tall section, a pinned frame, progress 0..1 ----------
+  const scenes = [];
+  const sceneP = (sec) => { const b = sec.getBoundingClientRect(); return Math.max(0, Math.min(1, -b.top / Math.max(1, b.height - innerHeight))); };
+  function addScene(sec, update) {
+    const sc = { sec, update, vis: false };
+    if ("IntersectionObserver" in window) new IntersectionObserver((es) => { sc.vis = es[0].isIntersecting; }, { threshold: 0 }).observe(sec);
+    else sc.vis = true;
+    scenes.push(sc);
+    update(sceneP(sec), performance.now());
+  }
+  (function sceneLoop() {
+    const tick = (now) => { for (const sc of scenes) if (sc.vis) sc.update(sceneP(sc.sec), now); requestAnimationFrame(tick); };
+    requestAnimationFrame(tick);
+  })();
+  const pickStep = (steps, line) => { let k = steps[0]; for (const st of steps) if ((st.firstElementChild || st).getBoundingClientRect().top < line) k = st; return k; };
+  const capsAt = (caps, p) => { let on = 0; caps.forEach((c, i) => { if (p >= +(c.dataset.from || 0)) on = i; }); caps.forEach((c, i) => c.classList.toggle("on", i === on)); };
+
+  // ---------- the night sky behind the whole page ----------
+  (function sky() {
+    const cv = $("#sky"); if (!cv) return;
+    const ctx = cv.getContext("2d");
+    let seed = 11; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    const stars = Array.from({ length: 240 }, () => ({ x: rnd(), y: rnd(), r: 0.35 + rnd() * 1.05, a: 0.12 + rnd() * 0.5, tw: rnd() < 0.3 ? 0.6 + rnd() * 1.6 : 0, ph: rnd() * 6.283, warm: rnd() < 0.15 }));
+    let W = 0, H = 0, dpr = 1, last = 0;
+    const size = () => { dpr = Math.min(window.devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); };
+    size(); addEventListener("resize", size);
+    const draw = (now) => {
+      if (now - last > 40) {  // ~25 fps is plenty for stars
+        last = now;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+        const off = (scrollY * 0.05) % H;
+        for (const st of stars) {
+          const tw = st.tw && !reduce ? 0.55 + 0.45 * Math.sin((now / 1000) * st.tw + st.ph) : 1;
+          ctx.globalAlpha = st.a * tw; ctx.fillStyle = st.warm ? "#ffe8c4" : "#ffffff";
+          let y = st.y * H - off; if (y < 0) y += H;
+          ctx.beginPath(); ctx.arc(st.x * W, y, st.r, 0, 6.283); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+      }
+      requestAnimationFrame(draw);
+    };
+    requestAnimationFrame(draw);
+  })();
+
+  // ---------- results: steps beside one pinned visual ----------
+  (function results() {
+    const panels = $$(".rvis .rpanel"), steps = $$(".step[data-rt]");
+    if (!panels.length) return;
     const fillBudgets = (panel) => $$(".bud-fill", panel).forEach((f) => {
       f.style.width = 0;
       requestAnimationFrame(() => requestAnimationFrame(() => (f.style.width = Math.min(100, (metric(f.dataset.bud) / +f.dataset.of) * 100) + "%")));
     });
-    function open(key) {
-      tabs.forEach((b) => { const on = b.dataset.rt === key; b.setAttribute("aria-selected", on); b.setAttribute("aria-pressed", on); });
+    let cur = "";
+    function open(key, force) {
+      if (key === cur && !force) return;
+      cur = key;
+      const stacked = innerWidth <= 720;  // phones show every panel, one after another
       panels.forEach((pn) => pn.classList.toggle("on", pn.dataset.rt === key));
-      const pn = panels.find((x) => x.dataset.rt === key);
-      if (!pn || reduce) return;
-      $$(".count", pn).forEach((n) => n._count && n._count());
-      $$(".bars", pn).forEach((b) => b._replay && b._replay());
-      fillBudgets(pn);
-      const d = $("#decay-svg", pn); if (d && d._draw) d._draw();
+      steps.forEach((st) => st.classList.toggle("active", st.dataset.rt === key));
+      const list = stacked ? panels : panels.filter((x) => x.dataset.rt === key);
+      for (const pn of list) {
+        $$(".count", pn).forEach((n) => n._count && n._count());
+        $$(".bars", pn).forEach((b) => b._replay && b._replay());
+        fillBudgets(pn);
+        const d = $("#decay-svg", pn); if (d && d._draw) d._draw();
+      }
     }
-    tabs.forEach((b) => b.addEventListener("click", () => open(b.dataset.rt)));
-    const tq = /[?&]tab=(\w+)/.exec(location.search); if (tq) open(tq[1]);  // test / deep-link hook
-    // the budget bars of the first visible tab fill when the section appears
-    const box = $(".rtabs");
-    if (box) whenShown(box, () => fillBudgets(box));
+    open("det", true);
+    addScene($(".rgrid"), () => { if (innerWidth > 720) open(pickStep(steps, innerHeight * 0.55).dataset.rt); });
+    if ("IntersectionObserver" in window) {
+      // replay the first panel's count-ups when the section first comes into view
+      let seen = false;
+      new IntersectionObserver((es) => { if (es[0].isIntersecting && !seen) { seen = true; open(cur, true); } }, { threshold: 0.15 }).observe($(".rgrid"));
+    }
   })();
 
   // ---------- decay curves ----------
@@ -1182,9 +1106,9 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
     svg.addEventListener("mouseleave", () => { tip.classList.remove("on"); cross.setAttribute("opacity", 0); });
   })();
 
-  // ---------- live map ----------
+  // ---------- live map: scrolling moves through the real hour ----------
   (function liveMap(D) {
-    const map = $("#map"); if (!D || !map) return;
+    const sec = $("#live"), map = $("#map"); if (!D || !map || !sec) return;
     const cv = $("canvas", map), ctx = cv.getContext("2d");
     const F = D.frames, N = D.n, STEP = D.step, DUR = (F - 1) * STEP, MISS = -32768;
     const bin = atob(D.pos), u8 = new Uint8Array(bin.length);
@@ -1198,13 +1122,11 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
     let W = 0, H = 0, dpr = 1, S = 1, OX = 0, OY = 0;
     const base = document.createElement("canvas");
     const X = (lon) => lon * COS * S + OX, Y = (lat) => OY - lat * S;
-    const tickerRight = () => (innerWidth > 1080 ? 344 : 0);
-
     function layout() {
       dpr = Math.min(window.devicePixelRatio || 1, 2);
       W = map.clientWidth; H = map.clientHeight;
       cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
-      const padL = 20, padR = 20 + tickerRight(), padT = innerWidth > 720 ? 40 : 70, padB = 70;
+      const padL = 16, padR = 24, padT = 24, padB = 64;
       S = Math.min((W - padL - padR) / ((LON1 - LON0) * COS), (H - padT - padB) / (LAT1 - LAT0));
       const spanX = (LON1 - LON0) * COS * S, spanY = (LAT1 - LAT0) * S;
       OX = padL + (W - padL - padR - spanX) / 2 - LON0 * COS * S;
@@ -1212,15 +1134,14 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
       base.width = cv.width; base.height = cv.height;
       const b = base.getContext("2d");
       b.setTransform(dpr, 0, 0, dpr, 0, 0);
-      b.strokeStyle = "rgba(160,190,230,0.16)"; b.lineWidth = 0.7; b.lineJoin = "round";
+      b.strokeStyle = "rgba(160,190,230,0.2)"; b.lineWidth = 0.7; b.lineJoin = "round";
       for (const ring of D.outlines) {
         b.beginPath();
         for (let i = 0; i < ring.length; i += 2) (i ? b.lineTo : b.moveTo).call(b, X(ring[i]), Y(ring[i + 1]));
         b.stroke();
       }
     }
-
-    // events for the ticker: a detection starts a run if that aircraft was quiet for 5 min
+    // events: a detection starts a run if that aircraft was quiet for 5 min
     const lastSeen = {}, events = [];
     for (const d of D.detections) {
       if (!(d.id in lastSeen) || d.t - lastSeen[d.id] > 300) events.push({ t: d.t, kind: "turb", d });
@@ -1230,35 +1151,34 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
     events.sort((a, b) => a.t - b.t);
     const lineHTML = (e) => {
       const when = `<time>${hhmm(D.t0 + e.t)}</time>`;
-      if (e.kind === "turb") {
-        const d = e.d;
-        return `${when}<span class="tag turb">Turbulence</span><b>${esc(d.id)}</b> ${esc(d.type || "")} FL${d.fl} · ${d.x.toFixed(1)}× threshold · ${esc(d.where)}`;
-      }
+      if (e.kind === "turb") { const d = e.d; return `${when}<span class="t-turb">TURBULENCE</span> ${esc(d.id)} ${esc(d.type || "")} FL${d.fl} ${d.x.toFixed(1)}×`; }
       const r = e.r;
-      const saw = !r.passed ? "no aircraft passed nearby" : r.felt ? `${r.passed} passed, <b>${r.felt} felt it</b>` : `${r.passed} passed, none felt it`;
-      return `${when}<span class="tag rep">Pilot report</span><b>${LEVEL[r.lvl] || "moderate+"}</b> ${flr(r.fl)} ${esc(r.where)} · ${saw}`;
+      return `${when}<span class="t-rep">PILOT REPORT</span> ${LEVEL[r.lvl] || "moderate+"} ${flr(r.fl)} ${esc(r.where.replace("over ", ""))}`;
     };
-    const tick = $("#ticker"), tickM = $("#ticker-m");
+    const feed = $("#map-feed");
     let shown = -1;
-    function renderTicker(t) {
+    function renderFeed(t) {
       let n = 0; while (n < events.length && events[n].t <= t) n++;
       if (n === shown) return; shown = n;
-      const last = events.slice(Math.max(0, n - 7), n).reverse();
-      const html = last.length ? last.map((e) => `<li>${lineHTML(e)}</li>`).join("") : `<li>Listening… the first lines arrive a few minutes in.</li>`;
-      tick.innerHTML = html; tickM.innerHTML = last.slice(0, 4).map((e) => `<li>${lineHTML(e)}</li>`).join("") || html;
+      const last = events.slice(Math.max(0, n - 4), n).reverse();
+      feed.innerHTML = last.length ? last.map((e) => `<li>${lineHTML(e)}</li>`).join("") : "<li>Listening… the first lines arrive a few minutes in.</li>";
     }
+    // the hour, in numbers (for the last caption)
+    const nAc = new Set(D.detections.map((d) => d.id)).size, reps = D.reports.length;
+    const covered = D.reports.filter((r) => r.passed > 0).length, backed = D.reports.filter((r) => r.felt > 0).length;
+    const sum = $("#map-sum");
+    if (sum) sum.innerHTML = `<b class="t-turb">${D.detections.length}</b> turbulence detections from ${nAc} aircraft, and <b class="t-rep">${reps}</b> pilot reports at FL200+. Aircraft passed near <b>${covered}</b> of those reports in the 10 minutes before; <b>${backed}</b> had a detection. At this strict threshold most reported turbulence goes unseen; the metrics below measure how much.`;
+    fill("ac-peak2", Math.max(...D.perFrame).toLocaleString("en-US"));
 
     const cAc = $("#c-ac"), cDet = $("#c-det"), cFc = $("#c-fc"), cRep = $("#c-rep"), clock = $("#clock");
     const fx = D.forecastX, LOGMAX = Math.log(45);
-    let active = []; // hover targets for this frame
-
+    let active = [];
     function draw(t) {
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, cv.width, cv.height);
       ctx.drawImage(base, 0, 0);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       active = [];
-      // forecast cells (current 2-min frame)
       const key = String(Math.min(Math.floor(t / STEP) * STEP, DUR));
       let hot = 0;
       for (const [c, x] of D.cells[key] || []) {
@@ -1268,12 +1188,11 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
         ctx.beginPath();
         for (let i = 0; i < poly.length; i += 2) (i ? ctx.lineTo : ctx.moveTo).call(ctx, X(poly[i]), Y(poly[i + 1]));
         ctx.closePath();
-        ctx.fillStyle = `rgba(179,92,232,${0.10 + 0.45 * a})`; ctx.fill();
-        ctx.strokeStyle = `rgba(201,140,240,${0.25 + 0.6 * a})`; ctx.lineWidth = 1; ctx.stroke();
+        ctx.fillStyle = `rgba(179,92,232,${0.12 + 0.45 * a})`; ctx.fill();
+        ctx.strokeStyle = `rgba(211,162,248,${0.3 + 0.6 * a})`; ctx.lineWidth = 1; ctx.stroke();
       }
-      // aircraft, interpolated between 2-min fixes
       const k = Math.min(Math.floor(t / STEP), F - 2), f = t / STEP - k;
-      const sz = W < 600 ? 1.4 : 1.9, h = sz / 2;
+      const sz = W < 600 ? 1.5 : 2, h = sz / 2;
       const buckets = RAMP.map(() => []);
       for (let i = 0; i < N; i++) {
         const a = (i * F + k) * 2, b = a + 2;
@@ -1286,74 +1205,46 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
         const fl = ALT ? 2 * (ALT[i * F + (f < 0.5 ? k : k + 1)] || ALT[i * F + k] || ALT[i * F + k + 1]) : 350;
         buckets[band(fl)].push(X(lon) - h, Y(lat) - h);
       }
-      buckets.forEach((pts, j) => {
-        ctx.fillStyle = RAMP[j][1];
-        for (let q = 0; q < pts.length; q += 2) ctx.fillRect(pts[q], pts[q + 1], sz, sz);
-      });
-      // detections: a ring that grows and fades, a dot that lingers
+      buckets.forEach((pts, j) => { ctx.fillStyle = RAMP[j][1]; for (let q = 0; q < pts.length; q += 2) ctx.fillRect(pts[q], pts[q + 1], sz, sz); });
       let ndet = 0;
       for (const d of D.detections) {
         const age = t - d.t; if (age < 0) break; ndet++;
         if (age > 600) continue;
         const x = X(d.lon), y = Y(d.lat);
-        if (age < 180) {
-          const g = age / 180;
-          ctx.beginPath(); ctx.arc(x, y, 4 + g * 26, 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(255,173,59,${0.9 * (1 - g)})`; ctx.lineWidth = 1.6; ctx.stroke();
-        }
+        if (age < 180) { const g = age / 180; ctx.beginPath(); ctx.arc(x, y, 4 + g * 26, 0, Math.PI * 2); ctx.strokeStyle = `rgba(255,180,77,${0.9 * (1 - g)})`; ctx.lineWidth = 1.6; ctx.stroke(); }
         const al = 1 - (age / 600) * 0.65;
-        ctx.beginPath(); ctx.arc(x, y, 4.2, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(208,122,0,${al})`; ctx.fill();
+        ctx.beginPath(); ctx.arc(x, y, 4.4, 0, Math.PI * 2); ctx.fillStyle = `rgba(208,122,0,${al})`; ctx.fill();
         ctx.lineWidth = 1.5; ctx.strokeStyle = `rgba(0,0,0,${al})`; ctx.stroke();
-        active.push({ x, y, html: `<span class="tag turb">Turbulence</span><b>${esc(d.id)}</b> ${esc(d.type)} · FL${d.fl}<br>${d.x.toFixed(1)}× threshold · ${esc(d.where)} · ${hhmm(D.t0 + d.t)}` });
+        active.push({ x, y, html: `<span class="t-turb"><b>TURBULENCE</b></span> ${esc(d.id)} ${esc(d.type)} · FL${d.fl}<br>${d.x.toFixed(1)}× threshold · ${esc(d.where)} · ${hhmm(D.t0 + d.t)}` });
       }
-      // pilot reports
       let nrep = 0;
       for (const r of D.reports) {
         const age = t - r.t; if (age < 0) continue; nrep++;
         if (age > 900) continue;
         const x = X(r.lon), y = Y(r.lat), al = 1 - (age / 900) * 0.6;
-        if (age < 200) {
-          const g = age / 200;
-          ctx.beginPath(); ctx.arc(x, y, 5 + g * 20, 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(224,80,127,${0.85 * (1 - g)})`; ctx.lineWidth = 1.4; ctx.stroke();
-        }
+        if (age < 200) { const g = age / 200; ctx.beginPath(); ctx.arc(x, y, 5 + g * 20, 0, Math.PI * 2); ctx.strokeStyle = `rgba(255,149,184,${0.85 * (1 - g)})`; ctx.lineWidth = 1.4; ctx.stroke(); }
         ctx.beginPath(); ctx.moveTo(x, y - 7); ctx.lineTo(x + 6, y + 4); ctx.lineTo(x - 6, y + 4); ctx.closePath();
         ctx.fillStyle = `rgba(224,80,127,${al})`; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = `rgba(0,0,0,${al})`; ctx.stroke();
         const saw = !r.passed ? "no aircraft passed nearby" : `${r.passed} passed within 40 km, ${r.felt ? r.felt + " felt it" : "none felt it"}`;
-        active.push({ x, y, html: `<span class="tag rep">Pilot report</span><b>${LEVEL[r.lvl] || "moderate+"}</b> ${flr(r.fl)} ${esc(r.type ? "(" + r.type + ")" : "")}<br>${esc(r.where)} · ${hhmm(D.t0 + r.t)} · Horus: ${saw}` });
+        active.push({ x, y, html: `<span class="t-rep"><b>PILOT REPORT</b></span> ${LEVEL[r.lvl] || "moderate+"} ${flr(r.fl)} ${esc(r.type ? "(" + r.type + ")" : "")}<br>${esc(r.where)} · ${hhmm(D.t0 + r.t)} · Horus: ${saw}` });
       }
       clock.textContent = hhmm(D.t0 + t);
       cAc.textContent = (D.perFrame[Math.round(t / STEP)] || 0).toLocaleString("en-US");
       cDet.textContent = ndet; cFc.textContent = hot; cRep.textContent = nrep;
-      renderTicker(t);
+      renderFeed(t);
     }
-
-    // playback: 90x real time (an hour in 40 s), paused when off-screen
-    const scrub = $("#scrub"), play = $("#play"), icon = $("#play-icon");
-    scrub.max = DUR;
     // the replay window opens at 15:00, so its first frames hold only the first fixes:
-    // start (and loop back) once traffic is at 80% of its usual level
+    // start once traffic is at 80% of its usual level
     const peakN = Math.max(...D.perFrame), T0 = STEP * Math.max(0, D.perFrame.findIndex((n) => n >= 0.8 * peakN));
-    scrub.min = T0;
-    let t = reduce ? DUR / 2 : T0, playing = !reduce, visible = false, last = 0;
-    const setIcon = () => { icon.setAttribute("d", playing ? "M3 2h3v10H3zM8 2h3v10H8z" : "M3 1.5l9.5 5.5L3 12.5z"); play.setAttribute("aria-label", playing ? "Pause" : "Play"); };
-    setIcon();
-    play.addEventListener("click", () => { playing = !playing; setIcon(); });
-    scrub.addEventListener("input", () => { t = +scrub.value; playing = false; setIcon(); draw(t); });
-    function frame(now) {
-      if (visible && playing) {
-        const dt = last ? Math.min(0.1, (now - last) / 1000) : 0;
-        t += dt * 90; if (t > DUR) t = T0;
-        scrub.value = t; draw(t);
-      }
-      last = now; requestAnimationFrame(frame);
-    }
-    new IntersectionObserver((es) => { visible = es[0].isIntersecting; last = 0; }, { threshold: 0.05 }).observe(map);
-    addEventListener("resize", () => { layout(); draw(t); });
-    layout(); draw(t); requestAnimationFrame(frame);
-
-    // hover details
+    const caps = $$(".map-caps .scap", sec);
+    let lastT = -1;
+    addEventListener("resize", () => { layout(); if (lastT >= 0) draw(lastT); });
+    layout();
+    addScene(sec, (p) => {
+      capsAt(caps, p);
+      const t = T0 + Math.min(1, p / 0.94) * (DUR - T0);
+      if (Math.abs(t - lastT) > 0.5 || lastT < 0) { lastT = t; draw(t); }
+    });
     const tip = $("#maptip");
     map.addEventListener("mousemove", (ev) => {
       const r = map.getBoundingClientRect(), mx = ev.clientX - r.left, my = ev.clientY - r.top;
@@ -1446,21 +1337,20 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
       const peak = Math.max(...cur.idx.map((q) => q[1]));
       $("#sig-foot").innerHTML = `<b>${esc(cur.id)}</b> · ${esc(cur.type)} · FL${cur.fl} · ${esc(cur.where)} — peak index <b>${peak.toFixed(1)}×</b> threshold` +
         (peak >= 1 ? ": Horus prints a TURBULENCE line." : ": nothing to report.");
-      $$("[data-sig]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.sig === w));
       placeThr();
     }
     // the steps beside the chart drive what it emphasises
     const steps = $$(".step[data-step]");
-    if ("IntersectionObserver" in window) {
-      const so = new IntersectionObserver((es) => {
-        for (const e of es) if (e.isIntersecting) {
-          steps.forEach((st) => st.classList.toggle("active", st === e.target));
-          svg.dataset.step = e.target.dataset.step;
-        }
-      }, { rootMargin: "-45% 0px -45% 0px", threshold: 0 });
-      steps.forEach((st) => so.observe(st));
-    }
-    $$("[data-sig]").forEach((b) => b.addEventListener("click", () => show(b.dataset.sig)));
+    let curStep = null;
+    addScene($("#how"), () => {
+      const st = pickStep(steps, innerHeight * (innerWidth <= 720 ? 0.8 : 0.55));
+      if (st === curStep) return;
+      curStep = st;
+      steps.forEach((x) => x.classList.toggle("active", x === st));
+      svg.dataset.step = st.dataset.step;
+      const pl = st.dataset.plane || "turbulent";
+      if (pl !== which) show(pl);
+    });
     const card = $("#signal"), tip = $("#sig-tip");
     hit.addEventListener("mousemove", (ev) => {
       const r = svg.getBoundingClientRect(), sx = ((ev.clientX - r.left) / r.width) * W;
@@ -1478,91 +1368,104 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
     show("turbulent");
   })(window.HORUS_SIGNAL);
 
-  // ---------- case studies ----------
-  (function cases(C) {
-    const svg = $("#case-svg"); if (!C || !svg) return;
+  // ---------- architecture: the pipeline lights stage by stage ----------
+  (function pipeline() {
+    const sec = $("#architecture"); if (!sec) return;
+    const nodes = $$(".node", sec), caps = $$(".pipe-detail .scap", sec), bar = $("#pipe-fill");
+    addScene(sec, (p) => {
+      const k = Math.min(caps.length - 1, Math.floor(p * caps.length * 0.999));
+      nodes.forEach((n, i) => { n.classList.toggle("on", i === k || k >= nodes.length); n.classList.toggle("done", i < k); });
+      caps.forEach((c, i) => c.classList.toggle("on", i === k));
+      bar.style.transform = `scaleX(${Math.min(1, k / (nodes.length - 1)).toFixed(3)})`;
+    });
+  })();
+
+  // ---------- case studies: one scene each; scrolling sweeps the cursor ----------
+  (function caseScenes(C) {
+    const secs = $$(".cscene"); if (!C || !secs.length) return;
     const W = 760, H = 330, L = 50, R = 16, T = 40, B = 300, DMAX = 150;
     const xm = (m) => L + ((m + 30) / 60) * (W - L - R), yd = (d) => B - (d / DMAX) * (B - T);
-    const tabs = $("#case-tabs"), card = svg.closest(".cases"), tip = $("#case-tip");
-    C.forEach((c, i) => {
-      const b = document.createElement("button");
-      b.type = "button"; b.textContent = `Case ${i + 1} · ${c.where.replace("over ", "")}`; b.dataset.i = i;
-      b.addEventListener("click", () => show(i)); tabs.appendChild(b);
-    });
-    let items = [], cursor = null, cursorLab = null, playing = 0;
-    function setCursor(mc) {
-      items.forEach(([n, m]) => (n.style.opacity = m <= mc ? 1 : 0.1));
-      const on = mc < 31;
-      cursor.setAttribute("opacity", on ? 1 : 0); cursorLab.setAttribute("opacity", on ? 1 : 0);
-      if (on) { cursor.setAttribute("x1", xm(mc)); cursor.setAttribute("x2", xm(mc)); cursorLab.setAttribute("x", xm(mc)); cursorLab.textContent = (Math.round(mc) > 0 ? "+" : "") + Math.round(mc) + " min"; }
-    }
-    $("#case-play").addEventListener("click", () => {
-      cancelAnimationFrame(playing);
-      const t0 = performance.now(), dur = reduce ? 0 : 7000;
-      const tick = (now) => {
-        const k = dur ? Math.min(1, (now - t0) / dur) : 1;
-        setCursor(k < 1 ? -30 + 60 * k : 99);
-        if (k < 1) playing = requestAnimationFrame(tick);
-      };
-      playing = requestAnimationFrame(tick);
-    });
-    function show(i) {
-      const c = C[i];
-      cancelAnimationFrame(playing);
-      svg.innerHTML = ""; items = [];
-      $$("button", tabs).forEach((b) => b.setAttribute("aria-pressed", +b.dataset.i === i));
-      // forecast strip
+    const legend = `<span><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="5" fill="#d07a00"/></svg>aircraft-minute in turbulence (size = strength)</span>` +
+      `<span><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" fill="#d07a00" stroke="#f5f5f7" stroke-width="2"/></svg>inside the match window</span>` +
+      `<span><svg width="14" height="10" aria-hidden="true"><rect x="1" y="1" width="12" height="8" rx="2" fill="#b35ce8"/></svg>forecast lit</span>` +
+      `<span><svg width="12" height="12" aria-hidden="true"><path d="M1 1h10L6 11z" fill="#e0507f"/></svg>pilot report</span>` +
+      `<span>height = km from the report</span>`;
+    secs.forEach((sec, i) => {
+      const c = C[i]; if (!c) { sec.remove(); return; }
+      const svg = $(".csvg", sec), tip = $(".tip", sec), box = $(".wrap", sec);
+      $(".case-legend", sec).innerHTML = legend;
+      const items = [];
       el("text", { x: L, y: 12, class: "ptitle" }, svg).textContent = "Forecast lit within 150 km";
       for (const [m, n, mx] of c.lit) if (n > 0) {
         const g0 = el("g", {}, svg);
         el("rect", { x: xm(m) - 4.5, y: 18, width: 9, height: 12, rx: 2, fill: "var(--fc)", opacity: Math.min(1, 0.35 + Math.log(mx) / Math.log(45) * 0.65) }, g0);
         items.push([g0, m]);
       }
-      // grid
       for (const d of [0, 50, 100, 150]) {
         el("line", { x1: L, x2: W - R, y1: yd(d), y2: yd(d), class: d ? "gridl" : "zero" }, svg);
-        el("text", { x: L - 8, y: yd(d) + 4, "text-anchor": "end" }, svg).textContent = d + (d ? "" : " km");
+        el("text", { x: L - 8, y: yd(d) + 4, "text-anchor": "end" }, svg).textContent = d;
       }
       el("line", { x1: L, x2: W - R, y1: yd(c.near), y2: yd(c.near), class: "thr" }, svg);
       el("text", { x: W - R, y: yd(c.near) - 6, "text-anchor": "end" }, svg).textContent = `match radius ${c.near} km`;
-      for (let m = -30; m <= 30; m += 10) el("text", { x: xm(m), y: H - 8, "text-anchor": "middle" }, svg).textContent = m === 0 ? "report" : (m > 0 ? "+" : "") + m + " min";
-      el("line", { x1: xm(0), x2: xm(0), y1: T - 4, y2: B, stroke: "var(--rep)", "stroke-width": 2 }, svg);
-      el("path", { d: `M${xm(0) - 6},${T - 10}L${xm(0) + 6},${T - 10}L${xm(0)},${T}z`, fill: "var(--rep)" }, svg);
-      // detections
-      const g = el("g", {}, svg);
-      c.detections.forEach((d, j) => {
+      const ticks = [];
+      for (let m = -30; m <= 30; m += 10) {
+        const tk = el("text", { x: xm(m), y: H - 8, "text-anchor": "middle" }, svg);
+        tk.textContent = m === 0 ? "report" : (m > 0 ? "+" : "") + m + " min";
+        ticks.push([tk, m]);
+      }
+      const rep0 = el("g", {}, svg);
+      el("line", { x1: xm(0), x2: xm(0), y1: T - 4, y2: B, stroke: "var(--rep)", "stroke-width": 2 }, rep0);
+      el("path", { d: `M${xm(0) - 6},${T - 10}L${xm(0) + 6},${T - 10}L${xm(0)},${T}z`, fill: "var(--rep)" }, rep0);
+      items.push([rep0, 0]);
+      c.detections.forEach((d) => {
         const r = 3.5 + Math.min(d.x, 4) * 1.4;
-        const dot = el("circle", { cx: xm(d.m), cy: yd(d.d), r, fill: "var(--turb)", stroke: d.match ? "#f5f5f7" : "var(--surface)", "stroke-width": 2 }, g);
+        const dot = el("circle", { cx: xm(d.m), cy: yd(d.d), r, fill: "var(--turb)", stroke: d.match ? "#f5f5f7" : "#01030a", "stroke-width": 2 }, svg);
         items.push([dot, d.m]);
-        if (!reduce) { dot.style.opacity = 0; dot.style.transition = `opacity 0.4s ${0.02 * j}s`; requestAnimationFrame(() => (dot.style.opacity = 1)); }
         dot.addEventListener("mousemove", (ev) => {
-          const b = card.getBoundingClientRect();
-          tipAt(tip, card, ev.clientX - b.left, ev.clientY - b.top,
-            `<span class="tag turb">Turbulence</span><b>${esc(d.id)}</b> FL${d.fl}<br>${d.m === 0 ? "at the report" : Math.abs(d.m) + " min " + (d.m < 0 ? "before" : "after")} · ${d.d} km away · ${d.x.toFixed(1)}×` + (d.match ? "<br><b>inside the match window</b>" : ""));
+          const bb = box.getBoundingClientRect();
+          tipAt(tip, box, ev.clientX - bb.left, ev.clientY - bb.top,
+            `<span class="t-turb"><b>TURBULENCE</b></span> ${esc(d.id)} FL${d.fl}<br>${d.m === 0 ? "at the report" : Math.abs(d.m) + " min " + (d.m < 0 ? "before" : "after")} · ${d.d} km away · ${d.x.toFixed(1)}×` + (d.match ? "<br><b>inside the match window</b>" : ""));
         });
         dot.addEventListener("mouseleave", () => tip.classList.remove("on"));
       });
-      cursor = el("line", { y1: T - 4, y2: B, stroke: "#f5f5f7", "stroke-width": 1.5, "stroke-dasharray": "3 3", opacity: 0 }, svg);
-      cursorLab = el("text", { y: B + 14, "text-anchor": "middle", opacity: 0 }, svg);
+      const cursor = el("line", { y1: T - 4, y2: B, stroke: "#f5f5f7", "stroke-width": 1.5, "stroke-dasharray": "3 3" }, svg);
+      const cursorLab = el("text", { y: B + 14, "text-anchor": "middle" }, svg);
       cursorLab.setAttribute("style", "fill:var(--ink);font-weight:600");
       const word = { MOD: "Moderate", SEV: "Severe", EXTRM: "Extreme" }[c.level] || c.level;
       const when = new Date(c.when * 1000);
-      $("#case-title").textContent = `${word} turbulence at ${flr(c.fl)} ${c.where}`;
+      $(".ckick", sec).textContent = `Case ${i + 1} of ${C.length}`;
+      $(".ctitle", sec).innerHTML = `<span class="t-rep">${word} turbulence</span> at ${flr(c.fl)} ${esc(c.where)}`;
       const ac = new Set(c.detections.map((d) => d.id)), mt = new Set(c.detections.filter((d) => d.match).map((d) => d.id));
       const before = new Set(c.detections.filter((d) => d.match && d.m <= 0).map((d) => d.id));
       const at = c.lit.find((q) => q[0] === 0) || [0, 0, 0];
-      $("#case-meta").innerHTML =
+      $(".cmeta", sec).innerHTML =
         `<span><b>${when.toUTCString().slice(0, 16)}</b>, ${hhmm(c.when)}</span>` +
-        `<span><b>${ac.size}</b> aircraft in turbulence within 150 km</span>` +
+        `<span><b class="t-turb">${ac.size}</b> aircraft in turbulence within 150 km</span>` +
         `<span><b>${mt.size}</b> inside the match window</span>` +
-        `<span>forecast at the report: <b>${at[1] ? at[1] + " cell" + (at[1] > 1 ? "s" : "") + " lit" : "normal"}</b></span>`;
-      $("#case-note").innerHTML = before.size
+        `<span>forecast at the report: <b class="t-fc">${at[1] ? at[1] + " cell" + (at[1] > 1 ? "s" : "") + " lit" : "normal"}</b></span>`;
+      const verdict = before.size
         ? `<b class="hit">A hit.</b> ${before.size} aircraft inside the match window had already detected it by the time the pilot called it in.`
         : mt.size
           ? `<b class="late">Late.</b> An aircraft inside the match window detected it, but only after the report.`
           : `<b class="miss">A miss.</b> Aircraft nearby detected turbulence, but none inside the 40 km, ±2,000 ft window. It stays in because the selection was by score, not by outcome.`;
-    }
-    show(0);
+      const note = $(".cnote", sec);
+      let phase = "";
+      addScene(sec, (p) => {
+        const mc = -32 + 66 * Math.min(1, p / 0.9);
+        items.forEach(([n, m]) => (n.style.opacity = m <= mc ? 1 : 0.1));
+        const shownC = Math.max(-30, Math.min(30, mc));
+        cursor.setAttribute("x1", xm(shownC)); cursor.setAttribute("x2", xm(shownC));
+        cursorLab.setAttribute("x", xm(shownC));
+        ticks.forEach(([tk, m]) => (tk.style.opacity = Math.abs(m - shownC) < 4.5 ? 0 : 1));
+        cursorLab.textContent = Math.round(shownC) === 0 ? "the report" : (shownC > 0 ? "+" : "") + Math.round(shownC) + " min";
+        const ph = mc < -1.5 ? "before" : mc < 2 ? "at" : "after";
+        const sofar = c.detections.filter((d) => d.m <= mc).length;
+        const txt = ph === "before"
+          ? `Before the report: <b class="t-turb">${sofar}</b> aircraft-minute${sofar === 1 ? "" : "s"} in turbulence within 150 km so far.`
+          : ph === "at" ? `<b class="t-rep">The pilot report arrives</b>: ${word.toLowerCase()} turbulence at ${flr(c.fl)}.` : verdict;
+        if (ph + sofar !== phase) { phase = ph + sofar; note.innerHTML = txt; }
+      });
+    });
   })(window.HORUS_CASES);
 
   // ---------- scroll story: one flight, scroll drives it ----------
@@ -1896,6 +1799,8 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
     document.documentElement.classList.add("still");
     document.getElementById(go[1])?.scrollIntoView({ behavior: "instant" });
     const dy = /[?&]dy=(\d+)/.exec(location.search); if (dy) scrollBy({ top: +dy[1], behavior: "instant" });
+    const sp = /[?&]sp=([\d.]+)/.exec(location.search), sec = document.getElementById(go[1]);
+    if (sp && sec) scrollTo({ top: sec.offsetTop + Math.min(1, +sp[1]) * (sec.offsetHeight - innerHeight), behavior: "instant" });
   }
 
   // ---------- nav hairline, copy ----------
@@ -1904,7 +1809,7 @@ footer { margin-top: clamp(96px, 12vw, 160px); border-top: 1px solid var(--line)
   addEventListener("scroll", onScroll, { passive: true }); onScroll();
   $$("[data-copy]").forEach((b) => b.addEventListener("click", async () => {
     try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = "Copied"; } catch { b.textContent = "Select and copy"; }
-    setTimeout(() => (b.textContent = "Copy"), 1600);
+    const was = b.dataset.label || (b.dataset.label = "Copy the commands"); setTimeout(() => (b.textContent = was), 1600);
   }));
 })();
 </script>

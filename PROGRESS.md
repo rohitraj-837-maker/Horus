@@ -124,6 +124,17 @@ Key findings (details in `reports/data_notes.md`):
 
 - **2026-11-17: new logo (Rohit: "change the logo").** The hexagon-and-dot mark is replaced by an original eye after the ancient Eye of Horus (public-domain motif): white lids with the two markings beneath, a lower lid drawn as a turbulent vertical-rate trace in amber, and a cyan pupil as the point of detection. Used in the nav and footer (26 px); the favicon puts the same mark on a navy rounded tile so it stays visible on light tab bars. Checked at 16–128 px.
 
+- **2026-11-17: the whole page as scroll scenes on one night sky (Rohit: "still looks vibe coded, fix the entire page"; chose "the whole page", and named cards/panels, icons/decorations and pills/chips/tabs as the problem).** A fixed starfield canvas (seeded, slow twinkle, slight parallax) now runs behind every section. Each section is a scene driven by scroll, with no boxes:
+  - **Live map:** the map fills the right of the screen, and scrolling moves through the real hour (15:0x → 16:00Z). The play button, slider and ticker box are gone. Captions on the left change with the scroll (aircraft by altitude → amber detections → purple forecast → rose pilot reports), followed by the hour's own numbers, computed from the data. Under them sit the clock, the counts and the last four lines as `make watch` would print them.
+  - **How it works:** the same real chart, with no card or toggle. A fifth step ("same type, smooth air") swaps in the smooth 737-800, so the steps now drive the comparison. On phones the chart pins under the nav.
+  - **Architecture:** a seven-stage pipeline (ADS-B archive → hold and gate → level flight → residual σ → per-type index → forecast grid → check) that lights stage by stage, each with a large caption of its real numbers, ending on "one core, offline and live".
+  - **Metrics:** one pinned visual (big number and chart) with four steps scrolling beside it. The limitation is now a large statement with the two recall numbers, and the limitations are a plain list.
+  - **Case studies:** three scenes; scrolling sweeps the cursor from −30 to +30 min while the note changes (so far → the report arrives → the verdict).
+  - **Text output and run:** the GIF without window chrome, and the commands as plain text.
+  - **Removed:** the bento cards with icon tiles and hexagon decoration, the result tabs, the case tabs and play button, the limitation boxes, the terminal chrome, pill buttons (now text links) and numbered step tiles (now plain numerals). Their CSS is deleted too (about 13 kB), not overridden.
+  - **Unchanged:** the opening story and the coloured text.
+  - **Checks:** the active step is chosen from its position on screen, so jumps and deep links land on the right panel. `?go=<id>&sp=<0..1>` opens any scene part-way, for screenshots. All `data-metric` hooks are kept, and `readme_numbers --check` passes. Checked at 1440×900, 1055×770, 390×844 and 375×667.
+
 ## M6 — API, live loop, map, replays ✅ gate passed (2026-11-16 ~08:45 UTC)
 
 `make gate-m6`: check ✔ (incl. `tests/api`), live latency p95 < 10 s ✔, 3 curated replays ✔, front end ✔, screenshots ✔.
